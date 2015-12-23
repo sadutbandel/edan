@@ -91,7 +91,6 @@
 
 	// get-started controller
 	.controller('startCtrl', function($rootScope) {
-
 	})
 	
 	// get free rai
@@ -202,7 +201,8 @@
 				payload.account = $scope.account;
 				payload.response = $scope.response;
 
-				$http.post('/freeRai', payload)
+				
+				$http.post('/freerai', payload)
 
 				.success(function(data) {
 
