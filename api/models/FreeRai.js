@@ -1,7 +1,7 @@
 /**
 * FreeCoins.js
 *
-* @description :: TODO: You might write a short summary of how this model works and what it represents here.
+* @description :: Requires an account string, and a recaptcha response string (derives from user-click). processRequest handles everything.
 * @docs        :: http://sailsjs.org/#!documentation/models
 */
 
@@ -24,16 +24,16 @@ module.exports = {
 
 	/**
 	 * Verifies ...
-	 * passed parameters,
+	 * all passed parameters,
 	 * recaptcha response,
-	 * price of Rai
+	 * account validity
 	 */
 	
 	processRequest: function(parameters, callback) {
 
 		// ensure all parameters are fulfilled
 		FreeCoinsService.verifyParameters(parameters, function(err, response) {
-			console.log('FreeCoinsService');
+			console.log('Verifying parameters...');
 
 			// parameters passed!
 			if(!err) {
@@ -42,7 +42,7 @@ module.exports = {
 
 				// ensure the recaptcha response is valid by asking Google
 				RecaptchaService.verifyResponse(parameters.response, function(err, response) {
-					console.log('RecaptchaService');
+					console.log('Verifying recaptcha...');
 
 					if(!err) {
 
@@ -51,50 +51,36 @@ module.exports = {
 
 							console.log(response);
 
-							// check the price for a single unit to determine if it's free or not
-							PricingService.checkPrice(1, function(err, response) {
-								console.log('PricingService');
+							// check if the account is valid
+							ValidateAccountService.validate(parameters.account, function(err, response) {
+								console.log('Verifying account...');
 
-								// price verification passed!
 								if(!err) {
 
 									console.log(response);
 
-									// check if the account is valid
-									ValidateAccountService.validate(parameters.account, function(err, response) {
-										console.log('ValidateAccountService');
+									// send rai to account
+									FreeCoinsService.send(parameters, function(err, response) {
+										console.log('Sending free rai...');
 
 										if(!err) {
 
 											console.log(response);
-
-											// send coins to account
-											FreeCoinsService.send(parameters, function(err, response) {
-												console.log('FreeCoinsService');
-
-												if(!err) {
-
-													console.log(response);
-													callback(null, response);
-
-												} else {
-
-													console.log(err);
-													callback(null, err); // free coins were not sent
-												}
-											});
+											callback(null, response);
 
 										} else {
+
 											console.log(err);
-											callback(err, null); // account validation failed!
+											callback(null, err); // free coins were not sent
 										}
 									});
 
 								} else {
 									console.log(err);
-									callback(err, null); // price check failed!
+									callback(err, null); // account validation failed!
 								}
 							});
+
 						} else {
 							console.log(response);
 							callback(response, null); // recaptcha failed!

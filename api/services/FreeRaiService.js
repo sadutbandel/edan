@@ -6,21 +6,28 @@ module.exports = {
  		// no problems by default
  		var problems = 0;
 
- 		// iterate through all parameters and
+ 		// iterate through all parameters and...
  		parameters.forEach(function(parameter) {
- 			// make sure they aren't undefined or empty
- 			if(parameter === undefined || parameter.length === 0) {
- 				// increase our problem count
+
+ 			// make sure they aren't undefined or empty and then...
+ 			if (parameter === undefined || parameter.length === 0) {
+
+ 				// increase our problem count!
  				problems++;
  			}
  		});
 
- 		// no problems. great!
- 		if(problems === 0) {
+ 		// no problems? great!
+ 		if (problems === 0) {
+
+ 			// return a success response, with an object where success === true
  			callback(null, { success: true });
- 		} 
+ 		}
+
  		// there were problems. doh!
  		else {
+
+ 			// return an error response, with an object where success === false
  			callback({ success: false }, null);
  		}
  	},
@@ -29,7 +36,7 @@ module.exports = {
 		
 		parameters.amount = 1000;
 
-		SendCoinsService.send(parameters, function(err, response) {
+		SendRaiService.send(parameters, function(err, response) {
 
 			if(!err) {
 				callback(null, response);

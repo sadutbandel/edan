@@ -44,7 +44,6 @@ module.exports = {
 		req.on('error', function(err) {
 			callback(err, null);
 		});
-
 	}
 
 }

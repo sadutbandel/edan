@@ -29,6 +29,5 @@ module.exports = {
 				res.send(err);
 			}
 		});
-
 	}
 };
