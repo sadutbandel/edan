@@ -42,7 +42,7 @@ logs/error.log
 ################################################
 
 config/local.js
-
+config/session.js
 
 
 
