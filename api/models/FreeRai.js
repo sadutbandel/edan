@@ -1,5 +1,5 @@
 /**
-* FreeCoins.js
+* FreeRai.js
 *
 * @description :: Requires an account string, and a recaptcha response string (derives from user-click). processRequest handles everything.
 * @docs        :: http://sailsjs.org/#!documentation/models
@@ -32,7 +32,7 @@ module.exports = {
 	processRequest: function(parameters, callback) {
 
 		// ensure all parameters are fulfilled
-		FreeCoinsService.verifyParameters(parameters, function(err, response) {
+		FreeRaiService.verifyParameters(parameters, function(err, response) {
 			console.log('Verifying parameters...');
 
 			// parameters passed!
@@ -60,7 +60,7 @@ module.exports = {
 									console.log(response);
 
 									// send rai to account
-									FreeCoinsService.send(parameters, function(err, response) {
+									FreeRaiService.send(parameters, function(err, response) {
 										console.log('Sending free rai...');
 
 										if(!err) {
@@ -71,7 +71,7 @@ module.exports = {
 										} else {
 
 											console.log(err);
-											callback(null, err); // free coins were not sent
+											callback(null, err); // free rai were not sent
 										}
 									});
 

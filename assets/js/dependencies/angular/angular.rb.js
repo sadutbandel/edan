@@ -202,7 +202,7 @@
 				payload.account = $scope.account;
 				payload.response = $scope.response;
 
-				$http.post('/freerai', payload)
+				$http.post('/freeRai', payload)
 
 				.success(function(data) {
 

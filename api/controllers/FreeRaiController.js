@@ -15,7 +15,7 @@ module.exports = {
 		parameters.account = req.body.account;
 		parameters.response = req.body.response;
 
-		FreeCoins.processRequest(parameters, function(err, response) {
+		FreeRai.processRequest(parameters, function(err, response) {
 
 			// request processed!
 			if(!err) {
