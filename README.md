@@ -4,4 +4,4 @@ This [SPA](https://en.wikipedia.org/wiki/Single-page_application) was built usin
 
 - [SailsJS](http://sailsjs.org)
 - [AngularJS](https://angularjs.org)
-- [Bootstrap](http://getbootstrap.com)
+- [Bootstrap 3](http://getbootstrap.com)
