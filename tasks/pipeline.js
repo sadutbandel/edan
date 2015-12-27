@@ -24,27 +24,17 @@ var cssFilesToInject = [
 // (uses Grunt-style wildcard/glob/splat expressions)
 var jsFilesToInject = [
 
-  // Load sails.io before everything else
-  'js/dependencies/sails.io.js',
-  'js/dependencies/jquery-1.11.3.min.js',
-  'js/dependencies/angular/angular.min.js',
-  'js/dependencies/angular/angular.bootstrap.js',
-  'js/dependencies/angular/angular-route.js',
-  'js/dependencies/angular/angular.rb.js',
-  'js/dependencies/angular/angular-payments.min.js',
-  'js/dependencies/angular/ui-bootstrap-tpls-0.13.3.min.js',
-  'js/dependencies/angular/angular-recaptcha.min.js',
-  'js/dependencies/bootstrap.min.js',
+  // Load our pre-ordered app dependancies
+  'js/dependencies/*.js',
 
-  // Dependencies like jQuery, or Angular are brought in here
-  'js/dependencies/**/*.js',
+  // Load any libs
+  'js/lib/*.js',
 
-  // All of the rest of your client-side js files
-  // will be injected here in no particular order.
-  'js/**/*.js',
+  // Load any libs
+  'js/*.js',
 
-  // Use the "exclude" operator to ignore files
-  // '!js/ignore/these/files/*.js'
+  // Ignore
+  '!js/angular-mocks.1.4.1.js'
 ];
 
 
