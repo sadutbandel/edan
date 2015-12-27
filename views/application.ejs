@@ -28,7 +28,7 @@
                 <div class="navbar-header">
 
                      <!-- home page header link -->
-                    <h3 class="text-muted pull-left">
+                    <h3 class="text-muted">
                         <a href="/#/">RaiBlocks.net</a>
                     </h3>
 
@@ -38,8 +38,10 @@
                     </button>
                 </div>
 
+                <br style="clear:both;"/>
+                
                 <!-- internal & external page navigation -->
-                <div class="navbar-collapse collapse pull-right">
+                <div class="navbar-collapse collapse">
 
                     <ul class="nav nav-pills">
                         <li ng-class="{'active': path === 'start'}">
@@ -50,6 +52,11 @@
                         <li ng-class="{'active': path === 'getblocks'}">
                             <a href="/#/getblocks">
                                 <i class="fa fa-cubes fa-xs"></i>&nbsp;Get Blocks
+                            </a>
+                        </li>
+                        <li ng-class="{'active': path === 'demo'}">
+                            <a href="/#/demo">
+                                <i class="fa fa-leaf fa-xs"></i>&nbsp;Demo
                             </a>
                         </li>
                         <li>
@@ -74,21 +81,11 @@
             </nav>
 
             <!-- routes container -->
-            <div ng-view></div>
+            <div class="row" ng-view></div>
         </div>
     </div>
 
     <!--SCRIPTS-->
-    <script src="/js/dependencies/sails.io.js"></script>
-    <script src="/js/dependencies/jquery-1.11.3.min.js"></script>
-    <script src="/js/dependencies/angular/angular.min.js"></script>
-    <script src="/js/dependencies/angular/angular.bootstrap.js"></script>
-    <script src="/js/dependencies/angular/angular-route.js"></script>
-    <script src="/js/dependencies/angular/angular.rb.js"></script>
-    <script src="/js/dependencies/angular/angular-payments.min.js"></script>
-    <script src="/js/dependencies/angular/ui-bootstrap-tpls-0.13.3.min.js"></script>
-    <script src="/js/dependencies/angular/angular-recaptcha.min.js"></script>
-    <script src="/js/dependencies/bootstrap.min.js"></script>
     <!--SCRIPTS END-->
 
     <script src="https://js.stripe.com/v2/" type="text/javascript"></script>
