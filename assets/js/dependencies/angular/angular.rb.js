@@ -29,6 +29,10 @@
 		.when('/getblocks', {
 			templateUrl : 'templates/getblocks.html',
 			controller  : 'getBlocksCtrl'
+		})
+		.when('/demo', {
+			templateUrl : 'templates/demo.html',
+			controller  : 'demoCtrl'
 		});
 
 	})
@@ -61,17 +65,146 @@
 		});
 	})
 
-	// readable time filter (currently accepts seconds as a starting point)
-	.filter('readableTime', function() {
-		return function(rawSeconds) {
-			var rawMinutes = rawSeconds / 60;
-			var minutes = Math.floor(rawMinutes);
-			var remainingSecondsFraction = rawMinutes - minutes;
-			var seconds = Math.round(remainingSecondsFraction * 60);
-			if(seconds < 10) { seconds = '0'+seconds; }
-			return minutes + ':' + seconds;
-	  	};
-	})
+	.directive('freeRaiForm', function(){
+        return {
+            restrict: 'E',
+            templateUrl: 'templates/free-rai-form.html',
+            controller: function(Button, $scope, $http, $timeout, vcRecaptchaService) {
+
+				var that = this;
+
+				$scope.init = function () {
+					$scope.account = null;
+					$scope.response = null;
+					$scope.widgetId = null;
+				}
+
+				$scope.init();
+				
+		  		$scope.setResponse = function (response) {
+					$scope.response = response;
+				};
+
+				$scope.setWidgetId = function (widgetId) {
+		     		$scope.widgetId = widgetId;
+		  		};
+
+		  		Button.create('free');
+
+				Button.mode('free', 'default', { 
+					'disabled' : false, 
+					'icon' : 'fa-plus-circle', 
+					'title': 'Request free 1 Grai', 
+					'class': 'btn-primary'
+				});
+
+				Button.mode('free', 'claiming', { 
+					'disabled' : true, 
+					'icon' : 'fa-spin fa-spinner', 
+					'title': 'Sending free Grai', 
+					'class': 'btn-default'
+				});
+
+				Button.mode('free', 'claimed', { 
+					'disabled' : true, 
+					'icon' : 'fa-thumbs-up', 
+					'title': 'Free Grai Sent', 
+					'class': 'btn-success'
+				});
+
+				Button.mode('free', 'account_error', {
+					'disabled' : true, 
+					'icon' : 'fa-thumbs-down', 
+					'title': 'Provide a valid account id', 
+					'class': 'btn-danger'
+				});
+
+				Button.mode('free', 'recaptcha_error', { 
+					'disabled' : true, 
+					'icon' : 'fa-thumbs-down', 
+					'title': 'Complete the reCaptcha', 
+					'class': 'btn-danger'
+				});
+
+				Button.mode('free', 'recaptcha_error', { 
+					'disabled' : true, 
+					'icon' : 'fa-thumbs-down', 
+					'title': 'Complete the reCaptcha', 
+					'class': 'btn-danger'
+				});
+
+				Button.mode('free', 'not_free', { 
+					'disabled' : true, 
+					'icon' : 'fa-thumbs-down', 
+					'title': 'RaiBlocks are not free right now', 
+					'class': 'btn-danger'
+				});
+
+				Button.change('free', 'default');
+
+				// validate the form submission by ensuring the account and response both contain something.
+				$scope.validateForm = function() {
+
+				}
+
+				// submit free coin request
+				$scope.submit = function () {
+
+					$scope.validateForm();
+
+					if($scope.account == null || $scope.account == '') {
+
+						Button.change('free', 'account_error');
+
+						$timeout(function() {
+							Button.change('free', 'default');
+						}, 3000);
+
+					} else if($scope.response == null || $scope.response == '') {
+
+						Button.change('free', 'recaptcha_error');
+
+						$timeout(function() {
+							Button.change('free', 'default');
+						}, 3000);
+
+					} else {
+
+						Button.change('free', 'claiming');
+
+						payload = {};
+						payload.account = $scope.account;
+						payload.response = $scope.response;
+
+						
+						$http.post('/freerai', payload)
+
+						.success(function(data) {
+
+							$timeout(function() {
+
+								Button.change('free', data.message);
+
+								$timeout(function() {
+									vcRecaptchaService.reload($scope.widgetId);
+									$scope.init();
+									Button.change('free', 'default');
+								}, 3000);
+
+							}, 3000);
+						})
+						.error(function(data, status) {
+							console.error('Error', status, data);
+						})
+						.finally(function() {
+							
+						});
+					}
+				}		
+
+            }
+        };
+    })
 
 	// allow entry to the block chain page
 	.controller('homeCtrl', function($rootScope, $scope, $location) {
@@ -91,141 +224,17 @@
 
 	// get-started controller
 	.controller('startCtrl', function($rootScope) {
+
 	})
 	
+	// demo controller
+	.controller('demoCtrl', function($rootScope) {
+
+	})
+
 	// get free rai
-	.controller('getBlocksCtrl', function(Button, $scope, $http, $timeout, vcRecaptchaService) {
+	.controller('getBlocksCtrl', function() {
 
-		var that = this;
-
-		$scope.init = function () {
-			$scope.account = null;
-			$scope.response = null;
-			$scope.widgetId = null;
-		}
-
-		$scope.init();
-		
-  		$scope.setResponse = function (response) {
-			$scope.response = response;
-		};
-
-		$scope.setWidgetId = function (widgetId) {
-     		$scope.widgetId = widgetId;
-  		};
-
-  		Button.create('free');
-
-		Button.mode('free', 'default', { 
-			'disabled' : false, 
-			'icon' : 'fa-plus-circle', 
-			'title': 'Request free 1 Grai', 
-			'class': 'btn-primary'
-		});
-
-		Button.mode('free', 'claiming', { 
-			'disabled' : true, 
-			'icon' : 'fa-spin fa-spinner', 
-			'title': 'Sending free Grai', 
-			'class': 'btn-default'
-		});
-
-		Button.mode('free', 'claimed', { 
-			'disabled' : true, 
-			'icon' : 'fa-thumbs-up', 
-			'title': 'Free Grai Sent', 
-			'class': 'btn-success'
-		});
-
-		Button.mode('free', 'account_error', {
-			'disabled' : true, 
-			'icon' : 'fa-thumbs-down', 
-			'title': 'Provide a valid account id', 
-			'class': 'btn-danger'
-		});
-
-		Button.mode('free', 'recaptcha_error', { 
-			'disabled' : true, 
-			'icon' : 'fa-thumbs-down', 
-			'title': 'Complete the reCaptcha', 
-			'class': 'btn-danger'
-		});
-
-		Button.mode('free', 'recaptcha_error', { 
-			'disabled' : true, 
-			'icon' : 'fa-thumbs-down', 
-			'title': 'Complete the reCaptcha', 
-			'class': 'btn-danger'
-		});
-
-		Button.mode('free', 'not_free', { 
-			'disabled' : true, 
-			'icon' : 'fa-thumbs-down', 
-			'title': 'RaiBlocks are not free right now', 
-			'class': 'btn-danger'
-		});
-
-		Button.change('free', 'default');
-
-		// validate the form submission by ensuring the account and response both contain something.
-		$scope.validateForm = function() {
-
-		}
-
-		// submit free coin request
-		$scope.submit = function () {
-
-			$scope.validateForm();
-
-			if($scope.account == null || $scope.account == '') {
-
-				Button.change('free', 'account_error');
-
-				$timeout(function() {
-					Button.change('free', 'default');
-				}, 3000);
-
-			} else if($scope.response == null || $scope.response == '') {
-
-				Button.change('free', 'recaptcha_error');
-
-				$timeout(function() {
-					Button.change('free', 'default');
-				}, 3000);
-
-			} else {
-
-				Button.change('free', 'claiming');
-
-				payload = {};
-				payload.account = $scope.account;
-				payload.response = $scope.response;
-
-				
-				$http.post('/freerai', payload)
-
-				.success(function(data) {
-
-					$timeout(function() {
-
-						Button.change('free', data.message);
-
-						$timeout(function() {
-							vcRecaptchaService.reload($scope.widgetId);
-							$scope.init();
-							Button.change('free', 'default');
-						}, 3000);
-
-					}, 3000);
-				})
-				.error(function(data, status) {
-					console.error('Error', status, data);
-				})
-				.finally(function() {
-					
-				});
-			}
-		}		
 	})
 
 	// block chain page
@@ -263,13 +272,28 @@
 
 		Button.change('block', 'default');
 
+		// ensure the block chain entered is not null, undefined, or empty.
+		$scope.validate = function(a) {
+
+			if(a === undefined || a === null || a === '') {
+				return false;
+			} else {
+				return true;
+			}
+		}
+
+		// submit block chain
 		$scope.submit = function() {
-			if($scope.blockChain === undefined || $scope.blockChain === null || $scope.blockChain === '') {
+
+			// if the block chain passes validation...
+			if($scope.validate($scope.blockChain)) {
+				// change the button
 				Button.change('block', 'empty_block');
 				$timeout(function() {
 					Button.change('block', 'default');
 				}, 3000);
 			}
+
 			else {
 
 				Button.change('block', 'processing');
@@ -283,6 +307,7 @@
 					}, 3000);
 				});
 			}
+	
 		}
 	})
 
