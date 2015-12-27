@@ -1,0 +1,27 @@
+<form ng-submit="submit()">
+
+	<!-- account id -->
+	<input class="form-control" type="text" ng-model="account" placeholder="Account #" autocomplete="off" />
+
+	<br style="clear:both"/>
+
+	<!-- recaptcha -->
+	<div
+	vc-recaptcha
+	theme="'light'"
+	key="recaptchaKey"
+	on-create="setWidgetId(widgetId)"
+	on-success="setResponse(response)"></div>
+
+	<br style="clear:both"/>
+
+	<!-- submission button -->
+	<button
+	ng-disabled="free.active.disabled == true"
+	ng-class="free.active.class"
+	class="btn btn-block"
+	type="submit">
+		<i ng-class="free.active.icon" class="fa"></i>&nbsp;{{ free.active.title }}
+	</button>
+
+</form>
