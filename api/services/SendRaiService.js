@@ -9,8 +9,8 @@ module.exports = {
 		payload = {};
 		payload.action = 'send';
 		payload.wallet = Globals.walletNumber;
-		payload.source = Globals.faucetAddress;
-		payload.destination = parameters.account;
+		payload.source = parameters.source;
+		payload.destination = parameters.destination;
 		payload.amount = parameters.amount.toString().concat(Globals.mrai);
 
 		RpcService.callRpc(payload, function(err, response) {

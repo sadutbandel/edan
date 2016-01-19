@@ -30,6 +30,7 @@ module.exports = {
 		    // response data
 		    res.on('data', function(response) {
 		    	response = JSON.parse(response.toString());
+		    	response.statusCode = res.statusCode;
 		    	callback(null, response);
 		    });
 		});
