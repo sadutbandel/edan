@@ -17,6 +17,7 @@
 # to fit your needs!
 ################################################
 
+assets/images/placeholder.jpg
 api/models/Globals.js
 logs/access.log
 logs/error.log
