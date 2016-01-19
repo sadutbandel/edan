@@ -33,8 +33,11 @@ module.exports.routes = {
   ***************************************************************************/
 
   '/': {
-    view: 'layout'
-  }
+    view: 'application'
+  },
+
+  'post /paymentdemo': 'PaymentDemoController.create',
+  'get /socketid': 'SocketController.getSocketID'
   
   /***************************************************************************
   *                                                                          *

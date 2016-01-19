@@ -113,6 +113,23 @@ body {
 	margin-top: 28px;
 }
 
+.banner {
+	border-radius: 2px;
+	margin: .5em 0em .5em 0em;
+}
+.banner.top {
+	padding: 1em;
+	text-align: center;
+	min-height: 2em;
+	height:100%;
+	font-size: 3em;
+}
+.banner.side {
+	padding: .5em;
+	min-height: 20em;
+	font-size: 2em;
+}
+
 /* Responsive: Portrait tablets and up */
 @media screen and (min-width: 768px) {
 	/* Remove the padding we set earlier */

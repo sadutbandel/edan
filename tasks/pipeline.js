@@ -19,24 +19,19 @@ var cssFilesToInject = [
   'styles/**/*.css'
 ];
 
-
 // Client-side javascript files to inject in order
 // (uses Grunt-style wildcard/glob/splat expressions)
 var jsFilesToInject = [
 
-  // Load our pre-ordered app dependancies
+  // Load app dependencies here (pre-ordered and others)
   'js/dependencies/*.js',
 
-  // Load any libs
-  'js/lib/*.js',
-
-  // Load any libs
+  // Load rest here (app/bootstrap js files)
   'js/*.js',
 
-  // Ignore
-  '!js/angular-mocks.1.4.1.js'
+  // Ignore testing files
+  '!js/tests/*.js'
 ];
-
 
 // Client-side HTML templates are injected using the sources below
 // The ordering of these templates shouldn't matter.
@@ -50,8 +45,6 @@ var jsFilesToInject = [
 var templateFilesToInject = [
   'templates/**/*.html'
 ];
-
-
 
 // Prefix relative paths to source files so they point to the proper locations
 // (i.e. where the other Grunt tasks spit them out, or in some cases, where

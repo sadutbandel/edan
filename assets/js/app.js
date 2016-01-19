@@ -1,13 +1,15 @@
-(function() {
+ (function() {
 
 	angular
 
-	// module + dependancies
-	.module('Raiblocks', [
-		'BootstrapInit',
-		'routeHelper'
-		'vcRecaptcha',
-		'ngRoute'
+	.module('Raiblocks', [ // primary module
+		'bootstrap', // angular application boostrap
+		'routeHelper', // route-assist
+		'vcRecaptcha', // google recaptcha
+		'ngRoute', // routing
+		'ngAnimate', // require for ui.bootstrap
+		'ui.bootstrap', // angularized-bootstrap
+		'RBDemos', // demos
 		])
 
 	// route provider (defines our front-end routes)
@@ -30,33 +32,28 @@
 		.when('/getblocks', {
 			templateUrl : 'templates/getblocks.html',
 			controller  : 'getBlocksCtrl'
-		})
-		.when('/demo', {
-			templateUrl : 'templates/demo.html',
-			controller  : 'demoCtrl'
 		});
 
 	})
 
-	.run(function($rootScope, Logo) {
+	.run(function($rootScope, logo) {
 
 		// grab logo from bootstrap
-		$rootScope.logo = Logo;
+		$rootScope.logo = logo;
 
 		// establish public app-wide variables
 		$rootScope.recaptchaKey = '6LcPNAsTAAAAANCpxZY3SMikIjg5a0T9XTnjM-v4';
 		$rootScope.faucetNumber = 'SZY2r3dduWuUKPwFbXhCeYetbdSs28zBA157cT6houLE5CunXC';
-		$rootScope.rb_version = '7.2.0';
+		$rootScope.rb_version = '7.2.1';
 	})
 
 	.directive('freeRaiForm', function() {
 
         return {
+
             restrict: 'E',
             templateUrl: 'templates/free-rai-form.html',
             controller: function(Button, $scope, $http, $timeout, vcRecaptchaService) {
-
-				var that = this;
 
 				$scope.init = function () {
 					$scope.account = null;
@@ -127,9 +124,32 @@
 
 				Button.change('free', 'default');
 
-				// validate the form submission by ensuring the account and response both contain something.
-				$scope.validateForm = function() {
+				$scope.validateAccount = function() {
+					if($scope.account == null || $scope.account == '') {
+						return false;
+					} else {
+						return true;
+					}
+				}
 
+				$scope.validateResponse = function() {
+					if($scope.response == null || $scope.response == '') {
+						return false;
+					} else {
+						return true;
+					}
+				}
+
+				$scope.validateForm = function() {
+					if($scope.validateAccount()) {
+						if($scope.validateResponse()) {
+							return true;
+						} else {
+							return false;
+						}
+					} else {
+						return false;
+					}
 				}
 
 				// submit free coin request
@@ -160,7 +180,6 @@
 						payload = {};
 						payload.account = $scope.account;
 						payload.response = $scope.response;
-
 						
 						$http.post('/freerai', payload)
 
@@ -210,10 +229,6 @@
 	.controller('startCtrl', function() {
 	})
 	
-	// demo controller
-	.controller('demoCtrl', function() {
-	})
-
 	// get free rai
 	.controller('getBlocksCtrl', function() {
 	})
@@ -321,24 +336,6 @@
 				$rootScope[name].active = $rootScope[name][mode];
  				resolve();
   			});
-		}
-	})
-
-	// application API connector to RPC
-	.service('API', function($q, $http, $rootScope) {
-
-		var that = this;
-
-		this.call = function(path, payload) {
-
-			var defer = $q.defer()
-
-			$http.post('/api/'+path, payload)
-			.then(function(response) {
-				defer.resolve(response)
-			})
- 
-			return defer.promise
 		}
 	})
 

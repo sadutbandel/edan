@@ -5,7 +5,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="description" content="RailBlocks - Sustainable Crptocurrency">
-    <meta name="author" content="Colin LeMahieu">
+    <meta name="author" content="Colin LeMahieu, Wesley LeMahieu">
     <meta name="norton-safeweb-site-verification" content="47ep7t-ab5t6ti9er56y44kt2tlqg8ci1k7s1hnmx8a805omnwy4cdtx32-q46pq3almpduqla4pg3gft78l2yu9e-0qo2hef1z2a77-rezwbk2wihel06q2ad4elb94" />
     <title>RaiBlocks.net</title>
     <!--STYLES-->
@@ -54,9 +54,9 @@
                                 <i class="fa fa-cubes fa-xs"></i>&nbsp;Get Blocks
                             </a>
                         </li>
-                        <li ng-class="{'active': path === 'demo'}">
-                            <a href="/#/demo">
-                                <i class="fa fa-leaf fa-xs"></i>&nbsp;Demo
+                        <li ng-class="{'active': path === 'demos'}">
+                            <a href="/#/demos">
+                                <i class="fa fa-bicycle fa-xs"></i>&nbsp;Demos
                             </a>
                         </li>
                         <li>
@@ -86,6 +86,18 @@
     </div>
 
     <!--SCRIPTS-->
+    <script src="/js/dependencies/01.angular.min.js"></script>
+    <script src="/js/dependencies/02.angular-route.min.js"></script>
+    <script src="/js/dependencies/03.angular-animate.min.js"></script>
+    <script src="/js/dependencies/04.ui-bootstrap.js"></script>
+    <script src="/js/dependencies/05.angular-recaptcha.min.js"></script>
+    <script src="/js/dependencies/06.jquery.min.js"></script>
+    <script src="/js/dependencies/07.bootstrap.min.js"></script>
+    <script src="/js/dependencies/angular-route-helper.1.0.js"></script>
+    <script src="/js/dependencies/rb-demos.js"></script>
+    <script src="/js/dependencies/sails.io.js"></script>
+    <script src="/js/app.js"></script>
+    <script src="/js/bootstrap.js"></script>
     <!--SCRIPTS END-->
 
     <script src="https://js.stripe.com/v2/" type="text/javascript"></script>
@@ -95,7 +107,6 @@
 <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
 <![endif]-->
 <script src="https://www.google.com/recaptcha/api.js?onload=vcRecaptchaApiLoaded&render=explicit" async defer></script>
-<script>Stripe.setPublishableKey('pk_test_xjmBXWckknBa01eASTHeRidc')</script>
 <script>
 (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
     (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
