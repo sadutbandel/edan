@@ -17,7 +17,7 @@ module.exports = {
 		payload.action = 'payment_wait';
 		payload.account = account;
 		payload.amount = '1'.concat(Globals.mrai);
-		payload.timeout = '15000'; // 15 seconds timeout
+		payload.timeout = '10000'; // 10 seconds timeout
 
 		RpcService.callRpc(payload, function(err, res) {
 

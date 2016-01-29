@@ -10,6 +10,7 @@ module.exports = {
 
 			if(!err) {
 
+				// usually a 200 is returned
 				if(res.statusCode == 200) {
 
 					if(res.status != 'nothing') {
@@ -37,7 +38,8 @@ module.exports = {
 					} 
 					// res.status == 'nothing'
 					else {
-						callback(null, { paid: false });
+						res.paid = false;
+						callback(null, res);
 					}
 				} else {
 					callback('Different response status than 200 - Code ' + res.statusCode);

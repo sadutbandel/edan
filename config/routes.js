@@ -37,7 +37,8 @@ module.exports.routes = {
   },
 
   'post /paymentdemo': 'PaymentDemoController.create',
-  'get /socketid': 'SocketController.getSocketID'
+  'get /session': 'SessionController.find',
+  'get /socketid': 'SocketController.getSocketID',
   
   /***************************************************************************
   *                                                                          *
