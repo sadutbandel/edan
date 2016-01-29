@@ -122,25 +122,25 @@ module.exports.sockets = {
   * disconnects                                                              *
   *                                                                          *
   ***************************************************************************/
-   afterDisconnect: function(session, socket, cb) {
+  afterDisconnect: function(session, socket, cb) {
 
-      console.log('Socket disconnected');
-      console.log(session.payment);
+    console.log('Socket disconnected');
+    console.log(session.payment);
 
-      // if there is a payment account left in the session upon user-exit, end the payment account.
-      if(session.payment) {
+    // if there is a payment account left in the session upon user-exit, end the payment account.
+    if(session.payment) {
 
-         PaymentDemo.end(session.payment.account, function(err, resp) {
+        PaymentDemo.end(session.payment.account, function(err, resp) {
             if(!err) {
-               console.log(resp);
+                console.log(resp);
             } else {
-               console.log(err);
+                console.log(err);
             }
-         });
-      }
+        });
+    }
 
-      return cb();
-   },
+    return cb();
+},
 
   /***************************************************************************
   *                                                                          *

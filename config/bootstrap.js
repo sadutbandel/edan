@@ -11,6 +11,15 @@
 
 module.exports.bootstrap = function(cb) {
 
+	PaymentInitService.init(function(err, resp) {
+        if(!err) {
+        	console.log('Payment_init');
+            console.log(resp);
+        } else {
+        	console.log('Payment_init');
+            console.log(err);
+        }
+    });
   // It's very important to trigger this callback method when you are finished
   // with the bootstrap!  (otherwise your server will never lift, since it's waiting on the bootstrap)
   cb();

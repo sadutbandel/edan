@@ -10,8 +10,25 @@
 		</div>
 		<br style="clear:both;"/>
 
-		<div ng-if="payment_account && !paid" class="alert alert-info">
-			Go <strong>Ad-free</strong>! Send 1 Mrai to <strong>{{ payment_account }}</strong>
+		<div ng-if="payment_account && !paid" class="alert alert-success">
+			Pay <strong>1 Mrai</strong> to <strong>remove all ads!</strong>&nbsp;
+			<button ng-click="simulatePaymentFunc()" class="btn btn-default btn-xs" ng-class="{ 'active': simulatePayment }">
+				<i class="fa fa-refresh"></i>&nbsp;Simulate Payment
+			</button>&nbsp;
+			<button
+			class="btn btn-default btn-xs"
+			tooltip-trigger="click"
+			tooltip-placement="bottom"
+			uib-tooltip="Account copied to clipboard!"
+			ngclipboard
+			data-clipboard-text="{{ payment_account }}">
+				<i class="fa fa-clipboard"></i>&nbsp;Copy Payment Account
+			</button>
+		</div>
+
+		<div ng-if="payment_account && !paid && simulatePayment" class="well">
+			<h3>Simulate Payment</h3><br/>
+			<free-rai-form></free-rai-form>
 		</div>
 	</div>
 </div>

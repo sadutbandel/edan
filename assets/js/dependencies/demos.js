@@ -2,7 +2,7 @@
 
 	angular
 
-	.module('RBDemos', [])
+	.module('RBDemos', ['ngclipboard'])
 
 	.config(function($routeProvider) {
 		$routeProvider.when('/demos', {
@@ -18,6 +18,10 @@
 
 			templateUrl: 'templates/pay-remove-ads.html',
 			controller: function($q, $scope, $interval) {
+
+				$scope.simulatePaymentFunc = function() {
+					$scope.simulatePayment = true;
+				}
 
 				$scope.initializeDemo = function() {
 
