@@ -14,8 +14,8 @@ module.exports = {
 		PaymentFinishService.init(req.session.payment.account, function(err, resp) {
 
 			if(!err) {
-				res.send(resp);
 				req.session.payment = undefined;
+				res.send(resp);
 			} else {
 				res.send(err);
 			}

@@ -13,6 +13,8 @@ module.exports = {
 		// if there's NO payment account in session, create a new one
 		if(!req.session.payment) {
 
+			console.log('No payment account found');
+
 			PaymentBeginService.init(function(err, resp) {
 
 				if(!err) {
@@ -27,6 +29,7 @@ module.exports = {
 				}
 			});
 		} else {
+			console.log('Payment account found');
 			res.send({ account: req.session.payment.account });
 		}
 	}
