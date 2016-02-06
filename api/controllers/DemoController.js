@@ -18,21 +18,19 @@ module.exports = {
 			var account = req.session.payment.account;
 
 			// send the payment account to the user
-			console.log('Emitting \'account\' = ' + account + ' via existing');
+			console.log('Emit existing ' + account);
 			sails.sockets.emit( socketId, 'account', account );
 
-			// pass the payment account from session to our payment_wait long-polling listener function
-			PaymentDemoService.waitPayment(account,function(err, resp) {
+			// pass the payment account from our server session to the payment_wait long-polling listener call
+			PaymentDemoService.waitPayment(account, function(err, resp) {
 
 				if(!err) {
 
 					// remove the payment account from session once we discover we've been paid
 					if(resp.paid === true) {
-						console.log('Clearing payment account from session');
+						console.log('Paid! Clearing account from req session');
 						req.session.payment = undefined;
 					}
-
-					console.log('Returning \'paid\' === ' + resp.paid);
 
 					res.send(resp);
 
@@ -47,15 +45,15 @@ module.exports = {
 		else {
 
 			// create a new payment account
-			PaymentDemo.new(function(err, resp) {
+			Demo.new(function(err, resp) {
 
 				if(!err) {
 
-					// retrieve newly created payment account
+					// store the newly created payment account
 					var account = resp.account;
 
 					// send the payment account to the user's front-end (demo.js)
-					console.log('Emitting \'account\' = ' + account + ' via new');
+					console.log('Emit new account ' + account);
 					sails.sockets.emit( socketId, 'account', account );
 
 					// create a session payment object
@@ -73,11 +71,9 @@ module.exports = {
 							if(resp.paid === true) {
 
 								// cler the payment account from the session
-								console.log('Clearing payment account from session');
+								console.log('Paid! Clearing account from req session');
 								req.session.payment = undefined;
 							}
-
-							console.log('Returning \'paid\' === ' + resp.paid);
 
 							//console.log(resp);
 							res.send(resp);

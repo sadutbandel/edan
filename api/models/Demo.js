@@ -9,7 +9,7 @@ module.exports = {
 
 	existing: function(account, callback) {
 
-		console.log('Existing payment account is waiting');
+		console.log('Existing payment account is waiting ' + account);
 
 		PaymentWaitService.init(account, function(err, res) {
 			if(!err) {
@@ -35,7 +35,7 @@ module.exports = {
 
 	recapture: function(account, callback) {
 
-		console.log('Recapturing the funds used in the demo');
+		console.log('Recapturing the funds used in the demo ' + account);
 
 		PaymentRecaptureService.init(account, function(err, res) {
 
@@ -49,7 +49,7 @@ module.exports = {
 
 	end: function(account, callback) {
 
-		console.log('Ending payment account');
+		console.log('Ending payment account ' + account);
 
 		PaymentEndService.init(account, function(err, res) {
 			if(!err) {

@@ -36,9 +36,8 @@ module.exports.routes = {
     view: 'application'
   },
 
-  'post /paymentdemo': 'PaymentDemoController.create',
-  'get /session': 'SessionController.find',
-  'get /socketid': 'SocketController.getSocketID',
+  'post /demo': 'PaymentDemoController.ping',
+  'post /clear': 'ClearController.create',
   
   /***************************************************************************
   *                                                                          *

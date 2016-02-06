@@ -1,0 +1,22 @@
+<div class="col-lg-12">
+	
+	<div class="row">
+
+		<uib-tabset justified="true">
+			<uib-tab heading="Pay-Remove Ads">
+				<pay-remove-ads></pay-remove-ads>
+			</uib-tab>
+			<uib-tab heading="Give Tips">Demo Coming Soon</uib-tab>
+			<uib-tab heading="File Downloads">Demo Coming Soon</uib-tab>
+		</uib-tabset>
+
+
+<!-- lefthand pane 
+
+		<div class="col-lg-8">
+			<h3>Send Rai to Complete</h3>
+			<free-rai-form></free-rai-form>
+		</div>
+-->
+	</div>
+</div>

@@ -1,12 +1,13 @@
 /**
- * Functions for the PaymentDemoController.js
+ * Functions for the DemoController.js
  * */
 
 module.exports = {
 
+	//obj contains account, and req
 	waitPayment: function(account, callback) {
 
-		PaymentDemo.existing(account, function(err, res) {
+		Demo.existing(account, function(err, res) {
 
 			if(!err) {
 
@@ -15,13 +16,17 @@ module.exports = {
 
 					if(res.status != 'nothing') {
 
+						// PAID - emit 'paid' true to the client to remove ads
+						console.log('Emit paid === true');
+						sails.sockets.emit( socketId, 'paid', true);
+
 						// recapture the demo funds to our holding address
-						PaymentDemo.recapture(account, function(err, res) {
+						Demo.recapture(account, function(err, res) {
 
 							if(!err) {
 
 								// end the payment
-								PaymentDemo.end(account, function(err, res) {
+								Demo.end(account, function(err, res) {
 									if(!err) {
 										res.paid = true;
 										callback(null, res);
@@ -36,9 +41,12 @@ module.exports = {
 							}
 						});
 					} 
+
 					// res.status == 'nothing'
 					else {
 						res.paid = false;
+						console.log('Emit paid === false');
+						sails.sockets.emit( socketId, 'paid', false);
 						callback(null, res);
 					}
 				} else {

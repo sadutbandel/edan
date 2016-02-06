@@ -2,51 +2,87 @@
 
 	angular
 
-	.module('RBDemos', ['ngclipboard'])
+	.module('RBDemos', [
+		'ngclipboard'
+		])
 
 	.config(function($routeProvider) {
 		$routeProvider.when('/demos', {
-			templateUrl : 'templates/demos.html'
+			templateUrl : 'templates/demos.html',
+			controller: 'demosCtrl'
 		})
 	})
 
-	.run(function(){})
+	.controller('demosCtrl', function($scope) {
 
-	.directive('payRemoveAds', function() {
+		$scope.payment_account = undefined;
 
-		return {
+		// pingDemo() sends a req to /demo to either create, or continue a payment account.
+		// when paid === true here, it's the end of the payment demo entirely.
+		$scope.pingDemo = function() {
 
-			templateUrl: 'templates/pay-remove-ads.html',
-			controller: function($q, $scope, $interval) {
+			// not paid yet...
+			$scope.paid = false;
 
-				$scope.simulatePaymentFunc = function() {
-					$scope.simulatePayment = true;
+			// entire demo is not complete yet...
+			$scope.demoComplete = false;
+
+			//  post air to /demo
+			io.socket.post('/demo', function (data, jwres) {
+
+				// store paid status
+				$scope.paid = data.paid;
+
+				// paid === false, pingDemo() again
+				if(data.paid === false) {
+					$scope.pingDemo();
+				} 
+
+				// paid === true
+				else {
+					// the demo is complete now
+					$scope.demoComplete = true;
+					// clear payment account
+					$scope.payment_account = undefined;
 				}
+				$scope.$apply();
+			});
+		}
 
-				$scope.initializeDemo = function() {
+		$scope.pingDemo();
 
-					$scope.paid = undefined;
+		// the user clicks on this button to popup the free-rai form
+		$scope.simulatePayment = function() {
 
-					io.socket.post('/paymentdemo', function (data, jwres){
-						if(data.paid === false) {
-							$scope.initializeDemo();
-						}
-						$scope.paid = data.paid;
-						$scope.$apply();
-					});
-				}
+			$scope.showSimulatePayment = true;
+		}
 
-				$scope.initializeDemo();
+		// store the payment account in $scope once it's created
+		io.socket.on('account', function onServerSentEvent (account) {
+			$scope.payment_account = account;
+			$scope.$apply();
+		});
 
-				// store the payment account in $scope once it's created
-				io.socket.on('account', function onServerSentEvent (account) {
-					//console.log('account = ' + account);
-					$scope.payment_account = account;
-					$scope.$apply();
+		// when paid === true here, it's the moment payment is received, but the demo is not complete quite yet
+		io.socket.on('paid', function onServerSentEvent (bool) {
+
+			// true or false
+			$scope.paid = bool;
+
+			// if payment was made, clear the simulatePayment panel from view, and clear the payment account.
+			if(bool) {
+
+				// clear our session from server
+				io.socket.post('/clear', function (data, jwres) {
+
+					// hide simulate payment
+					$scope.showSimulatePayment = false;
+
+					// clear payment account
+					$scope.payment_account = undefined;
 				});
-				
-			},
-			restrict: 'E'
-		};
-	})
+			}
+			$scope.$apply();
+		});
+	});
 })();
