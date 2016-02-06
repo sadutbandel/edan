@@ -13,76 +13,70 @@
 		})
 	})
 
-	.controller('demosCtrl', function($scope) {
+	.controller('demosCtrl', function($scope, $q) {
 
 		$scope.payment_account = undefined;
+		$scope.paid = false;
+		$scope.demoComplete = false;
 
-		// pingDemo() sends a req to /demo to either create, or continue a payment account.
-		// when paid === true here, it's the end of the payment demo entirely.
-		$scope.pingDemo = function() {
+		// begin a payment if no account exists yet
+		$scope.paymentBegin = function() {
 
-			// not paid yet...
-			$scope.paid = false;
-
-			// entire demo is not complete yet...
-			$scope.demoComplete = false;
-
-			//  post air to /demo
-			io.socket.post('/demo', function (data, jwres) {
-
-				// store paid status
-				$scope.paid = data.paid;
-
-				// paid === false, pingDemo() again
-				if(data.paid === false) {
-					$scope.pingDemo();
-				} 
-
-				// paid === true
-				else {
-					// the demo is complete now
-					$scope.demoComplete = true;
-					// clear payment account
-					$scope.payment_account = undefined;
-				}
-				$scope.$apply();
+			return $q(function(resolve, reject) {
+				io.socket.post('/paymentBegin', function (data, jwres) {
+					$scope.payment_account = data.account;
+					$scope.$apply();
+					resolve();
+				});
 			});
+
+			return promise;
 		}
 
-		$scope.pingDemo();
+		// initiates a payment wait
+		$scope.paymentWait = function() {
+
+			return $q(function(resolve, reject) {
+				io.socket.post('/paymentWait', function (data, jwres) {
+					$scope.paid = data.paid;
+					if(data.paid === false) {
+						$scope.paymentWait();
+					} else if(data.paid === true) {
+						$scope.paymentFinish();
+					}
+					$scope.$apply();
+					resolve();
+				});
+			});
+
+			return promise;
+		}
+
+		// recapture funds and end payment
+		$scope.paymentFinish = function() {
+
+			return $q(function(resolve, reject) {
+				io.socket.post('/paymentFinish', function (data, jwres) {
+					$scope.demoComplete = true;
+					$scope.payment_account = undefined;
+					$scope.$apply();
+					resolve();
+				});
+			});
+
+			return promise;
+		}
+
+		// kick it off
+		$scope.paymentBegin().then(function() {
+			$scope.paymentWait();
+		});
 
 		// the user clicks on this button to popup the free-rai form
 		$scope.simulatePayment = function() {
 
 			$scope.showSimulatePayment = true;
 		}
-
-		// store the payment account in $scope once it's created
-		io.socket.on('account', function onServerSentEvent (account) {
-			$scope.payment_account = account;
-			$scope.$apply();
-		});
-
-		// when paid === true here, it's the moment payment is received, but the demo is not complete quite yet
-		io.socket.on('paid', function onServerSentEvent (bool) {
-
-			// true or false
-			$scope.paid = bool;
-
-			// if payment was made, clear the simulatePayment panel from view, and clear the payment account.
-			if(bool) {
-
-				// clear our session from server
-				io.socket.post('/clear', function (data, jwres) {
-
-					// hide simulate payment
-					$scope.showSimulatePayment = false;
-
-					// clear payment account
-					$scope.payment_account = undefined;
-				});
-			}
-			$scope.$apply();
-		});
 	});
+
 })();

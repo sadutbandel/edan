@@ -128,14 +128,14 @@ module.exports.sockets = {
 
     // if there is a payment account left in the session upon user-exit, end the payment account.
     if(session.payment) {
-
-        Demo.end(session.payment.account, function(err, resp) {
-            if(!err) {
-              session.payment = undefined;
-              console.log(resp);
-            } else {
-              console.log(err);
-            }
+        console.log('Finishing (recapture & end) Payment Account #' + session.payment.account);
+        PaymentFinishService.init(session.payment.account, function(err, resp) {
+          if(!err) {
+            console.log('Successfully finished!')
+            session.payment = undefined;
+          } else {
+            console.log('Error finishing payment account!');
+          }
         });
     }
 
