@@ -44,7 +44,7 @@
 		// establish public app-wide variables
 		$rootScope.recaptchaKey = '6LcPNAsTAAAAANCpxZY3SMikIjg5a0T9XTnjM-v4';
 		$rootScope.faucetNumber = 'xrb_35jjmmmh81kydepzeuf9oec8hzkay7msr6yxagzxpcht7thwa5bus5tomgz9';
-		$rootScope.rb_version = '7.2.1';
+		$rootScope.rb_version = '7.3.0';
 	})
 
 	.directive('freeRaiForm', function() {
