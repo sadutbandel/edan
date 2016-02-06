@@ -8,7 +8,7 @@ module.exports = {
 
 		payload = {
 			action: 'send',
-			wallet: sails.config.wallet,
+			wallet: Globals.paymentWallets.production,
 			source: parameters.source,
 			destination: parameters.destination,
 			amount: parameters.amount.toString().concat(Globals.mrai)
