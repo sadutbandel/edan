@@ -8,7 +8,7 @@ module.exports = {
 
 		payload = {
 			action: 'send',
-			wallet: Globals.paymentWallets.production,
+			wallet: parameters.wallet,
 			source: parameters.source,
 			destination: parameters.destination,
 			amount: parameters.amount.toString().concat(Globals.mrai)

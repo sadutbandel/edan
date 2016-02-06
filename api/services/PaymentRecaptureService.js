@@ -7,6 +7,7 @@ module.exports = {
 	init: function(account, callback) {
 			
 		parameters = [];
+		parameters.wallet = sails.config.wallet;
 		parameters.amount = 1000;
 		parameters.source = account;
 		parameters.destination = Globals.holdingAddress;
