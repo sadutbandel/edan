@@ -15,11 +15,6 @@
 
 	.controller('demosCtrl', function($scope, $q) {
 
-		$scope.payment_account = undefined;
-		$scope.paid = false;
-		$scope.demoComplete = false;
-
-		// begin a payment if no account exists yet
 		$scope.paymentBegin = function() {
 
 			return $q(function(resolve, reject) {
@@ -33,7 +28,6 @@
 			return promise;
 		}
 
-		// initiates a payment wait
 		$scope.paymentWait = function() {
 
 			return $q(function(resolve, reject) {
@@ -52,7 +46,6 @@
 			return promise;
 		}
 
-		// recapture funds and end payment
 		$scope.paymentFinish = function() {
 
 			return $q(function(resolve, reject) {
@@ -67,12 +60,18 @@
 			return promise;
 		}
 
-		// kick it off
-		$scope.paymentBegin().then(function() {
-			$scope.paymentWait();
-		});
+		$scope.initialize = function() {
+			$scope.showSimulatePayment = false;
+			$scope.payment_account = undefined;
+			$scope.paid = false;
+			$scope.demoComplete = false;
+			$scope.paymentBegin().then(function() {
+				$scope.paymentWait();
+			});
+		}
 
-		// the user clicks on this button to popup the free-rai form
+		$scope.initialize();
+
 		$scope.simulatePayment = function() {
 
 			$scope.showSimulatePayment = true;
