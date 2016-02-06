@@ -53,7 +53,7 @@
 
             restrict: 'E',
             templateUrl: 'templates/free-rai-form.html',
-            controller: function(Button, $scope, $http, $timeout, vcRecaptchaService) {
+            controller: function($scope, $http, $timeout, vcRecaptchaService) {
 
 				$scope.init = function () {
 					$scope.account = null;
@@ -71,58 +71,53 @@
 		     		$scope.widgetId = widgetId;
 		  		};
 
-		  		Button.create('free');
+		  		// define the different button states
+		  		button = {
 
-				Button.mode('free', 'default', { 
-					'disabled' : false, 
-					'icon' : 'fa-plus-circle', 
-					'title': 'Request free 1 Grai', 
-					'class': 'btn-primary'
-				});
+		  			default: {
+		  				disabled: false,
+		  				icon: 'fa-plus-circle',
+		  				title: 'Request 1000 Mrai',
+		  				class: 'btn-primary'
+		  			},
 
-				Button.mode('free', 'claiming', { 
-					'disabled' : true, 
-					'icon' : 'fa-spin fa-spinner', 
-					'title': 'Sending free Grai', 
-					'class': 'btn-default'
-				});
+		  			claiming: {
+		  				disabled: true,
+		  				icon: 'fa-spin fa-spinner',
+		  				title: 'Sending free Mrai',
+		  				class: 'btn-default'
+		  			},
 
-				Button.mode('free', 'claimed', { 
-					'disabled' : true, 
-					'icon' : 'fa-thumbs-up', 
-					'title': 'Free Grai Sent', 
-					'class': 'btn-success'
-				});
+		  			claimed: {
+		  				disabled: true,
+		  				icon: 'fa-thumbs-up',
+		  				title: 'Free Mrai Sent',
+		  				class: 'btn-success'
+		  			},
 
-				Button.mode('free', 'account_error', {
-					'disabled' : true, 
-					'icon' : 'fa-thumbs-down', 
-					'title': 'Provide a valid account id', 
-					'class': 'btn-danger'
-				});
+		  			account_error: {
+		  				disabled: true,
+		  				icon: 'fa-thumbs-down',
+		  				title: 'Provide a valid account id',
+		  				class: 'btn-danger'
+		  			},
 
-				Button.mode('free', 'recaptcha_error', { 
-					'disabled' : true, 
-					'icon' : 'fa-thumbs-down', 
-					'title': 'Complete the reCaptcha', 
-					'class': 'btn-danger'
-				});
+		  			recaptcha_error: {
+		  				disabled: true,
+		  				icon: 'fa-thumbs-down',
+		  				title: 'Complete the reCaptcha',
+		  				class: 'btn-danger'
+		  			},
 
-				Button.mode('free', 'recaptcha_error', { 
-					'disabled' : true, 
-					'icon' : 'fa-thumbs-down', 
-					'title': 'Complete the reCaptcha', 
-					'class': 'btn-danger'
-				});
+		  			not_free: {
+		  				disabled: true,
+		  				icon: 'fa-thumbs-down',
+		  				title: 'RaiBlocks are not free right now',
+		  				class: 'btn-danger'
+		  			}
+		  		};
 
-				Button.mode('free', 'not_free', { 
-					'disabled' : true, 
-					'icon' : 'fa-thumbs-down', 
-					'title': 'RaiBlocks are not free right now', 
-					'class': 'btn-danger'
-				});
-
-				Button.change('free', 'default');
+		  		$scope.button = button.default;
 
 				$scope.validateAccount = function() {
 					if($scope.account == null || $scope.account == '') {
@@ -159,27 +154,28 @@
 
 					if($scope.account == null || $scope.account == '') {
 
-						Button.change('free', 'account_error');
+						$scope.button = button.account_error;
 
 						$timeout(function() {
-							Button.change('free', 'default');
+							$scope.button = button.default;
 						}, 3000);
 
 					} else if($scope.response == null || $scope.response == '') {
 
-						Button.change('free', 'recaptcha_error');
+						$scope.button = button.recaptcha_error;
 
 						$timeout(function() {
-							Button.change('free', 'default');
+							$scope.button = button.default;
 						}, 3000);
 
 					} else {
 
-						Button.change('free', 'claiming');
+						$scope.button = button.claiming;
 
-						payload = {};
-						payload.account = $scope.account;
-						payload.response = $scope.response;
+						payload = {
+							account: $scope.account,
+							response: $scope.response
+						};
 						
 						$http.post('/freerai', payload)
 
@@ -187,12 +183,12 @@
 
 							$timeout(function() {
 
-								Button.change('free', data.message);
+								$scope.button = button[data.message];
 
 								$timeout(function() {
 									vcRecaptchaService.reload($scope.widgetId);
 									$scope.init();
-									Button.change('free', 'default');
+									$scope.button = button.default;
 								}, 3000);
 
 							}, 3000);
@@ -234,39 +230,43 @@
 	})
 
 	// block chain page
-	.controller('blockCtrl', function(Button, $http, $rootScope, $scope, $timeout) {
+	.controller('blockCtrl', function($http, $rootScope, $scope, $timeout) {
 
-		Button.create('block');
+		// define the different button states
+  		button = {
 
-		Button.mode('block', 'default', { 
-			'disabled' : false, 
-			'icon' : 'fa-plus-circle', 
-			'title': 'Process Block Chain', 
-			'class': 'btn-primary'
-		});
+  			default: {
+  				disabled: false,
+  				icon: 'fa-plus-circle',
+  				title: 'Process Block Chain',
+  				class: 'btn-primary'
+  			},
 
-		Button.mode('block', 'processing', { 
-			'disabled' : true, 
-			'icon' : 'fa-spin fa-spinner', 
-			'title': 'Processing Block Chain', 
-			'class': 'btn-default'
-		});
+  			processing: {
+  				disabled: true,
+  				icon: 'fa-spin fa-spinner',
+  				title: 'Processing Block Chain',
+  				class: 'btn-default'
+  			},
 
-		Button.mode('block', 'processed', { 
-			'disabled' : true, 
-			'icon' : 'fa-thumbs-up', 
-			'title': 'Block Chain Processed', 
-			'class': 'btn-success'
-		});
+  			processed: {
+  				disabled: true,
+  				icon: 'fa-thumbs-up',
+  				title: 'Block Chain Processed',
+  				class: 'btn-success'
+  			},
 
-		Button.mode('block', 'empty_block', { 
-			'disabled' : true, 
-			'icon' : 'fa-thumbs-down', 
-			'title': 'Block Chain Empty', 
-			'class': 'btn-danger'
-		});
+  			empty_block: {
+  				disabled: true,
+  				icon: 'fa-thumbs-down',
+  				title: 'Block Chain Empty',
+  				class: 'btn-danger'
+  			},
 
-		Button.change('block', 'default');
+  			state
+  		};
+
+  		$scope.button = button.default;
 
 		// ensure the block chain entered is not null, undefined, or empty.
 		$scope.validate = function(a) {
@@ -285,57 +285,34 @@
 			if($scope.validate($scope.blockChain)) {
 
 				// change the button
-				Button.change('block', 'empty_block');
+				$scope.button = button.empty_block;
 				$timeout(function() {
-					Button.change('block', 'default');
+					$scope.button = button.default;
 				}, 3000);
 			}
 
 			else {
 
-				Button.change('block', 'processing');
+				$scope.button = button.processing;
+
 				var blockStr = JSON.stringify($scope.blockChain);
-				blockStr = blockStr.substring(1, blockStr.length - 1);
-				$http.post('/api/processBlockChain', { block: blockStr })
+
+				payload = { 
+					block: blockStr.substring(1, blockStr.length - 1)
+				}
+
+				$http.post('/api/processBlockChain', payload)
+
 				.success(function(data, status, headers, config) {
-					Button.change('block', 'processed');
+
+					$scope.button = button.processed;
+
 					$timeout(function() {
-						Button.change('block', 'default');
+						$scope.button = button.default;
 					}, 3000);
 				});
 			}
 	
-		}
-	})
-
-	// dynamic buttons
-	.service('Button', function($q, $rootScope, vcRecaptchaService) {
-
-		// create button object
-		this.create = function(name) {
-			$rootScope[name] = {};
-		}
-
-		// define all modes in rootScope
-		this.mode = function(name, mode, properties) {
-
-			$rootScope[name][mode] = {};
-
-			return $q(function(resolve, reject) {
-				angular.forEach(properties, function(val, key) {
-					$rootScope[name][mode][key] = val;
-				});
- 				resolve();
-  			});
-		}
-
-		// change the button status
-		this.change = function(name, mode) {
-
-			return $q(function(resolve, reject) {
-				$rootScope[name].active = $rootScope[name][mode];
- 				resolve();
-  			});
 		}
 	})
 
