@@ -14,9 +14,10 @@ module.exports = {
 
 	init: function(callback) {
 
-		payload = {};
-		payload.action = 'payment_init';
-		payload.wallet = Globals.walletNumber;
+		payload = {
+			action: 'payment_init',
+			wallet: sails.config.wallet
+		};
 		
 		RpcService.callRpc(payload, function(err, response) {
 

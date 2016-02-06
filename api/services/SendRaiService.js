@@ -6,12 +6,13 @@ module.exports = {
 	 */
 	send: function(parameters, callback) {
 
-		payload = {};
-		payload.action = 'send';
-		payload.wallet = Globals.walletNumber;
-		payload.source = parameters.source;
-		payload.destination = parameters.destination;
-		payload.amount = parameters.amount.toString().concat(Globals.mrai);
+		payload = {
+			action: 'send',
+			wallet: sails.config.wallet,
+			source: parameters.source,
+			destination: parameters.destination,
+			amount: parameters.amount.toString().concat(Globals.mrai)
+		};
 
 		RpcService.callRpc(payload, function(err, response) {
 

@@ -53,7 +53,7 @@
 
             restrict: 'E',
             templateUrl: 'templates/free-rai-form.html',
-            controller: function($scope, $http, $timeout, vcRecaptchaService) {
+            controller:  ['$scope', '$http', '$timeout', 'vcRecaptchaService', function($scope, $http, $timeout, vcRecaptchaService) {
 
 				$scope.init = function () {
 					$scope.account = null;
@@ -187,12 +187,12 @@
 						}, 3000);
 					}
 				}		
-            }
+            }]
         };
     })
 
 	// allow entry to the block chain page
-	.controller('homeCtrl', function($rootScope, $scope, $location) {
+	.controller('homeCtrl', ['$rootScope', '$scope', '$location', function($rootScope, $scope, $location) {
 
 		$scope.pass = 0;
 	    $scope.process = function() {
@@ -205,7 +205,7 @@
 	    		$location.path('block');
 	    	}
 	    }
-	})
+	}])
 
 	// get-started controller
 	.controller('startCtrl', function() {
@@ -216,7 +216,7 @@
 	})
 
 	// block chain page
-	.controller('blockCtrl', function($http, $rootScope, $scope, $timeout) {
+	.controller('blockCtrl', ['$rootScope', '$scope', '$http', '$timeout', function($http, $rootScope, $scope, $timeout) {
 
 		// define the different button states
   		button = {
@@ -300,6 +300,6 @@
 			}
 	
 		}
-	})
+	}])
 
 })();

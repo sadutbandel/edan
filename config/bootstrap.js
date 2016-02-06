@@ -11,6 +11,16 @@
 
 module.exports.bootstrap = function(cb) {
 
+  // I need to resolve an issue with minification before I can use the built-in prod/env flag
+  // dev env
+  if(sails.config.port === 1337) {
+    sails.config.wallet = Globals.paymentWallets.development;
+  } 
+  // prod env
+  else if(sails.config.port === 1338) {
+    sails.config.wallet = Globals.paymentWallets.production;
+  }
+
 	PaymentInitService.init(function(err, resp) {
         if(!err) {
         	console.log('Payment_init');
