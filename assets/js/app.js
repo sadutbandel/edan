@@ -120,7 +120,8 @@
 		  		$scope.button = button.default;
 
 				$scope.validateAccount = function() {
-					if($scope.account == null || $scope.account == '') {
+					if($scope.account === null || $scope.account === '') {
+						$scope.button = button.account_error;
 						return false;
 					} else {
 						return true;
@@ -128,7 +129,8 @@
 				}
 
 				$scope.validateResponse = function() {
-					if($scope.response == null || $scope.response == '') {
+					if($scope.response === null || $scope.response === '') {
+						$scope.button = button.recaptcha_error;
 						return false;
 					} else {
 						return true;
@@ -147,28 +149,10 @@
 					}
 				}
 
-				// submit free coin request
+				// submit form, triggers validateForm(), which triggers validateAccount() and validateResponse()
 				$scope.submit = function () {
 
-					$scope.validateForm();
-
-					if($scope.account == null || $scope.account == '') {
-
-						$scope.button = button.account_error;
-
-						$timeout(function() {
-							$scope.button = button.default;
-						}, 3000);
-
-					} else if($scope.response == null || $scope.response == '') {
-
-						$scope.button = button.recaptcha_error;
-
-						$timeout(function() {
-							$scope.button = button.default;
-						}, 3000);
-
-					} else {
+					if($scope.validateForm()) {
 
 						$scope.button = button.claiming;
 
@@ -195,10 +179,12 @@
 						})
 						.error(function(data, status) {
 							console.error('Error', status, data);
-						})
-						.finally(function() {
-							
 						});
+
+					} else {
+						$timeout(function() {
+							$scope.button = button.default;
+						}, 3000);
 					}
 				}		
             }
