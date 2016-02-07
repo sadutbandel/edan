@@ -34,7 +34,8 @@
 
 		<!-- Pay 1 Mrai, Copy Account to Clipboard -->
 		<div ng-if="payment_account && !paid" class="alert alert-success">
-			To <strong>remove all ads</strong>, pay <strong>1 Mrai</strong> to {{ payment_account }}&nbsp;
+			Go <strong>ad-free</strong> for 1000 Mrai
+			&nbsp;
 			<button
 			class="btn btn-default btn-xs"
 			tooltip-trigger="click"
@@ -43,7 +44,8 @@
 			ngclipboard
 			data-clipboard-text="{{ payment_account }}">
 				<i class="fa fa-clipboard"></i>
-			</button>&nbsp;
+			</button>
+			<br/>{{ payment_account }}
 			
 		</div>
 
