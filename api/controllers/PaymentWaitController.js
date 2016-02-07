@@ -18,6 +18,12 @@ module.exports = {
 				if(resp.statusCode === 200) {
 
 					if(resp.status !== 'nothing') {
+						// send the account back for finishing
+						resp.account = req.session.payment.account;
+						// remove the account from session immediately
+						// this is so that the user can restart the demo immediately
+						// without needing to wait for the server to complete the prior
+						req.session.payment = undefined;
 						resp.paid = true;
 					}
 					else {

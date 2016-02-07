@@ -11,10 +11,9 @@ module.exports = {
 
 		console.log('Payment Finish Controller');
 
-		PaymentFinishService.init(req.session.payment.account, function(err, resp) {
+		PaymentFinishService.init(req.body.account, function(err, resp) {
 
 			if(!err) {
-				req.session.payment = undefined;
 				res.send(resp);
 			} else {
 				res.send(err);
