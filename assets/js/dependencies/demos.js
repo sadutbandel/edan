@@ -3,7 +3,8 @@
 	angular
 
 	.module('RBDemos', [
-		'ngclipboard'
+		'ngclipboard',
+		'angular-google-adsense'
 		])
 
 	.config(function($routeProvider) {
