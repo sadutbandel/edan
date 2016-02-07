@@ -4,6 +4,7 @@
 
 	.module('RBDemos', [
 		'ngclipboard',
+		//'ngAdsense',
 		'angular-google-adsense'
 		])
 
