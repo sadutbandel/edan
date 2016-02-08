@@ -7,8 +7,6 @@
 		'routeHelper', // route-assist
 		'vcRecaptcha', // google recaptcha
 		'ngRoute', // routing
-		'ngAnimate', // require for ui.bootstrap
-		'ui.bootstrap', // angularized-bootstrap
 		'RBDemos', // demos
 		])
 
@@ -29,11 +27,6 @@
 			templateUrl : 'templates/block.html',
 			controller  : 'blockCtrl'
 		})
-		.when('/getblocks', {
-			templateUrl : 'templates/getblocks.html',
-			controller  : 'getBlocksCtrl'
-		});
-
 	})
 
 	.run(function($rootScope, logo) {
@@ -76,44 +69,44 @@
 
 		  			default: {
 		  				disabled: false,
-		  				icon: 'fa-plus-circle',
+		  				icon: 'add circle',
 		  				title: 'Request 1000 Mrai',
-		  				class: 'btn-primary'
+		  				class: 'blue'
 		  			},
 
 		  			claiming: {
 		  				disabled: true,
-		  				icon: 'fa-spin fa-spinner',
+		  				icon: 'loading spinner',
 		  				title: 'Sending free Mrai',
-		  				class: 'btn-default'
+		  				class: 'grey'
 		  			},
 
 		  			claimed: {
 		  				disabled: true,
-		  				icon: 'fa-thumbs-up',
+		  				icon: 'thumbs up',
 		  				title: 'Free Mrai Sent',
-		  				class: 'btn-success'
+		  				class: 'green'
 		  			},
 
 		  			account_error: {
 		  				disabled: true,
-		  				icon: 'fa-thumbs-down',
+		  				icon: 'thumbs down',
 		  				title: 'Provide a valid account id',
-		  				class: 'btn-danger'
+		  				class: 'red'
 		  			},
 
 		  			recaptcha_error: {
 		  				disabled: true,
-		  				icon: 'fa-thumbs-down',
+		  				icon: 'thumbs down',
 		  				title: 'Complete the reCaptcha',
-		  				class: 'btn-danger'
+		  				class: 'red'
 		  			},
 
 		  			not_free: {
 		  				disabled: true,
-		  				icon: 'fa-thumbs-down',
+		  				icon: 'thumbs down',
 		  				title: 'RaiBlocks are not free right now',
-		  				class: 'btn-danger'
+		  				class: 'red'
 		  			}
 		  		};
 
@@ -207,12 +200,12 @@
 	    }
 	}])
 
-	// get-started controller
-	.controller('startCtrl', function() {
-	})
-	
-	// get free rai
-	.controller('getBlocksCtrl', function() {
+	// wallet controller
+	.controller('startCtrl', function($scope) {
+		$scope.toggleTab = function(tab) {
+			$scope.tab = tab;
+		}
+		$scope.toggleTab('download');
 	})
 
 	// block chain page
