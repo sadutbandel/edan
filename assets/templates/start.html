@@ -1,21 +1,21 @@
 <!-- title -->
 <div class="sixteen wide column">
-	<h1>Let's get started!</h1>
+	<h1>Get started</h1>
 </div>
 <br style="clear:both;"/>
 
 <!-- getting started steps -->
-<div class="sixteen wide column">
-
+<div class="sixteen wide column centered">
 	<div class="ui steps">
-		<a class="step" ng-click="toggleTab('download')" ng-class="{'active': tab === 'download'}">
-			<i class="download icon"></i>
+		<a class="step" ng-click="toggleTab('platform')" ng-class="{'active': tab === 'platform'}">
+			<i class="cloud download icon"></i>
 			<div class="content">
-				<div class="title">The Wallet</div>
-				<div class="description">Download the RaiBlocks wallet.</div>
+				<div class="title">Download the wallet</div>
+				<div class="description">RaiBlocks wallet is currently version {{ rb_version }}</div>
 			</div>
 		</a>
 		<a class="step" ng-click="toggleTab('blocks')" ng-class="{'active': tab === 'blocks'}">
+			<i class="cubes icon"></i>
 			<div class="content">
 				<div class="title">Free Blocks</div>
 				<div class="description">Have some free Raiblocks, on us!</div>
@@ -23,59 +23,28 @@
 		</a>
 	</div>
 </div>
-<br style="clear:both;"/><br/>
+<br style="clear:both;"/>
 
-<!-- wallet version -->
-<div class="row" ng-hide="tab !== 'download'">
-	<div class="six wide column">
-		<div class="ui small statistic">
-			<div class="label">
-				Current Wallet Version
-			</div>
-			<div class="value">
-				{{ rb_version }}
-			</div>
-		</div>
+<!-- platform selection -->
+<div class="fourteen wide column centered ng-hide" ng-show="tab === 'platform'">
+	<div class="label">
+		Select a platform
 	</div>
-	<br style="clear:both;"/><br/>
-
-	<!-- download wallet -->
-	<div class="six wide column">
-		<div class="label">
-			Select a platform
-		</div>
-		<div class="ui massive buttons">
-			<a 
-			class="ui button" 
-			target="_blank" 
-			href="https://github.com/clemahieu/raiblocks/releases/download/V{{ rb_version }}/rai-{{ rb_version }}-Darwin.dmg">
-				<i class="apple icon"></i>OSX
-			</a>
-			<div class="or"></div>
-			<a 
-			class="ui button" 
-			target="_blank" 
-			href="https://github.com/clemahieu/raiblocks/releases/download/V{{ rb_version }}/rai-{{ rb_version }}-win64.zip">
-				<i class="windows icon"></i>Windows
-			</a>
-			<div class="or"></div>
-			<a 
-			class="ui button" 
-			target="_blank" 
-			href="https://github.com/clemahieu/raiblocks/releases/download/V{{ rb_version }}/rai-{{ rb_version }}-Linux.tar.bz2">
-				<i class="linux icon"></i>Linux
-			</a>
-		</div>
+	<div class="ui buttons">
+		<a
+		ng-repeat="platform in platforms"
+		class="ui button" 
+		target="_blank" 
+		href="{{ platform.link }}">
+			<i class="icon" ng-class="platform.icon"></i>{{ platform.name }}
+		</a>
 	</div>
 </div>
 
-<div class="row ng-hide" ng-show="tab === 'blocks'">
-	<!-- title -->
-	<div class="sixteen wide column">
-		<h1>Request Rai Blocks</h1>
+<!-- get free raiblocks tab -->
+<div class="fourteen wide column centered ng-hide" ng-show="tab === 'blocks'">
+	<div class="label">
+		Complete the form
 	</div>
-	<!-- free rai form -->
-	<div class="centered wide column">
-		<free-rai-form></free-rai-form>
-	</div>
+	<free-rai-form></free-rai-form>
 </div>

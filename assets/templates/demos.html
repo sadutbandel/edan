@@ -1,64 +1,113 @@
-<div class="sixteen wide column">
+<!-- title -->
+<div ng-show="!initialized && !payment_account" class="sixteen wide column ng-hide">
+	<h1>Usage Demos</h1>
+</div>
+<br style="clear:both;"/>
+
+<div ng-show="!initialized && !payment_account" class="fourteen wide column centered ng-hide">
+	<div class="ui items">
+		<div class="item">
+			<div class="ui image"><i class="huge erase icon"></i></div>
+			<div class="middle aligned content">
+				<div class="header">
+					Instant ad-removal
+				</div>
+				<div class="description">
+					<p>Wouldn't it be great if content distributors didn't have to battle ad-blockers, and content consumers didn't have to battle advertisements or cheat distributors by using ad-blockers? We've created a simple way to allow websites to let their visitors pay-to-remove advertisements using RaiBlocks.</p>
+				</div>
+				<div class="extra">
+					<a ng-click="initialize()" class="ui right floated violet button">Start Demo</a>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div ng-show="initialized" class="sixteen wide column centered ng-hide">
 
 	<!-- Restart Demo -->
-	<div ng-if="paid" class="ui blue message">
-		Should we do that again?
-		<button ng-click="initialize()" class="ui mini grey button ">
-			<i class="refresh icon"></i>&nbsp;Restart Demo
+	<div ng-if="paid" class="ui green message">
+		Ads successfully closed! Do it again?&nbsp;
+		<button ng-click="initialize()" class="ui mini green button ">
+			<i class="refresh icon"></i>Restart Demo
 		</button>
 	</div>
 
-	<h1>AmazingWebsite.tld</h1>
+	<!-- Pay 1 Mrai, Copy Account to Clipboard -->
+	<div id="go-ad-free" ng-if="payment_account && !paid" class="ui blue message">
+		Go <strong>ad-free</strong> for 1000 Mrai&nbsp;&nbsp;&nbsp;
+		<i class="clipboard icon" ngclipboard data-clipboard-text="{{ payment_account }}"></i>&nbsp;
+		{{ payment_account }}
+	</div>
 
 	<!-- Google Adsense Ads -->
 	<div ng-hide="paid">
 		<adsense ad-client="ca-pub-9603255231151209" ad-slot="7949639779" inline-style="display:block"></adsense>
 	</div>
 
-	<div ng-hide="paid" class="ui red leaderboard test ad" data-text="Annoying Ad"></div>
-	<br style="clear:both;"/>
-
-	<!-- Pay 1 Mrai, Copy Account to Clipboard -->
-	<div ng-if="payment_account && !paid" class="ui blue message">
-		Go <strong>ad-free</strong> for 1000 Mrai
-		&nbsp;
-		<button
-		class="ui mini grey button"
-		ngclipboard
-		data-clipboard-text="{{ payment_account }}">
-			<i class="clipboard icon"></i>
-		</button>
-		{{ payment_account }}
-	</div>
-
 	<!-- Simulate Payment -->
-	<div ng-if="payment_account && !paid">
-		<button ng-click="simulatePayment()" class="ui grey button" ng-class="{ 'active': showSimulatePayment }">
-			<i class="refresh icon"></i>&nbsp;Simulate Payment
+	<div class="centered" ng-if="payment_account && !paid && !showSimulatePayment">
+		<button ng-click="simulatePayment()" class="ui tiny blue button" ng-class="{ 'active': showSimulatePayment }">
+			Simulate a payment
 		</button>
 		<br style="clear:both;"/>
 	</div>
 
 	<div ng-if="payment_account && !paid && showSimulatePayment" class="ui segment">
-		<h3>Simulate Payment</h3><br/>
+		<span>Use the account above to make payment.</span>
 		<free-rai-form></free-rai-form>
 	</div>
 </div>
 
-<div class="sixteen wide column">
+<!-- DEMO INLINE WEBSITE -->
+<div ng-show="initialized" class="sixteen wide column ui centered raised segment ng-hide">
 
-	<!-- placeholder headline -->
-	<h2>Awesome Headline</h2>
+	<div class="ui grid">
 
-	<!-- placeholder image -->
-	<img src="images/placeholder.jpg" alt="..." class="ui fluid image">
+		<!-- Demo website header -->
+		<div class="sixteen wide column">
+			<h1>PopularPandaPlace.com</h1>
+		</div>
 
-	<!-- placeholder image desc -->
-	<p class="lead">Anxious image description!</p>
+		<!-- AD -->
+		<div ng-hide="paid" class="ui top banner test ad" data-text="Top Banner"></div>
 
-	<!-- placeholder paragraph -->
-	<p>
-		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-	</p>
+		<!-- CONTENT -->
+		<div class="thirteen wide column">
+
+			<!-- placeholder headline -->
+			<h2>Giant Pandas</h2>
+
+			<!-- placeholder image -->
+			<img src="images/panda.jpg" alt="A panda bear" class="ui medium image">
+
+			<!-- placeholder image desc -->
+			<h4 class="ui header">Solitary Munchers</h4>
+
+			<!-- placeholder paragraph -->
+			<p>
+				The 'giant panda', also known as 'panda bear', or simply 'panda', is a native bear to south-central China. With easily spotted features such as black eye patches and their white backs &amp; bellies, these bears are quite a unique creature.
+			</p>
+
+			<!-- AD -->
+			<div ng-hide="paid" class="sixteen wide column">
+				<div class="ui half banner test ad" data-text="Advertisement"></div>
+			</div>
+			<br style="clear:both;"/>
+			
+			<p>
+				Although they're classified as a carnivore, this fuzzy tree-crawler tends to graze on bamboo, fully living up to it's stereotype. Wild Giant pandas will occasionally eat other grasses, wild tubers, or even meat in the form of birds, rodents or carrion. While captive, pandas can receive honey, eggs, fish, yams, shrub leaves, oranges, or bananas along with specially prepared food.
+			</p>
+
+			<!-- AD -->
+			<div ng-hide="paid" class="sixteen wide column">
+				<div class="ui half banner test ad" data-text="Advertisement"></div>
+			</div>
+		</div>
+
+		<!-- AD -->
+		<div ng-hide="paid" class="three wide column">
+			<div class="ui skyscraper test ad" data-text="Advertisement"></div>
+		</div>
+	</div>
 </div>
-<div ng-hide="paid" class="ui red leaderboard test ad" data-text="Annoying Ad"></div>

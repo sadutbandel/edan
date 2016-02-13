@@ -16,6 +16,8 @@
 
 	.controller('demosCtrl', function($scope, $q) {
 
+		$scope.initialized = false;
+
 		$scope.paymentBegin = function() {
 
 			return $q(function(resolve, reject) {
@@ -49,22 +51,22 @@
 
 		$scope.paymentFinish = function(account) {
 
-			io.socket.post('/paymentFinish', { account: account })
+			io.socket.post('/paymentFinish', { account: account }, function (data, jwres) {
+				$scope.payment_account = undefined;
+			});
 		}
 
 		$scope.initialize = function() {
-			$scope.showSimulatePayment = false;
-			$scope.payment_account = undefined;
-			$scope.paid = false;
+			$scope.initialized = true; // triggers showing of demo itself. only reset on refresh or demo "quit"
+			$scope.showSimulatePayment = false; // the form for simulating a payment using the free-rai form
+			$scope.payment_account = undefined; // no payment account by default
+			$scope.paid = false; // not paid by default
 			$scope.paymentBegin().then(function() {
 				$scope.paymentWait();
 			});
 		}
 
-		$scope.initialize();
-
 		$scope.simulatePayment = function() {
-
 			$scope.showSimulatePayment = true;
 		}
 	});

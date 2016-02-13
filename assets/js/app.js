@@ -200,12 +200,32 @@
 	    }
 	}])
 
-	// wallet controller
+	// get started controller
 	.controller('startCtrl', function($scope) {
+
 		$scope.toggleTab = function(tab) {
 			$scope.tab = tab;
 		}
-		$scope.toggleTab('download');
+
+		var githubLink = 'https://github.com/clemahieu/raiblocks/releases/download/V' + $scope.rb_version + '/rai-' + $scope.rb_version + '-';
+
+		$scope.platforms = [
+			{
+				name: 'OSX',
+				icon: 'apple',
+				link: githubLink + 'Darwin.dmg'
+			},
+			{
+				name: 'Windows',
+				icon: 'windows',
+				link: githubLink + 'win64.zip'
+			},
+			{
+				name: 'Linux',
+				icon: 'linux',
+				link: githubLink + 'Linux.tar.bz2'
+			}
+		];
 	})
 
 	// block chain page
