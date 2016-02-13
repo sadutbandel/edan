@@ -1,44 +1,50 @@
-<div class="col-xs-12 col-sm-8 col-sm-offset-2 col-md-8 col-md-offset-2 col-lg-8 col-lg-offset-2">
+<!-- title -->
+<div class="sixteen wide column">
+	<h1>Get started</h1>
+</div>
+<br style="clear:both;"/>
 
-	<h1>Get the wallet</h1>
+<!-- getting started steps -->
+<div class="sixteen wide column centered">
+	<div class="ui steps">
+		<a class="step" ng-click="toggleTab('platform')" ng-class="{'active': tab === 'platform'}">
+			<i class="cloud download icon"></i>
+			<div class="content">
+				<div class="title">Download the wallet</div>
+				<div class="description">RaiBlocks wallet is currently version {{ rb_version }}</div>
+			</div>
+		</a>
+		<a class="step" ng-click="toggleTab('blocks')" ng-class="{'active': tab === 'blocks'}">
+			<i class="cubes icon"></i>
+			<div class="content">
+				<div class="title">Free Blocks</div>
+				<div class="description">Have some free Raiblocks, on us!</div>
+			</div>
+		</a>
+	</div>
+</div>
+<br style="clear:both;"/>
 
-	<table id="start">
-		<tbody>
-			<tr>
-				<td>
-					<i class="fa fa-apple fa-3x"></i>
-				</td>
-				<td>
-					<a target="_blank" href="https://github.com/clemahieu/raiblocks/releases/download/V{{ rb_version }}/rai-{{ rb_version }}-Darwin.dmg">
-						Mac (rai-{{ rb_version }}-Darwin.dmg)
-					</a>
-				</td>
-			</tr>
-			<tr>
-				<td>
-					<i class="fa fa-windows fa-3x"></i>
-				</td>
-				<td>
-					<a target="_blank" href="https://github.com/clemahieu/raiblocks/releases/download/V{{ rb_version }}/rai-{{ rb_version }}-win64.zip">
-						Windows (rai-{{ rb_version }}-win64.zip)
-					</a>
-				</td>
-			</tr>
-			<tr>
-				<td>
-					<i class="fa fa-linux fa-3x"></i>
-				</td>
-				<td>
-					<a target="_blank" href="https://github.com/clemahieu/raiblocks/releases/download/V{{ rb_version }}/rai-{{ rb_version }}-Linux.tar.bz2">
-						Linux (rai-{{ rb_version }}-Linux.tar.bz2)
-					</a>
-				</td>
-			</tr>
-		</tbody>
-	</table>
+<!-- platform selection -->
+<div class="fourteen wide column centered ng-hide" ng-show="tab === 'platform'">
+	<div class="label">
+		Select a platform
+	</div>
+	<div class="ui buttons">
+		<a
+		ng-repeat="platform in platforms"
+		class="ui button" 
+		target="_blank" 
+		href="{{ platform.link }}">
+			<i class="icon" ng-class="platform.icon"></i>{{ platform.name }}
+		</a>
+	</div>
+</div>
 
-	<br style="clear:both;"/>
-
-	<strong>Have a wallet?</strong>
-	<a class="btn btn-block btn-success" href="/#/getblocks" role="button">Get Blocks</a>
+<!-- get free raiblocks tab -->
+<div class="fourteen wide column centered ng-hide" ng-show="tab === 'blocks'">
+	<div class="label">
+		Complete the form
+	</div>
+	<free-rai-form></free-rai-form>
 </div>

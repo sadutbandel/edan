@@ -16,6 +16,7 @@ var tmpPath = '.tmp/public/';
 // (if you're using LESS with the built-in default config, you'll want
 //  to change `assets/styles/importer.less` instead.)
 var cssFilesToInject = [
+  'styles/*.css',
   'styles/**/*.css'
 ];
 
@@ -28,6 +29,7 @@ var jsFilesToInject = [
 
   // Load rest here (app/bootstrap js files)
   'js/*.js',
+  'js/**/*.js',
 
   // Ignore testing files
   '!js/tests/*.js'
