@@ -61,11 +61,9 @@
 		$scope.paymentFinish = function(account) {
 
 			console.log('Payment Finish');
-			
-			io.socket.post('/paymentFinish', { account: account }, function (data, jwres) {
-				$scope.payment_account = undefined;
-				$scope.$apply();
-			});
+			$scope.payment_account = undefined;
+
+			io.socket.post('/paymentFinish', { account: account });
 		}
 
 		$scope.initialize = function() {
