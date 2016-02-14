@@ -10,12 +10,14 @@ module.exports = {
 	create: function(req, res) {
 
 		console.log('Payment Finish Controller');
-
+		console.log('PaymentFinishService');
 		PaymentFinishService.init(req.body.account, function(err, resp) {
 
 			if(!err) {
+				console.log('PaymentFinishService SUCCESS');
 				res.send(resp);
 			} else {
+				console.log('PaymentFinishService ERROR');
 				res.send(err);
 			}
 		});

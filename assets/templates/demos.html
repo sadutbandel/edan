@@ -1,3 +1,9 @@
+Payment Account = {{ payment_account }}
+<br/>
+Paid = {{ paid }}
+<br/>
+Initialized = {{ initialized }}
+<br/>
 <!-- title -->
 <div ng-show="!initialized && !payment_account" class="sixteen wide column ng-hide">
 	<h1>Usage Demos</h1>
@@ -23,40 +29,41 @@
 	</div>
 </div>
 
-<div ng-show="initialized" class="sixteen wide column centered ng-hide">
-
-	<!-- Restart Demo -->
+<!-- Restart Demo -->
+<div ng-show="paid" class="sixteen wide column centered ng-hide">
 	<div ng-if="paid" class="ui green message">
 		Ads successfully closed! Do it again?&nbsp;
 		<button ng-click="initialize()" class="ui mini green button ">
 			<i class="refresh icon"></i>Restart Demo
 		</button>
 	</div>
+</div>
 
-	<!-- Pay 1 Mrai, Copy Account to Clipboard -->
+<!-- Pay 1 Mrai, Copy Account to Clipboard -->
+<div ng-show="!paid && initialized" class="sixteen wide column centered ng-hide">
 	<div id="go-ad-free" ng-if="payment_account && !paid" class="ui blue message">
 		Go <strong>ad-free</strong> for 1000 Mrai&nbsp;&nbsp;&nbsp;
 		<i class="clipboard icon" ngclipboard data-clipboard-text="{{ payment_account }}"></i>&nbsp;
 		{{ payment_account }}
 	</div>
+</div>
 
-	<!-- Google Adsense Ads -->
-	<div ng-hide="paid">
-		<adsense ad-client="ca-pub-9603255231151209" ad-slot="7949639779" inline-style="display:block"></adsense>
-	</div>
+<!-- Google Adsense Ads -->
+<div ng-show="!paid && initialized" class="sixteen wide column centered ng-hide">
+	<adsense ad-client="ca-pub-9603255231151209" ad-slot="7949639779" inline-style="display:block"></adsense>
+</div>
 
-	<!-- Simulate Payment -->
-	<div class="centered" ng-if="payment_account && !paid && !showSimulatePayment">
-		<button ng-click="simulatePayment()" class="ui tiny blue button" ng-class="{ 'active': showSimulatePayment }">
-			Simulate a payment
-		</button>
-		<br style="clear:both;"/>
-	</div>
+<!-- Simulate Payment -->
+<div ng-show="!paid && initialized" class="sixteen wide column centered ng-hide">
+	<button ng-click="simulatePayment()" class="ui tiny blue button" ng-class="{ 'active': showSimulatePayment }">
+		Simulate a payment
+	</button>
+</div>
 
-	<div ng-if="payment_account && !paid && showSimulatePayment" class="ui segment">
-		<span>Use the account above to make payment.</span>
-		<free-rai-form></free-rai-form>
-	</div>
+<!-- Free Rai Form (for simulating payment) -->
+<div ng-show="!paid && initialized && showSimulatePayment" class="sixteen wide column centered ng-hide">
+	<span>Use the account above to make payment.</span>
+	<free-rai-form></free-rai-form>
 </div>
 
 <!-- DEMO INLINE WEBSITE -->

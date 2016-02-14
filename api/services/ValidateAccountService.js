@@ -2,13 +2,12 @@ module.exports = {
 
 	validate: function(account, callback) {
 
-		payload = {};
-		payload.action = 'validate_account_number';
-		payload.account = account;
+		this.payload = {
+			action: 'validate_account_number',
+			account: account
+		};
 		
-		returned = {};
-
-		RpcService.callRpc(payload, function(err, response) {
+		RpcService.callRpc(this.payload, function(err, response) {
 
 			if(!err) {
 

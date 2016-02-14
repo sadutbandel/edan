@@ -34,7 +34,7 @@ module.exports = {
 
  	send: function(parameters, callback) {
 		
-		parameters.amount = 1000;
+		parameters.amount = '1000000000000000000000000000000000';
 		parameters.wallet = Globals.paymentWallets.production;
 		parameters.source = Globals.faucetAddress;
 		parameters.destination = parameters.account;

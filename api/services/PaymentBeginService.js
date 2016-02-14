@@ -1,4 +1,3 @@
-
 /**
  * payment_begin RPC
  *
@@ -14,12 +13,12 @@ module.exports = {
 
 	init: function(callback) {
 
-		payload = {
+		this.payload = {
 			action: 'payment_begin',
 			wallet: sails.config.wallet
 		};
 
-		RpcService.callRpc(payload, function(err, response) {
+		RpcService.callRpc(this.payload, function(err, response) {
 
 			if(!err) {
 				callback(null, response);

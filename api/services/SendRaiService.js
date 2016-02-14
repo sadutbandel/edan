@@ -6,15 +6,15 @@ module.exports = {
 	 */
 	send: function(parameters, callback) {
 
-		payload = {
+		this.payload = {
 			action: 'send',
 			wallet: parameters.wallet,
 			source: parameters.source,
 			destination: parameters.destination,
-			amount: parameters.amount.toString().concat(Globals.mrai)
+			amount: parameters.amount
 		};
 
-		RpcService.callRpc(payload, function(err, response) {
+		RpcService.callRpc(this.payload, function(err, response) {
 
 			if(!err) {
 				callback(null, response);

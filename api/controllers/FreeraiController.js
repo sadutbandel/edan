@@ -11,11 +11,11 @@ module.exports = {
 	create: function (req, res) {
 		
 		// 2 required parameters (account, response)
-		parameters = [];
-		parameters.account = req.body.account;
-		parameters.response = req.body.response;
+		this.parameters = [];
+		this.parameters.account = req.body.account;
+		this.parameters.response = req.body.response;
 
-		FreeRai.processRequest(parameters, function(err, response) {
+		FreeRai.processRequest(this.parameters, function(err, response) {
 
 			if(!err) {
 				response.message = 'claimed';

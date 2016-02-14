@@ -11,12 +11,16 @@ module.exports = {
 
 		console.log('Payment Wait Controller');
 
+		console.log('PaymentWaitService');
 		PaymentWaitService.init(req.session.payment.account, function(err, resp) {
 
 			if(!err) {
 
+				console.log('PaymentWaitService SUCCESS');
+
 				if(resp.statusCode === 200) {
 
+					console.log('PaymentWaitService RPC SUCCESS');
 					if(resp.status !== 'nothing') {
 						// send the account back for finishing
 						resp.account = req.session.payment.account;
@@ -33,9 +37,11 @@ module.exports = {
 					res.send(resp);
 				}
 				else {
-					res.send('Different response status than 200 - Code ' + resp.statusCode);
+					console.log('PaymentWaitService Non-200 Response Code');
+					res.send('Non-200 Response Code' + resp.statusCode);
 				}
 			} else {
+				console.log('PaymentWaitService ERROR');
 				res.send(err);
 			}
 		});

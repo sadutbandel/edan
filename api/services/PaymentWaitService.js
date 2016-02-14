@@ -13,13 +13,15 @@ module.exports = {
 
 	init: function(account, callback) {
 
-		payload = {};
-		payload.action = 'payment_wait';
-		payload.account = account;
-		payload.amount = '1'.concat(Globals.mrai);
-		payload.timeout = '60000'; // 60 seconds timeout
-
-		RpcService.callRpc(payload, function(err, res) {
+		this.payload = {
+			action: 'payment_wait',
+			account: account,
+			amount: '1000000000000000000000000000000000',
+			//timeout: '60000' // 60 seconds timeout
+			timeout: '10000' // 10 seconds timeout for testing
+		};
+		
+		RpcService.callRpc(this.payload, function(err, res) {
 
 			if(!err) {
 				callback(null, res);
