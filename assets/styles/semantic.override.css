@@ -4,3 +4,7 @@
 #go-ad-free {
 	word-wrap: break-word;
 }
+.account_input {
+	width: 100% !important;
+	font-size: 1em !important;
+}
