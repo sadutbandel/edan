@@ -134,7 +134,7 @@ module.exports.sockets = {
             console.log('Successfully finished!')
             session.payment = undefined;
           } else {
-            console.log('Error finishing payment account!');
+            console.log('Payment account not finished!');
           }
         });
     }

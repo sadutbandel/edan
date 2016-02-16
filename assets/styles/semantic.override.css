@@ -7,7 +7,9 @@
 .borderless.main.menu .toc.item {
 	display: none !important;
 }
-
+.account_textarea {
+	width: 600px !important;
+}
 @media only screen and (max-width: 700px) {
 
 	.borderless.main.menu .item {
@@ -16,7 +18,10 @@
 	.borderless.main.menu .mobile.item {
 		display: block !important;
 	}
-	.account_input {
-		width: 100% !important;
+}
+@media only screen and (max-width: 767px) {
+
+	.account_textarea {
+		width: 292px !important;
 	}
 }
