@@ -35,7 +35,8 @@ module.exports = {
 					else {
 						resp.paid = false;
 					}
-					console.log(Timestamp.utc() + ' ' + resp);
+					console.log(Timestamp.utc() + ' --- ');
+					console.log(resp);
 					res.send(resp);
 				}
 				else {

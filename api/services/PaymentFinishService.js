@@ -12,7 +12,8 @@ module.exports = {
 		AccountBalanceService.init(account, function(err, resp) {
 
 			console.log(Timestamp.utc() + ' account_balance responded');
-			console.log(Timestamp.utc() + ' ' + resp);
+			console.log(Timestamp.utc() + ' --- ');
+			console.log(resp);
 
 			if(!err) {
 
@@ -23,7 +24,8 @@ module.exports = {
 				PaymentRecaptureService.init({ account: account, balance: resp.balance }, function(err, resp) {
 
 					console.log(Timestamp.utc() + ' payment recapture responded');
-					console.log(Timestamp.utc() + ' ' + resp);
+					console.log(Timestamp.utc() + ' --- ');
+					console.log(resp);
 
 					if(!err) {
 
@@ -33,7 +35,8 @@ module.exports = {
 						PaymentEndService.init(account, function(err, resp) {
 
 							console.log(Timestamp.utc() + ' payment_end responded');
-							console.log(Timestamp.utc() + ' ' + resp);
+							console.log(Timestamp.utc() + ' --- ');
+							console.log(resp);
 
 							if(!err) {
 								console.log(Timestamp.utc() + ' payment_end success');

@@ -38,7 +38,8 @@ module.exports = {
 			// parameters passed!
 			if(!err) {
 
-				console.log(Timestamp.utc() + ' ' + response);
+				console.log(Timestamp.utc() + ' --- ');
+				console.log(response);
 
 				// ensure the recaptcha response is valid by asking Google
 				RecaptchaService.verifyResponse(parameters.response, function(err, response) {
@@ -49,7 +50,8 @@ module.exports = {
 						// recaptcha passed!
 						if(response.success) {
 
-							console.log(Timestamp.utc() + ' ' + response);
+							console.log(Timestamp.utc() + ' --- ');
+							console.log(response);
 
 							// check if the account is valid
 							ValidateAccountService.validate(parameters.account, function(err, response) {
@@ -57,7 +59,8 @@ module.exports = {
 
 								if(!err) {
 
-									console.log(Timestamp.utc() + ' ' + response);
+									console.log(Timestamp.utc() + ' --- ');
+									console.log(response);
 
 									// send rai to account
 									FreeRaiService.send(parameters, function(err, response) {
@@ -65,35 +68,41 @@ module.exports = {
 
 										if(!err) {
 
-											console.log(Timestamp.utc() + ' ' + response);
+											console.log(Timestamp.utc() + ' --- ');
+											console.log(response);
 											callback(null, response);
 
 										} else {
 
-											console.log(Timestamp.utc() + ' ' + err);
+											console.log(Timestamp.utc() + ' --- ');
+											console.log(err);
 											callback(null, err); // free rai were not sent
 										}
 									});
 
 								} else {
-									console.log(Timestamp.utc() + ' ' + err);
+									console.log(Timestamp.utc() + ' --- ');
+									console.log(err);
 									callback(err, null); // account validation failed!
 								}
 							});
 
 						} else {
-							console.log(Timestamp.utc() + ' ' + response);
+							console.log(Timestamp.utc() + ' --- ');
+							console.log(response);
 							callback(response, null); // recaptcha failed!
 						}
 
 					} else {
-						console.log(Timestamp.utc() + ' ' + err);
+						console.log(Timestamp.utc() + ' --- ');
+						console.log(err);
 						callback(err, null); // recaptcha failed!
 					}
 				});
 
 			} else {
-				console.log(Timestamp.utc() + ' ' + err);
+				console.log(Timestamp.utc() + ' --- ');
+				console.log(err);
 				callback(err, null); // one or more params failed!
 			}
 		});
