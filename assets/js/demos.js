@@ -42,6 +42,7 @@
 				io.socket.post('/paymentWait', function (data, jwres) {
 					$scope.paid = data.paid;
 
+					console.log(data);
 					// NOT PAID
 					if(data.paid === false) {
 						$scope.paymentWait();
