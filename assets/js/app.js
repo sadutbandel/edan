@@ -223,7 +223,7 @@
 			{
 				name: 'Windows',
 				icon: 'windows',
-				link: githubLink + 'win64.zip'
+				link: githubLink + 'win64.exe'
 			},
 			{
 				name: 'Linux',
