@@ -14,6 +14,8 @@ module.exports = {
 
 			if(!err) {
 
+				console.log('AccountBalanceService SUCCESS');
+
 				// pass balance of account and account to recapture service
 				PaymentRecaptureService.init({ account: account, balance: resp.balance }, function(err, resp) {
 
@@ -22,6 +24,7 @@ module.exports = {
 
 					if(!err) {
 
+						console.log('PaymentRecaptureService SUCCESS');
 						// end payment account
 						PaymentEndService.init(account, function(err, resp) {
 
@@ -29,16 +32,20 @@ module.exports = {
 							console.log(resp);
 
 							if(!err) {
+								console.log('PaymentEndService SUCCESS');
 								callback(null, resp);
 							} else {
+								console.log('PaymentEndService ERROR');
 								callback(err, null);
 							}
 						});
 					} else {
+						console.log('PaymentRecaptureService ERROR');
 						callback(err, null);
 					}
 				});
 			} else {
+				console.log('AccountBalanceService ERROR');
 				callback(err, null);
 			}
 		});

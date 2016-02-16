@@ -8,9 +8,7 @@
 module.exports = {
 
 	create: function(req, res) {
-
-		console.log('Payment Wait Controller');
-
+		
 		console.log('PaymentWaitService');
 		PaymentWaitService.init(req.session.payment.account, function(err, resp) {
 
@@ -27,7 +25,7 @@ module.exports = {
 						// remove the account from session immediately
 						// this is so that the user can restart the demo immediately
 						// without needing to wait for the server to complete the prior
-						req.session.payment = undefined;
+						delete req.session.payment;
 						resp.paid = true;
 					}
 					else {

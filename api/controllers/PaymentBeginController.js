@@ -8,17 +8,15 @@ module.exports = {
 
 	create: function(req, res) {
 
-		console.log('Payment Begin Controller');
-
 		// if there's NO payment account in session, create a new one
 		if(!req.session.payment) {
 
 			console.log('No payment account found');
-
 			console.log('PaymentBeginService');
 			PaymentBeginService.init(function(err, resp) {
 
 				if(!err) {
+					
 					console.log('PaymentBeginService SUCCESS');
 
 					// store in payment account in session

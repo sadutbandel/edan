@@ -9,13 +9,25 @@ module.exports = {
 
 	create: function(req, res) {
 
-		console.log('Payment Finish Controller');
 		console.log('PaymentFinishService');
 		PaymentFinishService.init(req.body.account, function(err, resp) {
 
+			console.log(resp);
+
 			if(!err) {
-				console.log('PaymentFinishService SUCCESS');
-				res.send(resp);
+
+				if(resp.statusCode === 200) {
+
+					console.log('PaymentFinishService SUCCESS');
+					delete req.session.payment;
+					console.log('Payment account cleared from session!');
+					res.send(resp);
+				}
+				else {
+					console.log('PaymentFinishService Non-200 Response Code');
+					res.send('Non-200 Response Code' + resp.statusCode);
+				}
+				
 			} else {
 				console.log('PaymentFinishService ERROR');
 				res.send(err);
