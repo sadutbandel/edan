@@ -5,21 +5,28 @@
 module.exports = {
 
 	init: function(obj, callback) {
-			
-		this.payload = {
-			wallet: sails.config.wallet,
-			amount: obj.balance,
-			source: obj.account,
-			destination: Globals.holdingAddress
-		};
 		
-		SendRaiService.send(this.payload, function(err, res) {
+		if(obj.balance > 0) {
 
-			if(!err) {
-				callback(null, res);
-			} else {
-				callback(err, null);
-			}
-		});
+			this.payload = {
+				wallet: sails.config.wallet,
+				amount: obj.balance,
+				source: obj.account,
+				destination: Globals.holdingAddress
+			};
+			
+			SendRaiService.send(this.payload, function(err, res) {
+
+				if(!err) {
+					callback(null, res);
+				} else {
+					callback(err, null);
+				}
+			});
+		} else {
+			var message = 'No account balance to recapture';
+			console.log(message);
+			callback(null, { response: message });
+		}
  	}
 };

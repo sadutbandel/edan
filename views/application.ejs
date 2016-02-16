@@ -65,36 +65,50 @@
 
     <!-- Sidebar Menu -->
     <div class="ui vertical inverted sidebar menu">
-      <a class="active item">Home</a>
-      <a class="item">Work</a>
-      <a class="item">Company</a>
-      <a class="item">Careers</a>
-      <a class="item">Login</a>
-      <a class="item">Signup</a>
-  </div>
-
-    <!-- Menu -->
-    <div class="ui borderless large main menu fixed">
-        <div class="ui container">
-            <a href="/#/" class="item header">RaiBlocks.net</a>
-            <a href="/#/start" ng-class="{'active': path === 'start'}" class="item">Get Started</a>
-            <a href="/#/demos" ng-class="{'active': path === 'demos'}" class="item">Demos</a>
-            <a target="_blank" href="https://github.com/clemahieu/raiblocks/wiki" class="item">
-                <i class="info circle icon"></i>Info
-            </a>
-            <a target="_blank" href="https://groups.google.com/forum/#!forum/raiblocks" class="item">
-                <i class="comment icon"></i>Discussion
-            </a>
-            <a target="_blank" href="https://github.com/clemahieu/raiblocks" class="item">
-                <i class="code icon"></i>Devs
-            </a>
-        </div>
+        <a href="/#/" class="item header">RaiBlocks.net</a>
+        <a href="/#/start" ng-class="{'active': path === 'start'}" class="item">Get Started</a>
+        <a href="/#/demos" ng-class="{'active': path === 'demos'}" class="item">Demos</a>
+        <a target="_blank" href="https://github.com/clemahieu/raiblocks/wiki" class="item">
+            <i class="info circle icon"></i>Info
+        </a>
+        <a target="_blank" href="https://groups.google.com/forum/#!forum/raiblocks" class="item">
+            <i class="comment icon"></i>Discussion
+        </a>
+        <a target="_blank" href="https://github.com/clemahieu/raiblocks" class="item">
+            <i class="code icon"></i>Devs
+        </a>
     </div>
 
-    <!-- routes container -->
-    <div id="main" class="ui grid container" ng-view></div>
+    <!-- Menu -->
+    <div class="pusher">
 
-    <!-- Ads -->
+        <div class="ui large borderless main menu">
+            <div class="ui container">
+                <a class="mobile toc item">
+                    <i class="sidebar icon"></i>
+                </a>
+                <a href="/#/" class="item mobile header">RaiBlocks.net</a>
+                <a href="/#/start" ng-class="{'active': path === 'start'}" class="item">Get Started</a>
+                <a href="/#/demos" ng-class="{'active': path === 'demos'}" class="item">Demos</a>
+                <a target="_blank" href="https://github.com/clemahieu/raiblocks/wiki" class="item">
+                    <i class="info circle icon"></i>Info
+                </a>
+                <a target="_blank" href="https://groups.google.com/forum/#!forum/raiblocks" class="item">
+                    <i class="comment icon"></i>Discussion
+                </a>
+                <a target="_blank" href="https://github.com/clemahieu/raiblocks" class="item">
+                    <i class="code icon"></i>Devs
+                </a>
+            </div>
+        </div>
+
+        <!-- routes container -->
+        <div id="main" class="ui grid container" ng-view></div>
+        <br style="clear:both;"/><br/>
+        
+    </div>
+
+    <!-- Ads 
     <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
     <ins class="adsbygoogle"
     style="display:block"
@@ -104,6 +118,7 @@
     <script>
     (adsbygoogle = window.adsbygoogle || []).push({});
     </script>
+    -->
 
     <!--SCRIPTS-->
     <script src="/js/dependencies/01.angular.min.js"></script>
@@ -142,6 +157,25 @@
     <script src="/js/components/transition.min.js"></script>
     <script src="/js/components/visibility.min.js"></script>
     <!--SCRIPTS END-->
+
+    <script>
+    $(document).ready(function() {
+
+        // fix menu when passed
+        $('.masthead').visibility({
+            once: false,
+            onBottomPassed: function() {
+                $('.fixed.menu').transition('fade in');
+            },
+            onBottomPassedReverse: function() {
+                $('.fixed.menu').transition('fade out');
+            }
+        });
+
+        // create sidebar and attach to menu open
+        $('.ui.sidebar').sidebar('attach events', '.toc.item');
+    });
+    </script>
 
     <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
     <!--[if lt IE 9]>

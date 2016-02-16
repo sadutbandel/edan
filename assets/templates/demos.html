@@ -1,6 +1,6 @@
 <!-- title -->
-<div ng-show="!initialized && !payment_account" class="sixteen wide column ng-hide">
-	<h1>Usage Demos</h1>
+<div class="sixteen wide column">
+	<h1>Use-case Demos</h1>
 </div>
 <br style="clear:both;"/>
 
@@ -26,7 +26,7 @@
 <!-- Restart Demo -->
 <div ng-show="paid" class="sixteen wide column centered ng-hide">
 	<div ng-if="paid" class="ui green message">
-		Ads successfully closed! Do it again?&nbsp;
+		Payment received! Ads now closed.
 		<button ng-click="initialize()" class="ui mini green button ">
 			<i class="refresh icon"></i>Restart Demo
 		</button>
@@ -36,9 +36,18 @@
 <!-- Pay 1 Mrai, Copy Account to Clipboard -->
 <div ng-show="!paid && initialized" class="sixteen wide column centered ng-hide">
 	<div id="go-ad-free" ng-if="payment_account && !paid" class="ui blue message">
-		Go <strong>ad-free</strong> for 1000 Mrai&nbsp;&nbsp;&nbsp;
-		<i class="clipboard icon" ngclipboard data-clipboard-text="{{ payment_account }}"></i>&nbsp;
-		{{ payment_account }}
+		<div class="header">
+			Want an <strong>ad-free</strong> experience?
+		</div>
+		<br style="clear:both;"/>
+		Pay <em>1000</em> Mrai to <strong>{{ payment_account }}</strong>&nbsp;
+		<a
+		id="copy"
+		class="ui mini grey button" 
+		ngclipboard 
+		data-clipboard-text="{{ payment_account }}">
+			<i class="clipboard icon"></i>
+		</a>
 	</div>
 </div>
 
@@ -49,14 +58,14 @@
  -->
 
 <!-- Simulate Payment -->
-<div ng-show="!paid && initialized && !showSimulatePayment" class="sixteen wide column centered ng-hide">
-	<button ng-click="simulatePayment()" class="ui tiny blue button" ng-class="{ 'active': showSimulatePayment }">
+<div ng-show="!paid && initialized && !showSimulatePayment" class="twelve wide column centered ng-hide">
+	<button ng-click="simulatePayment()" class="ui fluid blue button" ng-class="{ 'active': showSimulatePayment }">
 		Simulate a payment
 	</button>
 </div>
 
 <!-- Free Rai Form (for simulating payment) -->
-<div ng-show="!paid && initialized && showSimulatePayment" class="ten wide column ng-hide">
+<div ng-show="!paid && initialized && showSimulatePayment" class="sixteen wide column ng-hide">
 	<span>Use the account above to make payment.</span>
 	<free-rai-form></free-rai-form>
 </div>

@@ -31,6 +31,11 @@
 
 	.run(function($rootScope, logo) {
 
+		$('.ui.sidebar').sidebar();
+		$('.ui.sidebar a').on('click', function() {
+			$('.ui.sidebar').sidebar('hide');
+		});
+
 		// grab logo from bootstrap
 		$rootScope.logo = logo;
 
@@ -70,42 +75,42 @@
 		  			default: {
 		  				disabled: false,
 		  				icon: 'add circle',
-		  				title: 'Request 1000 Mrai',
+		  				title: 'Request',
 		  				class: 'blue'
 		  			},
 
 		  			claiming: {
 		  				disabled: true,
 		  				icon: 'loading spinner',
-		  				title: 'Sending free Mrai',
+		  				title: 'Sending',
 		  				class: 'grey'
 		  			},
 
 		  			claimed: {
 		  				disabled: true,
 		  				icon: 'thumbs up',
-		  				title: 'Free Mrai Sent',
+		  				title: 'Sent',
 		  				class: 'green'
 		  			},
 
 		  			account_error: {
 		  				disabled: true,
 		  				icon: 'thumbs down',
-		  				title: 'Provide a valid account id',
+		  				title: 'Invalid account',
 		  				class: 'red'
 		  			},
 
 		  			recaptcha_error: {
 		  				disabled: true,
 		  				icon: 'thumbs down',
-		  				title: 'Complete the reCaptcha',
+		  				title: 'Incomplete reCaptcha',
 		  				class: 'red'
 		  			},
 
 		  			not_free: {
 		  				disabled: true,
 		  				icon: 'thumbs down',
-		  				title: 'RaiBlocks are not free right now',
+		  				title: 'RaiBlocks valuable',
 		  				class: 'red'
 		  			}
 		  		};

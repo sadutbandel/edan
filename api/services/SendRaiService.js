@@ -10,7 +10,7 @@ module.exports = {
 			action: 'send',
 			wallet: parameters.wallet,
 			source: parameters.source,
-			destination: parameters.destination,
+			destination: parameters.destination.toLowerCase(),
 			amount: parameters.amount
 		};
 

@@ -16,15 +16,18 @@
 
 	.controller('demosCtrl', function($scope, $q) {
 
-		$scope.paymentBegin = function() {
+		$('#copy')
+		.popup({
+			title   : 'Popup Title',
+			content : 'Hello I am a popup'
+		});
 
-			console.log('Payment Begin');
+		$scope.paymentBegin = function() {
 
 			return $q(function(resolve, reject) {
 				io.socket.post('/paymentBegin', function (data, jwres) {
 					$scope.payment_account = data.account;
 					$scope.$apply();
-					console.log('resolving payment begin');
 					resolve();
 				});
 			});
@@ -33,8 +36,6 @@
 		}
 
 		$scope.paymentWait = function() {
-
-			console.log('Payment Wait');
 			
 			return $q(function(resolve, reject) {
 
@@ -50,7 +51,6 @@
 						$scope.paymentFinish(data.account);
 					}
 					$scope.$apply();
-					console.log('resolving payment wait');
 					resolve();
 				});
 			});
@@ -60,9 +60,7 @@
 
 		$scope.paymentFinish = function(account) {
 
-			console.log('Payment Finish');
 			$scope.payment_account = undefined;
-
 			io.socket.post('/paymentFinish', { account: account });
 		}
 
