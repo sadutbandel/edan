@@ -14,10 +14,10 @@ module.exports = {
 			amount: parameters.amount
 		};
 
-		RpcService.callRpc(this.payload, function(err, response) {
+		RpcService.callRpc(this.payload, function(err, resp) {
 
 			if(!err) {
-				callback(null, response);
+				callback(null, resp);
 			} else {
 				callback(err, null);
 			}

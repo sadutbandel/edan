@@ -2,7 +2,7 @@
 
 	angular
 
-	.module('RBDemos', [
+	.module('Demos', [
 		'ngclipboard',
 		'angular-google-adsense'
 		])
@@ -40,15 +40,14 @@
 			return $q(function(resolve, reject) {
 
 				io.socket.post('/paymentWait', function (data, jwres) {
-					$scope.paid = data.paid;
+					$scope.paid = data.response.paid;
 
-					console.log(data);
 					// NOT PAID
-					if(data.paid === false) {
+					if(data.response.paid === false) {
 						$scope.paymentWait();
 					} 
 					// PAID
-					else if(data.paid === true) {
+					else if(data.response.paid === true) {
 						$scope.paymentFinish(data.account);
 					}
 					$scope.$apply();

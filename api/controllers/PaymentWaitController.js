@@ -30,10 +30,10 @@ module.exports = {
 						// this is so that the user can restart the demo immediately
 						// without needing to wait for the server to complete the prior
 						delete req.session.payment;
-						resp.paid = true;
+						resp.response.paid = true;
 					}
 					else {
-						resp.paid = false;
+						resp.response.paid = false;
 					}
 					console.log(Timestamp.utc() + ' --- ');
 					console.log(resp);

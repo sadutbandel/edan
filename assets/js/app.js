@@ -6,8 +6,9 @@
 		'bootstrap', // angular application boostrap
 		'routeHelper', // route-assist
 		'vcRecaptcha', // google recaptcha
-		'ngRoute', // routing
-		'RBDemos', // demos
+		'ngRoute', // angular routing
+		'Demos', // use-case demos
+		'Explorer', // block-chain explorer
 		])
 
 	// route provider (defines our front-end routes)
@@ -165,7 +166,11 @@
 
 							$timeout(function() {
 
-								$scope.button = button[data.message];
+								if(data.statusCode === 200) {
+									$scope.button = button.claimed;
+								} else {
+									$scope.button = button[data.message];
+								}
 
 								$timeout(function() {
 									vcRecaptchaService.reload($scope.widgetId);

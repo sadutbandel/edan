@@ -10,7 +10,13 @@
 .account_textarea {
 	width: 600px !important;
 }
-@media only screen and (max-width: 700px) {
+.hash_search {
+	width: 600px !important;
+}
+.capitalize {
+	text-transform:capitalize;
+}
+@media only screen and (max-width: 730px) {
 
 	.borderless.main.menu .item {
 		display: none !important;
@@ -18,9 +24,9 @@
 	.borderless.main.menu .mobile.item {
 		display: block !important;
 	}
-}
-@media only screen and (max-width: 767px) {
-
+	.hash_search {
+		width: 306px !important;
+	}
 	.account_textarea {
 		width: 292px !important;
 	}

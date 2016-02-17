@@ -28,10 +28,19 @@ module.exports = {
 		var req = http.request(options, function(res) {
 
 		    // response data
-		    res.on('data', function(response) {
-		    	response = JSON.parse(response.toString());
-		    	response.statusCode = res.statusCode;
-		    	callback(null, response);
+		    res.on('data', function(resp) {
+
+		    	payload = {
+	    			statusCode: res.statusCode,
+	    			response: resp.toString() // errors come in strings
+	    		};
+
+		    	if(res.statusCode === 400) {
+		    		callback(payload, null);
+		    	} else {
+		    		payload.response = JSON.parse(payload.response); // responses come in objects
+		    		callback(null, payload);
+		    	}
 		    });
 		});
 

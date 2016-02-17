@@ -12,7 +12,7 @@ module.exports = {
 			if(!err) {
 
 				// valid account
-				if(response.valid == '1') {
+				if(response.response.valid === '1') {
 					callback(null, response);
 				} 
 				// invalid account

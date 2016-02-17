@@ -21,10 +21,10 @@ module.exports = {
 			//timeout: '10000' // 10 seconds timeout for testing
 		};
 		
-		RpcService.callRpc(this.payload, function(err, res) {
+		RpcService.callRpc(this.payload, function(err, resp) {
 
 			if(!err) {
-				callback(null, res);
+				callback(null, resp);
 			} else {
 				callback(err, null);
 			}

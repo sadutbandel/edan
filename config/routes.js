@@ -39,6 +39,7 @@ module.exports.routes = {
   'post /paymentBegin': 'PaymentBeginController.create',
   'post /paymentWait': 'PaymentWaitController.create',
   'post /paymentFinish': 'PaymentFinishController.create',
+  'post /blockExplorer': 'BlockExplorerController.create',
   'post /clear': 'ClearController.create',
   
   /***************************************************************************

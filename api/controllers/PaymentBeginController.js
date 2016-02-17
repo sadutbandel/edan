@@ -24,7 +24,7 @@ module.exports = {
 
 					// store in payment account in session
 					req.session.payment = {
-						account: resp.account
+						account: resp.response.account
 					};
 
 					// return new or existing payment account

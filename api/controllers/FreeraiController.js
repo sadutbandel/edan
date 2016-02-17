@@ -15,11 +15,11 @@ module.exports = {
 		this.parameters.account = req.body.account;
 		this.parameters.response = req.body.response;
 
-		FreeRai.processRequest(this.parameters, function(err, response) {
+		FreeRai.processRequest(this.parameters, function(err, resp) {
 
 			if(!err) {
-				response.message = 'claimed';
-				res.send(response);
+				resp.response.message = 'claimed';
+				res.send(resp);
 			} else {
 				res.send(err);
 			}

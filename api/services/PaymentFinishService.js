@@ -21,7 +21,7 @@ module.exports = {
 				console.log(Timestamp.utc() + ' payment recapture hit');
 
 				// pass balance of account and account to recapture service
-				PaymentRecaptureService.init({ account: account, balance: resp.balance }, function(err, resp) {
+				PaymentRecaptureService.init({ account: account, balance: resp.response.balance }, function(err, resp) {
 
 					console.log(Timestamp.utc() + ' payment recapture responded');
 					console.log(Timestamp.utc() + ' --- ');
