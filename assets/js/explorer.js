@@ -49,7 +49,14 @@
   				icon: 'thumbs down',
   				title: 'No hash',
   				class: 'red'
-  			}
+  			},
+
+         missing_block: {
+            disabled: true,
+            icon: 'thumbs down',
+            title: 'Block missing',
+            class: 'red'
+         }
   		};
 
   		$scope.newSearch = function() {
@@ -118,7 +125,17 @@
 									$scope.$apply();
 									resolve();
 								}, 3000);
-							}
+							} else if(data.response === 'Block not found') {
+
+                        $scope.button = button.missing_block;
+                        $scope.$apply();
+
+                        $timeout(function() {
+                           $scope.button = button.default;
+                           $scope.$apply();
+                           resolve();
+                        }, 3000);
+                     }
 						}
 
 						// success
@@ -132,6 +149,7 @@
 								$scope.response[key].value = val;
 							});
 
+                    // remove any unnecessarykeys
                      angular.forEach($scope.response, function(obj, key) {
                         if(!obj.value) {
                            delete $scope.response[key];
