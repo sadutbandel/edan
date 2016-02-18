@@ -80,7 +80,16 @@
   			},
   			signature: {
   				icon: 'write'
-  			}
+  			},
+         source: {
+            icon: 'sun'
+         },
+         representative: {
+            icon: 'clone'
+         },
+         account: {
+            icon: 'university'
+         }
   		};
 
 		// explore a specific block chain hash		
@@ -122,6 +131,12 @@
 							angular.forEach(contents, function(val, key) {
 								$scope.response[key].value = val;
 							});
+
+                     angular.forEach($scope.response, function(obj, key) {
+                        if(!obj.value) {
+                           delete $scope.response[key];
+                        }
+                     });
 
 							$scope.button = button.explored;
 							$scope.submitted = true;
