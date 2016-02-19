@@ -132,7 +132,7 @@ module.exports.sockets = {
         PaymentFinishService.init(session.payment.account, function(err, resp) {
           if(!err) {
             console.log(Timestamp.utc() + ' successfully finished!')
-            delete req.session.payment;
+            session.payment = undefined;
           } else {
             console.log(Timestamp.utc() + ' payment account not finished!');
           }
