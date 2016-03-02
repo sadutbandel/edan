@@ -19,7 +19,7 @@ module.exports = {
 
 				if(resp.statusCode === 200) {
 
-					if(resp.status !== 'nothing') {
+					if(resp.response.status === 'success') {
 
 						console.log(Timestamp.utc() + ' payment_wait response code 200 and status === \'success\'');
 
