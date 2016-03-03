@@ -24,7 +24,7 @@
 </div>
 
 <!-- Restart Demo -->
-<div ng-show="paid" class="sixteen wide column centered ng-hide">
+<div ng-show="paid" class="twelve wide computer sixteen wide tablet column centered ng-hide">
 	<div ng-if="paid" class="ui green message">
 		Payment received! Ads now closed.
 		<button ng-click="initialize()" class="ui mini green button ">
@@ -34,7 +34,7 @@
 </div>
 
 <!-- Pay 1 Mrai, Copy Account to Clipboard -->
-<div ng-show="!paid && initialized" class="sixteen wide column centered ng-hide">
+<div ng-show="!paid && initialized" class="twelve wide computer sixteen wide tablet column centered ng-hide">
 	<div id="go-ad-free" ng-if="payment_account && !paid" class="ui blue message">
 		<div class="header">
 			Want an <strong>ad-free</strong> experience?
@@ -59,30 +59,32 @@
  -->
 
 <!-- Simulate Payment -->
-<div ng-show="!paid && initialized && !showSimulatePayment" class="twelve wide column centered ng-hide">
-	<button ng-click="simulatePayment()" class="ui fluid blue button" ng-class="{ 'active': showSimulatePayment }">
+<div ng-show="!paid && initialized && !showSimulatePayment" class="eight wide computer twelve wide column centered ng-hide">
+	<button ng-click="simulatePayment()" class="ui fluid green button" ng-class="{ 'active': showSimulatePayment }">
 		Simulate a payment
 	</button>
 </div>
 
 <!-- Free Rai Form (for simulating payment) -->
-<div ng-show="!paid && initialized && showSimulatePayment" class="sixteen wide column ng-hide">
+<div 
+ng-show="!paid && initialized && showSimulatePayment" 
+class="ten wide computer sixteen wide tablet column centered ng-hide">
 	<span>Use the account above to make payment.</span>
 	<free-rai-form></free-rai-form>
 </div>
 
 <!-- DEMO INLINE WEBSITE -->
-<div ng-show="initialized" class="sixteen wide column ui centered raised segment ng-hide">
+<div ng-show="initialized" class="ten wide computer sixteen wide tablet column ui centered raised segment ng-hide">
 
 	<div class="ui grid">
 
 		<!-- Demo website header -->
 		<div class="sixteen wide column">
-			<h1>PopularPandaPlace.com</h1>
+			<a class="ui massive blue ribbon label">PopularPandaPlace.com</a>
 		</div>
 
 		<!-- AD -->
-		<img class="ui fluid image" ng-hide="paid" src="images/fake-ads/leaderboard.png"></img>
+		<iframe ng-hide="paid" data-aa='138545' src='https://ad.a-ads.com/138545?size=728x90' scrolling='no' style='width:100%; height:90px; border:0px; padding:0;overflow:hidden' allowtransparency='true' frameborder='0'></iframe>
 
 		<!-- CONTENT -->
 		<div class="thirteen wide column">
@@ -102,24 +104,16 @@
 			</p>
 
 			<!-- AD -->
-			<div ng-hide="paid" class="sixteen wide column">
-				<img class="ui fluid image" src="images/fake-ads/hotel_wide.png"></img>
-			</div>
-			<br style="clear:both;"/>
+			<iframe ng-hide="paid" data-aa='138545' src='https://ad.a-ads.com/138545?size=728x90' scrolling='no' style='width:100%; height:90px; border:0px; padding:0;overflow:hidden' allowtransparency='true' frameborder='0'></iframe>
 			
 			<p>
 				Although they're classified as a carnivore, this fuzzy tree-crawler tends to graze on bamboo, fully living up to it's stereotype. Wild Giant pandas will occasionally eat other grasses, wild tubers, or even meat in the form of birds, rodents or carrion. While captive, pandas can receive honey, eggs, fish, yams, shrub leaves, oranges, or bananas along with specially prepared food.
 			</p>
-
-			<!-- AD -->
-			<div ng-hide="paid" class="sixteen wide column">
-				<img class="ui medium image" src="images/fake-ads/hotel.png"></img>
-			</div>
 		</div>
 
 		<!-- AD -->
 		<div ng-hide="paid" class="three wide column">
-			<img class="ui fluid image" src="images/fake-ads/skyscraper.png"></img>
+			<iframe data-aa='140441' src='https://ad.a-ads.com/140441?size=120x600' scrolling='no' style='width:120px; height:600px; border:0px; padding:0;overflow:hidden' allowtransparency='true' frameborder='0'></iframe>
 		</div>
 	</div>
 </div>
