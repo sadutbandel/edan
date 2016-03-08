@@ -16,6 +16,9 @@
 
 	.controller('demosCtrl', function($scope, $q) {
 
+		// clear any blocks upon page refresh
+		delete $rootScope.block;
+		
 		$('#copy')
 		.popup({
 			title   : 'Popup Title',
