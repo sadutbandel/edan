@@ -54,7 +54,7 @@
 
 <!-- Simulate Payment -->
 <div ng-show="!paid && initialized && !showSimulatePayment" class="eight wide computer twelve wide column centered ng-hide">
-	<button ng-click="simulatePayment()" class="ui fluid green button" ng-class="{ 'active': showSimulatePayment }">
+	<button ng-click="simulatePayment()" class="ui fluid blue button" ng-class="{ 'active': showSimulatePayment }">
 		Simulate a payment
 	</button>
 </div>
@@ -63,7 +63,9 @@
 <div 
 ng-show="!paid && initialized && showSimulatePayment" 
 class="ten wide computer sixteen wide tablet column centered ng-hide">
-	<span>Use the account above to make payment.</span>
+	<div class="ui blue pointing below label">
+		Use the account shown above to simulate payment below
+	</div>
 	<free-rai-form></free-rai-form>
 </div>
 
@@ -74,7 +76,7 @@ class="ten wide computer sixteen wide tablet column centered ng-hide">
 
 		<!-- Demo website header -->
 		<div class="sixteen wide column">
-			<a class="ui massive blue ribbon label">PopularPandaPlace.com</a>
+			<a class="ui massive grey ribbon label">PopularPandaPlace.com</a>
 		</div>
 
 		<!-- AD -->
