@@ -1,4 +1,4 @@
-<form ng-submit="submit()">
+<form>
 
 	<!-- account id -->
 	<div class="ui form field account_textarea">
@@ -21,9 +21,15 @@
 	<button
 	ng-disabled="button.disabled == true"
 	ng-class="button.class"
+	ng-click="submit()"
 	class="ui button"
 	type="submit">
 		<i ng-class="button.icon" class="icon"></i>&nbsp;{{ button.title }}
 	</button>
-
+	<button 
+	class="ng-hide ui teal button"
+	ng-show="block"
+	ng-click="exploreBlock()">
+		Explore Block
+	</button>
 </form>

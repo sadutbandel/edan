@@ -1,6 +1,6 @@
  (function() {
 
-	angular
+ 	angular
 
 	.module('Raiblocks', [ // primary module
 		'bootstrap', // angular application boostrap
@@ -49,11 +49,11 @@
 
 	.directive('freeRaiForm', function() {
 
-        return {
+		return {
 
-            restrict: 'E',
-            templateUrl: 'templates/free-rai-form.html',
-            controller:  ['$scope', '$http', '$timeout', 'vcRecaptchaService', function($scope, $http, $timeout, vcRecaptchaService) {
+			restrict: 'E',
+			templateUrl: 'templates/free-rai-form.html',
+			controller:  ['$rootScope', '$scope', '$http', '$timeout', '$location', 'vcRecaptchaService', function($rootScope, $scope, $http, $timeout, $location, vcRecaptchaService) {
 
 				$scope.init = function () {
 					$scope.account = null;
@@ -63,13 +63,13 @@
 
 				$scope.init();
 				
-		  		$scope.setResponse = function (response) {
+				$scope.setResponse = function (response) {
 					$scope.response = response;
 				};
 
 				$scope.setWidgetId = function (widgetId) {
-		     		$scope.widgetId = widgetId;
-		  		};
+					$scope.widgetId = widgetId;
+				};
 
 		  		// define the different button states
 		  		button = {
@@ -119,35 +119,35 @@
 
 		  		$scope.button = button.default;
 
-				$scope.validateAccount = function() {
-					if($scope.account === null || $scope.account === '') {
-						$scope.button = button.account_error;
-						return false;
-					} else {
-						return true;
-					}
-				}
+		  		$scope.validateAccount = function() {
+		  			if($scope.account === null || $scope.account === '') {
+		  				$scope.button = button.account_error;
+		  				return false;
+		  			} else {
+		  				return true;
+		  			}
+		  		}
 
-				$scope.validateResponse = function() {
-					if($scope.response === null || $scope.response === '') {
-						$scope.button = button.recaptcha_error;
-						return false;
-					} else {
-						return true;
-					}
-				}
+		  		$scope.validateResponse = function() {
+		  			if($scope.response === null || $scope.response === '') {
+		  				$scope.button = button.recaptcha_error;
+		  				return false;
+		  			} else {
+		  				return true;
+		  			}
+		  		}
 
-				$scope.validateForm = function() {
-					if($scope.validateAccount()) {
-						if($scope.validateResponse()) {
-							return true;
-						} else {
-							return false;
-						}
-					} else {
-						return false;
-					}
-				}
+		  		$scope.validateForm = function() {
+		  			if($scope.validateAccount()) {
+		  				if($scope.validateResponse()) {
+		  					return true;
+		  				} else {
+		  					return false;
+		  				}
+		  			} else {
+		  				return false;
+		  			}
+		  		}
 
 				// submit form, triggers validateForm(), which triggers validateAccount() and validateResponse()
 				$scope.submit = function () {
@@ -168,6 +168,7 @@
 							$timeout(function() {
 
 								if(data.statusCode === 200) {
+									$rootScope.block = data.response.block;
 									$scope.button = button.claimed;
 								} else {
 									$scope.button = button[data.message];
@@ -190,32 +191,40 @@
 							$scope.button = button.default;
 						}, 3000);
 					}
-				}		
-            }]
-        };
-    })
+				}
+
+				$scope.exploreBlock = function() {
+					$location.path('block-explorer');
+				}
+			}]
+		};
+	})
 
 	// allow entry to the block chain page
 	.controller('homeCtrl', ['$rootScope', '$scope', '$location', function($rootScope, $scope, $location) {
 
 		$scope.pass = 0;
-	    $scope.process = function() {
+		$scope.process = function() {
 
-	    	$scope.pass++;
+			$scope.pass++;
 
-	    	if($scope.pass === 5) {
+			if($scope.pass === 5) {
 
-	    		$scope.pass = 0;
-	    		$location.path('block');
-	    	}
-	    }
+				$scope.pass = 0;
+				$location.path('block');
+			}
+		}
 	}])
 
 	// get started controller
 	.controller('startCtrl', function($rootScope, $scope, $filter) {
 
+		// clear any blocks upon page refresh
+		delete $rootScope.block;
+
 		// fetch the available supply
 		io.socket.get('/api/available_supply', function (resData, jwres){
+
 			$scope.available_supply_absolute = resData;
 			var percentage_distributed = resData / $rootScope.total_faucet * 100;
 			$scope.percentage_distributed = $filter('number')(percentage_distributed, 3);
@@ -233,21 +242,21 @@
 		var githubLink = 'https://github.com/clemahieu/raiblocks/releases/download/V' + $scope.rb_version + '/rai-' + $scope.rb_version + '-';
 
 		$scope.platforms = [
-			{
-				name: 'OSX',
-				icon: 'apple',
-				link: githubLink + 'Darwin.dmg'
-			},
-			{
-				name: 'Windows',
-				icon: 'windows',
-				link: githubLink + 'win64.exe'
-			},
-			{
-				name: 'Linux',
-				icon: 'linux',
-				link: githubLink + 'Linux.tar.bz2'
-			}
+		{
+			name: 'OSX',
+			icon: 'apple',
+			link: githubLink + 'Darwin.dmg'
+		},
+		{
+			name: 'Windows',
+			icon: 'windows',
+			link: githubLink + 'win64.exe'
+		},
+		{
+			name: 'Linux',
+			icon: 'linux',
+			link: githubLink + 'Linux.tar.bz2'
+		}
 		];
 	})
 
@@ -255,40 +264,40 @@
 	.controller('blockCtrl', ['$rootScope', '$scope', '$http', '$timeout', function($http, $rootScope, $scope, $timeout) {
 
 		// define the different button states
-  		button = {
+		button = {
 
-  			default: {
-  				disabled: false,
-  				icon: 'fa-plus-circle',
-  				title: 'Process Block Chain',
-  				class: 'btn-primary'
-  			},
+			default: {
+				disabled: false,
+				icon: 'fa-plus-circle',
+				title: 'Process Block Chain',
+				class: 'btn-primary'
+			},
 
-  			processing: {
-  				disabled: true,
-  				icon: 'fa-spin fa-spinner',
-  				title: 'Processing Block Chain',
-  				class: 'btn-default'
-  			},
+			processing: {
+				disabled: true,
+				icon: 'fa-spin fa-spinner',
+				title: 'Processing Block Chain',
+				class: 'btn-default'
+			},
 
-  			processed: {
-  				disabled: true,
-  				icon: 'fa-thumbs-up',
-  				title: 'Block Chain Processed',
-  				class: 'btn-success'
-  			},
+			processed: {
+				disabled: true,
+				icon: 'fa-thumbs-up',
+				title: 'Block Chain Processed',
+				class: 'btn-success'
+			},
 
-  			empty_block: {
-  				disabled: true,
-  				icon: 'fa-thumbs-down',
-  				title: 'Block Chain Empty',
-  				class: 'btn-danger'
-  			},
+			empty_block: {
+				disabled: true,
+				icon: 'fa-thumbs-down',
+				title: 'Block Chain Empty',
+				class: 'btn-danger'
+			},
 
-  			state
-  		};
+			state
+		};
 
-  		$scope.button = button.default;
+		$scope.button = button.default;
 
 		// ensure the block chain entered is not null, undefined, or empty.
 		$scope.validate = function(a) {
@@ -334,7 +343,7 @@
 					}, 3000);
 				});
 			}
-	
+
 		}
 	}])
 
