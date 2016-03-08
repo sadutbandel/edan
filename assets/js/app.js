@@ -84,7 +84,7 @@
 		  			claiming: {
 		  				disabled: true,
 		  				icon: 'loading spinner',
-		  				title: 'Sending',
+		  				title: 'Queued',
 		  				class: 'grey'
 		  			},
 
