@@ -1,18 +1,18 @@
 <!-- title -->
-<div class="sixteen wide column">
+<div class="twelve wide computer sixteen wide tablet column">
 	<h1>Block Explorer</h1>
 </div>
 <br style="clear:both;"/>
 
 <!-- hash search -->
-<div ng-show="!submitted" class="sixteen wide column ng-hide">
+<div ng-show="!submitted" class="twelve wide computer sixteen wide tablet column ng-hide">
 	<div class="ui form field hash_search">
 		<textarea ng-model="hash" placeholder="Hash #" rows="2" autocomplete="off"></textarea>
 	</div>
 </div>
 
 <!-- hash explorer submission -->
-<div ng-show="!submitted" class="sixteen wide column ng-hide">
+<div ng-show="!submitted" class="twelve wide computer sixteen wide tablet column ng-hide">
 	<button
 	ng-disabled="button.disabled == true"
 	ng-class="button.class"
@@ -23,7 +23,7 @@
 </div>
 
 <!-- new search button -->
-<div ng-show="submitted" class="sixteen wide column ng-hide">
+<div ng-show="submitted" class="twelve wide computer sixteen wide tablet column ng-hide">
 	<button
 	class="ui green button"
 	ng-click="newSearch()">
@@ -32,14 +32,16 @@
 </div>
 
 <!-- response -->
-<div ng-show="submitted" class="ui piled segment ng-hide">
-	<h4 class="ui header">{{ hash }}</h4>
-	<div class="ui relaxed divided list">
-		<div class="item" ng-repeat="(key, obj) in response track by $index">
-			<i ng-class="obj.icon" class="large middle aligned icon"></i>
-			<div class="content">
-				<span class="header capitalize">{{ key }}</span>
-				<div class="description">{{ obj.value }}</div>
+<div ng-show="submitted" class="twelve wide computer sixteen wide tablet column ng-hide">
+	<div class="ui piled segment">
+		<h4 class="ui header">Exploring: {{ hash }}</h4>
+		<div class="ui relaxed divided list">
+			<div class="item" ng-repeat="(key, obj) in response track by $index">
+				<i ng-class="obj.icon" class="large middle aligned icon"></i>
+				<div class="content">
+					<span class="header capitalize">{{ key }}</span>
+					<div class="description break-word">{{ obj.value }}</div>
+				</div>
 			</div>
 		</div>
 	</div>

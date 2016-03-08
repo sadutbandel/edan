@@ -1,8 +1,12 @@
 #main {
 	margin-top: 1em;
 }
-#go-ad-free {
+.word-wrap{
 	word-wrap: break-word;
+}
+.break-word{
+	display: inline-block !important;
+	word-break: break-word !important;
 }
 .borderless.main.menu .toc.item {
 	display: none !important;

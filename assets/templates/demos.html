@@ -1,10 +1,10 @@
 <!-- title -->
-<div class="sixteen wide column">
+<div class="twelve wide computer sixteen wide tablet column">
 	<h1>Live use-case demos</h1>
 </div>
 <br style="clear:both;"/>
 
-<div ng-show="!initialized && !payment_account" class="fourteen wide column centered ng-hide">
+<div ng-show="!initialized && !payment_account" class="twelve wide computer sixteen wide tablet column ng-hide">
 	<div class="ui items">
 		<div class="item">
 			<div class="ui image"><i class="huge erase icon"></i></div>
@@ -35,7 +35,7 @@
 
 <!-- Pay 1 Mrai, Copy Account to Clipboard -->
 <div ng-show="!paid && initialized" class="twelve wide computer sixteen wide tablet column centered ng-hide">
-	<div id="go-ad-free" ng-if="payment_account && !paid" class="ui blue message">
+	<div ng-if="payment_account && !paid" class="ui blue message word-wrap">
 		<div class="header">
 			Want an <strong>ad-free</strong> experience?
 		</div>
