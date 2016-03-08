@@ -228,7 +228,7 @@
 			$scope.available_supply_absolute = resData;
 			var percentage_distributed = resData / $rootScope.total_faucet * 100;
 			$scope.percentage_distributed = $filter('number')(percentage_distributed, 3);
-
+			$scope.$apply();
 			$('#distributed_perc').progress({
 				showActivity: false,
 				percent: $scope.percentage_distributed
