@@ -44,6 +44,7 @@
 		$rootScope.recaptchaKey = '6LcPNAsTAAAAANCpxZY3SMikIjg5a0T9XTnjM-v4';
 		$rootScope.faucetNumber = 'xrb_35jjmmmh81kydepzeuf9oec8hzkay7msr6yxagzxpcht7thwa5bus5tomgz9';
 		$rootScope.rb_version = '7.3.2';
+		$rootScope.total_faucet = 340282366;
 	})
 
 	.directive('freeRaiForm', function() {
@@ -211,7 +212,19 @@
 	}])
 
 	// get started controller
-	.controller('startCtrl', function($scope) {
+	.controller('startCtrl', function($rootScope, $scope, $filter) {
+
+		// fetch the available supply
+		io.socket.get('/api/available_supply', function (resData, jwres){
+			$scope.available_supply_absolute = resData;
+			var percentage_distributed = resData / $rootScope.total_faucet * 100;
+			$scope.percentage_distributed = $filter('number')(percentage_distributed, 3);
+
+			$('#distributed_perc').progress({
+				showActivity: false,
+				percent: $scope.percentage_distributed
+			});
+		});
 
 		$scope.toggleTab = function(tab) {
 			$scope.tab = tab;

@@ -1,17 +1,17 @@
 <!-- title -->
-<div class="sixteen wide column">
+<div class="twelve wide computer sixteen wide tablet column">
 	<h1>Let's get started</h1>
 </div>
 <br style="clear:both;"/>
 
 <!-- getting started steps -->
-<div class="sixteen wide column">
+<div class="twelve wide computer sixteen wide tablet column">
 	<div class="ui steps">
 		<a class="step" ng-click="toggleTab('platform')" ng-class="{'active': tab === 'platform'}">
 			<i class="cloud download icon"></i>
 			<div class="content">
 				<div class="title">Download the wallet</div>
-				<div class="description">RaiBlocks wallet is currently version {{ rb_version }}</div>
+				<div class="description">RaiBlocks is currently v.{{ rb_version }}</div>
 			</div>
 		</a>
 		<a class="step" ng-click="toggleTab('blocks')" ng-class="{'active': tab === 'blocks'}">
@@ -23,10 +23,10 @@
 		</a>
 	</div>
 </div>
-<br style="clear:both;"/>
+<br style="clear:both;"/><br/><br/>
 
 <!-- wallet platform selection -->
-<div class="sixteen wide column ng-hide" ng-show="tab === 'platform'">
+<div class="twelve wide computer sixteen wide tablet column ng-hide" ng-show="tab === 'platform'">
 	<div class="label">
 		Select a platform
 	</div>
@@ -42,9 +42,52 @@
 </div>
 
 <!-- get free raiblocks tab -->
-<div class="sixteen wide column ng-hide" ng-show="tab === 'blocks'">
-	<div class="label">
-		Complete the form
+<div class="twelve wide computer sixteen wide tablet column ng-hide" ng-show="tab === 'blocks'">
+
+	<br style="clear:both;"/>
+
+	<div class="ui grid">
+
+		<!-- free rai form -->
+		<div class="sixteen wide column">
+			
+			<div class="ui blue pointing below label">
+				Please complete the form
+			</div>
+			<free-rai-form></free-rai-form>
+			<br style="clear:both;"/>
+		</div>
+
+		<br style="clear:both;"/>
+		
+		<div class="ten wide computer ten wide tablet column">
+
+			<!-- Coin Availability -->
+			<div class="ui small statistics">
+				<div class="statistic">
+					<div class="value">
+						{{ available_supply_absolute | number }}
+					</div>
+					<div class="label">
+						Mrai
+					</div>
+				</div>
+				<div class="statistic">
+					<div class="value">
+						{{ percentage_distributed }}%
+					</div>
+					<div class="label">
+						Distributed (<a target="_blank" href="/api/available_supply" target="_bank">API</a>)
+					</div>
+				</div>
+			</div>
+
+			<br style="clear:both;"/>
+			
+			<!-- Distributed Progress Bar -->
+			<div class="ui green progress" id="distributed_perc">
+				<div class="bar"></div>
+			</div>
+		</div>
 	</div>
-	<free-rai-form></free-rai-form>
 </div>

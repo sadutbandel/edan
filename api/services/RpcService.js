@@ -35,11 +35,12 @@ module.exports = {
 	    			response: resp.toString() // errors come in strings
 	    		};
 
-		    	if(res.statusCode === 400) {
-		    		callback(payload, null);
-		    	} else {
+	    		// explicitly look for success responses. anything but 200 is an "error"
+		    	if(res.statusCode === 200) {
 		    		payload.response = JSON.parse(payload.response); // responses come in objects
 		    		callback(null, payload);
+		    	} else {
+		    		callback(payload, null);
 		    	}
 		    });
 		});

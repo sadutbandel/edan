@@ -41,7 +41,8 @@ module.exports.routes = {
   'post /paymentFinish': 'PaymentFinishController.create',
   'post /blockExplorer': 'BlockExplorerController.create',
   'post /clear': 'ClearController.create',
-  
+  'get /api/available_supply': 'AvailableSupplyController.fetch'
+
   /***************************************************************************
   *                                                                          *
   * Custom routes here...                                                    *
