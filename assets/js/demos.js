@@ -14,11 +14,11 @@
 		})
 	})
 
-	.controller('demosCtrl', function($scope, $q) {
+	.controller('demosCtrl', function($rootScope, $scope, $q) {
 
 		// clear any blocks upon page refresh
 		delete $rootScope.block;
-		
+
 		$('#copy')
 		.popup({
 			title   : 'Popup Title',
