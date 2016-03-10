@@ -443,13 +443,13 @@ a.ui.inverted.teal.header:hover {
 /*--- Blue ---*/
 
 .ui.blue.header {
-  color: #2185D0 !important;
+  color: #FF0000 !important;
 }
 a.ui.blue.header:hover {
-  color: #1678c2 !important;
+  color: #e60000 !important;
 }
 .ui.blue.dividing.header {
-  border-bottom: 2px solid #2185D0;
+  border-bottom: 2px solid #FF0000;
 }
 
 /* Inverted */
