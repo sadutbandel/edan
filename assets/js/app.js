@@ -202,18 +202,9 @@
 
 	// allow entry to the block chain page
 	.controller('homeCtrl', ['$rootScope', '$scope', '$location', function($rootScope, $scope, $location) {
-
-		$scope.pass = 0;
-		$scope.process = function() {
-
-			$scope.pass++;
-
-			if($scope.pass === 5) {
-
-				$scope.pass = 0;
-				$location.path('block');
-			}
-		}
+		$('.social').popup({
+			position: 'bottom center'
+		});
 	}])
 
 	// get started controller

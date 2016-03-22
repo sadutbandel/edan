@@ -72,9 +72,6 @@
         <a target="_blank" href="https://github.com/clemahieu/raiblocks/wiki" class="item">
             <i class="github icon"></i>Wiki
         </a>
-        <a target="_blank" href="https://groups.google.com/forum/#!forum/raiblocks" class="item">
-            <i class="comment icon"></i>Discussion
-        </a>
         <a target="_blank" href="https://github.com/clemahieu/raiblocks" class="item">
             <i class="code icon"></i>Developers
         </a>
@@ -93,21 +90,72 @@
                 <a href="/#/demos" ng-class="{'active': path === 'demos'}" class="item">See Demos</a>
                 <a href="/#/block-explorer" ng-class="{'active': path === 'block-explorer'}" class="item">Explore Blocks</a>
                 <a target="_blank" href="https://github.com/clemahieu/raiblocks/wiki" class="item">
-                    <i class="github icon"></i>Wiki
-                </a>
-                <a target="_blank" href="https://groups.google.com/forum/#!forum/raiblocks" class="item">
-                    <i class="comments icon"></i>Discussion
+                    Wiki
                 </a>
                 <a target="_blank" href="https://github.com/clemahieu/raiblocks" class="item">
-                    <i class="code icon"></i>Developers
+                    Developers
                 </a>
             </div>
         </div>
 
         <!-- routes container -->
-        <div id="main" class="ui centered grid container" ng-view></div>
-        <br style="clear:both;"/><br/>
-        
+        <div class="ui centered grid container">
+
+            <!-- content -->
+            <div id="main" class="row" ng-view></div>
+
+            <!-- content/footer divider -->
+            <div class="sixteen wide column">
+                <div class="ui divider"></div>
+            </div>
+
+            <!-- footer -->
+            <div class="three wide computer six wide mobile centered column">
+                <h4 class="ui header">Sitemap</h4>
+                <div class="ui link list">
+                    <a class="item" href="/#/start" ng-class="{'active': path === 'start'}">
+                        <i class="play icon"></i>Get Started
+                    </a>
+                    <a class="item" href="/#/demos" ng-class="{'active': path === 'demos'}">
+                        <i class="file outline icon"></i>See Demos
+                    </a>
+                    <a class="item" href="/#/block-explorer" ng-class="{'active': path === 'block-explorer'}">
+                        <i class="cube icon"></i>Explore Blocks
+                    </a>
+                </div>
+            </div>
+            <div class="three wide computer six wide mobile centered column">
+                <h4 class="ui header">Information</h4>
+                <div class="ui link list">
+                    <a class="item" target="_blank" href="https://docs.google.com/document/d/13s6BKzRq9oD5Me55JBRzR7BdvjJ44QKqPu2lf-JsAlU/edit">
+                        <i class="file outline icon"></i>Whitepaper
+                    </a>
+                    <a class="item" href="https://github.com/clemahieu/raiblocks/wiki" target="_blank">
+                        <i class="github icon"></i>Wiki
+                    </a>
+                    <a class="item" href="https://github.com/clemahieu/raiblocks" target="_blank">
+                        <i class="code icon"></i>Developers
+                    </a>
+                </div>
+            </div>
+            <div class="three wide computer four wide mobile centered column">
+                <h4 class="ui header">Social</h4>
+                <div class="ui link list">
+                    <a class="item" href="https://groups.google.com/forum/#!forum/raiblocks" target="_blank">
+                        <i class="google icon"></i>Forums
+                    </a>
+                    <a class="item" href="https://twitter.com/raiblocks" target="_blank">
+                        <i class="twitter icon"></i>Twitter
+                    </a>
+                    <a class="item" href="mailto:clemahieu@raiblocks.net" target="_blank">
+                        <i class="mail icon"></i>Email
+                    </a>
+                </div>
+            </div>
+            <div class="sixteen wide column">
+                <br style="clear:both;"/>
+            </div>
+        </div>
     </div>
 
     <!--SCRIPTS-->

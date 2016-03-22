@@ -1,16 +1,18 @@
 <!-- title -->
-<div class="twelve wide computer sixteen wide tablet column">
-	<h1>Live use-case demos</h1>
+<div class="sixteen wide column">
+	<h1>Live Use-Case Demos</h1><br/>
 </div>
-<br style="clear:both;"/>
 
-<div ng-show="!initialized && !payment_account" class="twelve wide computer sixteen wide tablet column ng-hide">
+<div ng-show="!initialized && !payment_account" class="twelve wide computer sixteen wide tablet centered column ng-hide">
+
+	<br style="clear:both;"/>
+
 	<div class="ui items">
 		<div class="item">
 			<div class="ui image"><i class="huge erase icon"></i></div>
 			<div class="middle aligned content">
 				<div class="header">
-					Instant ad-removal
+					Instant Web-Ad Removal
 				</div>
 				<div class="description">
 					<p>Wouldn't it be great if content distributors didn't have to battle ad-blockers, and content consumers didn't have to battle advertisements or cheat distributors by using ad-blockers? We've created a simple way to allow websites to let their visitors pay-to-remove advertisements using RaiBlocks.</p>
@@ -30,6 +32,7 @@
 		<button ng-click="initialize()" class="ui mini green button ">
 			<i class="refresh icon"></i>Restart Demo
 		</button>
+		<br style="clear:both;"/>
 	</div>
 </div>
 
@@ -50,6 +53,7 @@
 		<br/>
 		<em>{{ payment_account }}</em>
 	</div>
+	<br style="clear:both;"/>
 </div>
 
 <!-- Simulate Payment -->
@@ -57,6 +61,7 @@
 	<button ng-click="simulatePayment()" class="ui fluid blue button" ng-class="{ 'active': showSimulatePayment }">
 		Simulate a payment
 	</button>
+	<br style="clear:both;"/>
 </div>
 
 <!-- Free Rai Form (for simulating payment) -->
@@ -67,6 +72,7 @@ class="ten wide computer sixteen wide tablet column centered ng-hide">
 		Use the account shown above to simulate payment below
 	</div>
 	<free-rai-form></free-rai-form>
+	<br style="clear:both;"/>
 </div>
 
 <!-- DEMO INLINE WEBSITE -->

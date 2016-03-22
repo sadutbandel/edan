@@ -1,29 +1,26 @@
 <!-- title -->
-<div class="twelve wide computer sixteen wide tablet column">
-	<h1>Block Explorer</h1>
+<div class="sixteen wide column">
+	<h1>Explore Blocks</h1><br/>
 </div>
-<br style="clear:both;"/>
 
 <!-- hash search -->
-<div ng-show="!submitted" class="twelve wide computer sixteen wide tablet column ng-hide">
-	<div class="ui form field hash_search">
-		<textarea ng-model="hash" placeholder="Hash #" rows="2" autocomplete="off"></textarea>
-	</div>
+<div ng-show="!submitted" class="ui form field hash_search twelve wide computer sixteen wide tablet centered column ng-hide">
+	<textarea ng-model="hash" placeholder="Enter a hash number" rows="2" autocomplete="off"></textarea>
 </div>
 
 <!-- hash explorer submission -->
-<div ng-show="!submitted" class="twelve wide computer sixteen wide tablet column ng-hide">
+<div ng-show="!submitted" class="twelve wide computer sixteen wide tablet centered column ng-hide">
 	<button
 	ng-disabled="button.disabled == true"
 	ng-class="button.class"
-	class="ui button"
+	class="ui fluid button"
 	ng-click="explore()">
 		<i ng-class="button.icon" class="icon"></i>&nbsp;{{ button.title }}
 	</button>
 </div>
 
 <!-- new search button -->
-<div ng-show="submitted" class="twelve wide computer sixteen wide tablet column ng-hide">
+<div ng-show="submitted" class="twelve wide computer sixteen wide tablet centered column ng-hide">
 	<button
 	class="ui green button"
 	ng-click="newSearch()">
@@ -32,7 +29,8 @@
 </div>
 
 <!-- response -->
-<div ng-show="submitted" class="twelve wide computer sixteen wide tablet column ng-hide">
+<div ng-show="submitted" class="twelve wide computer sixteen wide tablet centered column ng-hide">
+	<br/>
 	<div class="ui piled segment">
 		<h4 class="ui header">Exploring: {{ hash }}</h4>
 		<div class="ui relaxed divided list">
