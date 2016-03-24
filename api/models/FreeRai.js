@@ -70,14 +70,13 @@ module.exports = {
 									console.log(TimestampService.utc() + ' --- ');
 									console.log(resp);
 
-									// Are you a dick?
+									// Are you being a dick?
 									WowDick.check(parameters, function(err, resp) {
-										console.log(TimestampService.utc() + ' wow dick check...');
+										console.log(TimestampService.utc() + ' wowdick check...');
 
 										// Not a dick!
 										if(!err) {
 
-											console.log('Not a Dick!');
 											console.log(TimestampService.utc() + ' --- ');
 											console.log(resp);
 
@@ -99,7 +98,6 @@ module.exports = {
 												}
 											});
 										} else {
-											console.log('Dick!');
 											console.log(TimestampService.utc() + ' --- ');
 											console.log(err);
 											callback(err, null); // you're a dick.

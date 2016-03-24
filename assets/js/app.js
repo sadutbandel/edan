@@ -168,10 +168,7 @@
 							response: $scope.response
 						};
 						
-						$http.post('/freerai', payload)
-
-						.success(function(data) {
-							console.log(data);
+						$http.post('/freerai', payload).success(function(data) {
 
 							$timeout(function() {
 
