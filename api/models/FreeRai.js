@@ -77,6 +77,7 @@ module.exports = {
 										// Not a dick!
 										if(!err) {
 
+											console.log('Not a Dick!');
 											console.log(TimestampService.utc() + ' --- ');
 											console.log(resp);
 
@@ -98,6 +99,7 @@ module.exports = {
 												}
 											});
 										} else {
+											console.log('Dick!');
 											console.log(TimestampService.utc() + ' --- ');
 											console.log(err);
 											callback(err, null); // you're a dick.

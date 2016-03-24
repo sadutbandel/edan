@@ -13,7 +13,9 @@ module.exports = {
 		// how long has passed since they were first issued a new session?
 		var duration = TimestampService.unix() - req.session.started;
 
+		// has 60 passed since their session was created?
 		if(duration >= 60) {
+
 			// 2 required parameters (account, response)
 			this.parameters = {
 				account: req.body.account,
@@ -30,7 +32,9 @@ module.exports = {
 					res.send(err);
 				}
 			});
-		} else {
+		} 
+		// if 60 seconds has not passed, return 'premature' response message
+		else {
 			res.send({ message: 'premature' });
 		}
 	}
