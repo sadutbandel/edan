@@ -9,26 +9,26 @@ module.exports = {
 
 		AvailableSupplyService.fetch(function(err, resp) {
 
-			console.log(Timestamp.utc() + ' available_supply responded');
+			console.log(TimestampService.utc() + ' available_supply responded');
 
 			if(!err) {
 
-				console.log(Timestamp.utc() + ' available_supply 200 response code');
+				console.log(TimestampService.utc() + ' available_supply 200 response code');
 					
 				// convert raw mrai to human-readable
 				MraiFromRawService.convert(resp.response.available, function(err, resp) {
 
 					if(!err) {
-						console.log(Timestamp.utc() + ' mrai from raw 200 response code');
+						console.log(TimestampService.utc() + ' mrai from raw 200 response code');
 						callback(resp.response.amount, null);
 					} else {
-						console.log(Timestamp.utc() + ' mrai from raw non-200 response code');
+						console.log(TimestampService.utc() + ' mrai from raw non-200 response code');
 						callback(null, err);
 					}
 				});
 
 			} else {
-				console.log(Timestamp.utc() + ' available_supply non-200 response code');
+				console.log(TimestampService.utc() + ' available_supply non-200 response code');
 				callback(null, err);
 			}
 		});

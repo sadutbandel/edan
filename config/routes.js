@@ -32,16 +32,14 @@ module.exports.routes = {
   *                                                                          *
   ***************************************************************************/
 
-  '/': {
-    view: 'application'
-  },
-
-  'post /paymentBegin': 'PaymentBeginController.create',
-  'post /paymentWait': 'PaymentWaitController.create',
-  'post /paymentFinish': 'PaymentFinishController.create',
-  'post /blockExplorer': 'BlockExplorerController.create',
-  'post /clear': 'ClearController.create',
-  'get /api/available_supply': 'AvailableSupplyController.fetch'
+  'GET /': { controller: 'SessionController', action: 'append' },
+  'POST /paymentBegin': 'PaymentBeginController.create',
+  'POST /paymentWait': 'PaymentWaitController.create',
+  'POST /paymentFinish': 'PaymentFinishController.create',
+  'POST /blockExplorer': 'BlockExplorerController.create',
+  'POST /clear': 'ClearController.create',
+  'POST /demo': 'DemoController.create',
+  'GET /api/available_supply': 'AvailableSupplyController.fetch'
 
   /***************************************************************************
   *                                                                          *

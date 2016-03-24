@@ -6,16 +6,15 @@ module.exports = {
  		// no problems by default
  		var problems = 0;
 
- 		// iterate through all parameters and...
- 		parameters.forEach(function(parameter) {
+ 		// iterate through all parameters
+ 		for (param in parameters) {
 
- 			// make sure they aren't undefined or empty and then...
- 			if (parameter === undefined || parameter.length === 0) {
+ 			if (parameters[param] === undefined || parameters[param].length === 0) {
 
  				// increase our problem count!
  				problems++;
  			}
- 		});
+ 		}
 
  		// no problems? great!
  		if (problems === 0) {
@@ -41,7 +40,7 @@ module.exports = {
 
 		SendRaiService.send(parameters, function(err, response) {
 
-			if(!err) {
+			if (!err) {
 				callback(null, response);
 			} else {
 				callback(err, null);

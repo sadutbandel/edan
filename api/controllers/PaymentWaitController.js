@@ -9,19 +9,19 @@ module.exports = {
 
 	create: function(req, res) {
 		
-		console.log(Timestamp.utc() + ' payment_wait hit');
+		console.log(TimestampService.utc() + ' payment_wait hit');
 		PaymentWaitService.init(req.session.payment.account, function(err, resp) {
 
-			console.log(Timestamp.utc() + ' payment_wait responded');
+			console.log(TimestampService.utc() + ' payment_wait responded');
 			if(!err) {
 
-				console.log(Timestamp.utc() + ' payment_wait success');
+				console.log(TimestampService.utc() + ' payment_wait success');
 
 				if(resp.statusCode === 200) {
 
 					if(resp.response.status === 'success') {
 
-						console.log(Timestamp.utc() + ' payment_wait response code 200 and status === \'success\'');
+						console.log(TimestampService.utc() + ' payment_wait response code 200 and status === \'success\'');
 
 						// send the account back for finishing
 						resp.account = req.session.payment.account;
@@ -35,16 +35,16 @@ module.exports = {
 					else {
 						resp.response.paid = false;
 					}
-					console.log(Timestamp.utc() + ' --- ');
+					console.log(TimestampService.utc() + ' --- ');
 					console.log(resp);
 					res.send(resp);
 				}
 				else {
-					console.log(Timestamp.utc() + ' payment_wait non-200 response code');
+					console.log(TimestampService.utc() + ' payment_wait non-200 response code');
 					res.send('Non-200 Response Code' + resp.statusCode);
 				}
 			} else {
-				console.log(Timestamp.utc() + ' payment_wait error');
+				console.log(TimestampService.utc() + ' payment_wait error');
 				res.send(err);
 			}
 		});

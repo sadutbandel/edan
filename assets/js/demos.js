@@ -14,16 +14,63 @@
 		})
 	})
 
-	.controller('demosCtrl', function($rootScope, $scope, $q) {
+	.controller('demosCtrl', function($rootScope, $scope, $q, $http, $timeout) {
 
 		// clear any blocks upon page refresh
 		delete $rootScope.block;
 
-		$('#copy')
-		.popup({
-			title   : 'Popup Title',
-			content : 'Hello I am a popup'
-		});
+		// define the different button states
+  		button = {
+
+  			default: {
+  				disabled: false,
+  				icon: 'add circle',
+  				title: 'Pay',
+  				class: 'blue'
+  			},
+
+  			paying: {
+  				disabled: true,
+  				icon: 'loading spinner',
+  				title: 'Paying',
+  				class: 'grey'
+  			},
+
+  			paid: {
+  				disabled: true,
+  				icon: 'thumbs up',
+  				title: 'Paid',
+  				class: 'green'
+  			}
+  		};
+
+  		$scope.button = button.default;
+
+  		$scope.submit = function () {
+
+			$scope.button = button.paying;
+
+			$http.post('/demo').success(function(data) {
+
+				$timeout(function() {
+
+					if(data.statusCode === 200) {
+						$scope.button = button.paid;
+					} else {
+						$scope.button = button[data.message];
+					}
+
+					$timeout(function() {
+						$scope.account = null;
+						$scope.button = button.default;
+					}, 3000);
+
+				}, 3000);
+			})
+			.error(function(data, status) {
+				console.error('Error', status, data);
+			});
+		}
 
 		$scope.paymentBegin = function() {
 

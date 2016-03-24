@@ -22,15 +22,18 @@ module.exports.bootstrap = function(cb) {
    }
 
    PaymentInitService.init(function(err, resp) {
-      console.log(Timestamp.utc() + ' Payment_init');
+      console.log(TimestampService.utc() + ' Payment_init');
       if(!err) {
-         console.log(Timestamp.utc() + ' --- ');
+         console.log(TimestampService.utc() + ' --- ');
          console.log(resp);
       } else {
-         console.log(Timestamp.utc() + ' --- ');
+         console.log(TimestampService.utc() + ' --- ');
          console.log(err);
       }
    });
+
+   //sails.hooks.http.app.set('trust proxy', true);
+   
    // It's very important to trigger this callback method when you are finished
    // with the bootstrap!  (otherwise your server will never lift, since it's waiting on the bootstrap)
    cb();

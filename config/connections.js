@@ -32,6 +32,12 @@ module.exports.connections = {
     adapter: 'sails-disk'
   },
 
+  redis: {
+    adapter: 'sails-redis',
+    port: 6379,
+    host: 'localhost'
+  },
+
   /***************************************************************************
   *                                                                          *
   * MySQL is the world's most popular relational database.                   *
@@ -56,7 +62,7 @@ module.exports.connections = {
   * Run: npm install sails-mongo                                             *
   *                                                                          *
   ***************************************************************************/
-  someMongoDb: {
+  mongoDb: {
     adapter: 'sails-mongo',
     host: 'localhost',
     port: 27017,

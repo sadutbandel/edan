@@ -71,7 +71,33 @@ class="ten wide computer sixteen wide tablet column centered ng-hide">
 	<div class="ui blue pointing below label">
 		Use the account shown above to simulate payment below
 	</div>
-	<free-rai-form></free-rai-form>
+
+	<form>
+
+		<!-- account id -->
+		<div class="ui form field account_textarea">
+			<textarea ng-model="account" placeholder="Account #" rows="2" autocomplete="off"></textarea>
+		</div>
+
+		<br style="clear:both"/>
+
+		<!-- submission button -->
+		<button
+		ng-disabled="button.disabled == true"
+		ng-class="button.class"
+		ng-click="submit()"
+		class="ui button"
+		type="submit">
+			<i ng-class="button.icon" class="icon"></i>&nbsp;{{ button.title }}
+		</button>
+		<button 
+		class="ng-hide ui teal button"
+		ng-show="block"
+		ng-click="exploreBlock()">
+			Explore Block
+		</button>
+	</form>
+
 	<br style="clear:both;"/>
 </div>
 

@@ -114,6 +114,13 @@
 		  				icon: 'thumbs down',
 		  				title: 'RaiBlocks valuable',
 		  				class: 'red'
+		  			},
+
+		  			premature: {
+		  				disabled: true,
+		  				icon: 'thumbs down',
+		  				title: 'Try again shortly',
+		  				class: 'yellow'
 		  			}
 		  		};
 
@@ -164,6 +171,7 @@
 						$http.post('/freerai', payload)
 
 						.success(function(data) {
+							console.log(data);
 
 							$timeout(function() {
 

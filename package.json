@@ -13,6 +13,7 @@
     "angular-ui-bootstrap": "^1.0.3",
     "bootstrap": "^3.3.6",
     "clipboard": "^1.5.8",
+    "connect-mongo": "^1.1.0",
     "ejs": "~0.8.4",
     "grunt": "^0.4.2",
     "grunt-contrib-clean": "~0.5.0",
@@ -38,6 +39,7 @@
     "sails-disk": "~0.10.0",
     "sails-hook-autoreload": "^0.12.0",
     "sails-mongo": "^0.12.0",
+    "sails-redis": "^0.10.7",
     "semantic-ui": "^2.1.8",
     "socket.io-redis": "^0.1.4",
     "twitter-bootstrap": "^2.1.1"
