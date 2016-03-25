@@ -32,72 +32,42 @@
 		<button ng-click="initialize()" class="ui mini green button ">
 			<i class="refresh icon"></i>Restart Demo
 		</button>
-		<br style="clear:both;"/><br/>
 	</div>
+	<br style="clear:both;"/>
 </div>
 
 <!-- Pay 1 Mrai, Copy Account to Clipboard -->
 <div ng-show="!paid && initialized" class="twelve wide computer sixteen wide tablet column centered ng-hide">
-	<div ng-if="payment_account && !paid" class="ui blue message word-wrap">
+	<div ng-if="payment_account && !paid" class="ui message word-wrap">
 		<div class="header">
-			Want an <strong>ad-free</strong> experience?
+			To remove ads, pick one option:
 		</div>
-		Pay 100 Mrai&nbsp;
-		<a
-		id="copy"
-		class="ui mini black button" 
-		ngclipboard 
-		data-clipboard-text="{{ payment_account }}">
-			<i class="clipboard icon"></i>
-		</a>
-		<br/>
-		<em>{{ payment_account }}</em>
+		<ol class="list">
+			<li>
+				Pay 100 Mrai using your wallet&nbsp;
+				<a
+					id="copy"
+					class="ui mini blue button" 
+					ngclipboard 
+					data-clipboard-text="{{ payment_account }}">
+					<i class="clipboard icon"></i> Copy Account
+				</a>
+			</li>
+			<li>Pay 100 Mrai using simulation</li>
+		</ol>
 	</div>
 	<br style="clear:both;"/>
 </div>
-
+		
 <!-- Simulate Payment -->
 <div ng-show="!paid && initialized && !showSimulatePayment" class="eight wide computer twelve wide column centered ng-hide">
-	<button ng-click="simulatePayment()" class="ui fluid blue button" ng-class="{ 'active': showSimulatePayment }">
-		Simulate a payment
+	<button
+	ng-disabled="button.disabled == true"
+	ng-class="button.class"
+	ng-click="simulatePayment()"
+	class="ui fluid button">
+		<i ng-class="button.icon" class="icon"></i>&nbsp;{{ button.title }}
 	</button>
-	<br style="clear:both;"/>
-</div>
-
-<!-- Free Rai Form (for simulating payment) -->
-<div 
-ng-show="!paid && initialized && showSimulatePayment" 
-class="ten wide computer sixteen wide tablet column centered ng-hide">
-	<div class="ui blue pointing below label">
-		Use the account shown above to simulate payment below
-	</div>
-
-	<form>
-
-		<!-- account id -->
-		<div class="ui form field account_textarea">
-			<textarea ng-model="account" placeholder="Account #" rows="2" autocomplete="off"></textarea>
-		</div>
-
-		<br style="clear:both"/>
-
-		<!-- submission button -->
-		<button
-		ng-disabled="button.disabled == true"
-		ng-class="button.class"
-		ng-click="submit()"
-		class="ui button"
-		type="submit">
-			<i ng-class="button.icon" class="icon"></i>&nbsp;{{ button.title }}
-		</button>
-		<button 
-		class="ng-hide ui teal button"
-		ng-show="block"
-		ng-click="exploreBlock()">
-			Explore Block
-		</button>
-	</form>
-
 	<br style="clear:both;"/>
 </div>
 
