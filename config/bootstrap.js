@@ -24,11 +24,9 @@ module.exports.bootstrap = function(cb) {
    PaymentInitService.init(function(err, resp) {
       console.log(TimestampService.utc() + ' Payment_init');
       if(!err) {
-         console.log(TimestampService.utc() + ' --- ');
-         console.log(resp);
+         console.log(TimestampService.utc() + ' ' + JSON.stringify(resp));
       } else {
-         console.log(TimestampService.utc() + ' --- ');
-         console.log(err);
+         console.log(TimestampService.utc() + ' ' + JSON.stringify(err));
       }
    });
 
