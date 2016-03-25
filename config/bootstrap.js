@@ -11,6 +11,9 @@
 
 module.exports.bootstrap = function(cb) {
 
+   // allows us to retrieve the client IP
+   sails.hooks.http.app.set('trust proxy', true);
+
    // I need to resolve an issue with minification before I can use the built-in prod/env flag
    // dev env
    if(sails.config.port === 1337) {

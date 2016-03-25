@@ -27,6 +27,12 @@ module.exports = {
 			type:'string',
 			required:true,
 			unique:true
+		},
+
+		ip: {
+			type:'string',
+			required:true,
+			unique:false
 		}
 	},
 

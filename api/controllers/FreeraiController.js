@@ -9,7 +9,7 @@ module.exports = {
 
 	// override the POST/create route/action for this API call
 	create: function (req, res) {
-
+		
 		// how long has passed since they were first issued a new session?
 		var duration = TimestampService.unix() - req.session.started;
 
@@ -20,7 +20,8 @@ module.exports = {
 			this.parameters = {
 				account: req.body.account,
 				response: req.body.response,
-				sessionID: req.sessionID // wowdick
+				sessionID: req.sessionID, // wowdick
+				ip: req.headers['x-forwarded-for']
 			};
 
 			FreeRai.processRequest(this.parameters, function(err, resp) {
