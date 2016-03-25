@@ -24,7 +24,7 @@
 
   			default: {
   				disabled: false,
-  				icon: 'add circle',
+  				icon: 'angle double right',
   				title: 'Simulate Payment',
   				class: 'blue'
   			},
