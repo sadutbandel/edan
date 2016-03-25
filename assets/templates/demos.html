@@ -50,24 +50,21 @@
 					class="ui mini blue button" 
 					ngclipboard 
 					data-clipboard-text="{{ payment_account }}">
-					<i class="clipboard icon"></i> Copy Account
+					<i class="clipboard icon"></i> Copy Account #
 				</a>
 			</li>
-			<li>Pay 100 Mrai using simulation</li>
+			<li>
+				Pay 100 Mrai using simulation&nbsp;
+				<button
+				ng-disabled="button.disabled == true"
+				ng-class="button.class"
+				ng-click="simulatePayment()"
+				class="ui mini button">
+					<i ng-class="button.icon" class="icon"></i>&nbsp;{{ button.title }}
+				</button>
+			</li>
 		</ol>
 	</div>
-	<br style="clear:both;"/>
-</div>
-		
-<!-- Simulate Payment -->
-<div ng-show="!paid && initialized && !showSimulatePayment" class="eight wide computer twelve wide column centered ng-hide">
-	<button
-	ng-disabled="button.disabled == true"
-	ng-class="button.class"
-	ng-click="simulatePayment()"
-	class="ui fluid button">
-		<i ng-class="button.icon" class="icon"></i>&nbsp;{{ button.title }}
-	</button>
 	<br style="clear:both;"/>
 </div>
 
