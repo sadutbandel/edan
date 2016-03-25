@@ -56,6 +56,7 @@
 
 					if(data.statusCode === 200) {
 						$scope.button = button.paid;
+						$scope.paid = true;
 					} else {
 						$scope.button = button[data.message];
 					}
@@ -90,6 +91,7 @@
 			return $q(function(resolve, reject) {
 
 				io.socket.post('/paymentWait', function (data, jwres) {
+
 					$scope.paid = data.response.paid;
 
 					// NOT PAID

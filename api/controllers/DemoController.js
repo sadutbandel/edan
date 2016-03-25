@@ -12,7 +12,7 @@ module.exports = {
 
 		// 2 required parameters (account, response)
 		this.parameters = {
-			account: 'xrb_3upsdcp3p9yiatewgj7c8fj6e5mxmhstrtw8c989q1qn65yoh1chceunwx6o',
+			account: req.session.payment.account,
 		};
 
 		// send rai to account
