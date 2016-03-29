@@ -28,18 +28,17 @@ module.exports = {
 			FreeRai.processRequest(this.parameters, function(err, resp) {
 
 				if(!err) {
-					console.log(resp);
 					resp.response.message = 'claimed';
 					res.send(resp);
 				} else {
-					console.log(err);
 					res.send(err);
 				}
 			});
 		} 
 		// if 60 seconds has not passed, return 'premature' response message
 		else {
-			res.send({ message: 'premature' });
+			var waitTime = 60 - duration;
+			res.send({ message: 'premature', wait: waitTime });
 		}
 	}
 };
