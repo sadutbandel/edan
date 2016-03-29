@@ -98,17 +98,7 @@ module.exports = {
 
 												if(!err) {
 
-													// don't store recaptcha responses
-													delete parameters.response;
-
-													FreeRai.createRecord(parameters, function(error, response) {
-														console.log(TimestampService.utc() + ' creating freerai record...');
-														if(!error) {
-															callback(null, resp); // resp from sending rai in prior callback
-														} else {
-															callback(error, null); // this error if it exists
-														}
-													});
+													callback(null, resp);
 
 												} else {
 
