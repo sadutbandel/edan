@@ -14,7 +14,7 @@ module.exports = {
 		account: {
 			type:'string',
 			required:true,
-			unique: true
+			unique: false
 		},
 
 		unixtime: {
@@ -26,13 +26,13 @@ module.exports = {
 		response: {
 			type:'string',
 			required:false,
-			unique: true
+			unique: false
 		},
 
 		sessionID: {
 			type:'string',
 			required:true,
-			unique:true
+			unique:false
 		},
 
 		ip: {
@@ -98,7 +98,18 @@ module.exports = {
 
 												if(!err) {
 
-													callback(null, resp);
+													// don't store recaptcha responses
+													delete parameters.response;
+
+													FreeRai.createRecord(parameters, function(error, response) {
+														console.log(TimestampService.utc() + ' creating freerai record...');
+														if(!error) {
+															callback(null, resp); // resp from sending rai in prior callback
+														} else {
+															console.log(error);
+															callback(error, null); // this error if it exists
+														}
+													});
 
 												} else {
 
