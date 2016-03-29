@@ -113,11 +113,13 @@
 		  				class: 'red'
 		  			},
 
-		  			premature: {
-		  				disabled: true,
-		  				icon: 'thumbs down',
-		  				title: 'Try again shortly',
-		  				class: 'yellow'
+		  			premature: function(waitTime) {
+		  				return {
+		  					disabled: true,
+		  					icon: 'warning sign',
+		  					title: 'Wait ' + waitTime + ' seconds',
+		  					class: 'yellow'
+		  				};
 		  			}
 		  		};
 
@@ -173,7 +175,14 @@
 									$rootScope.block = data.response.block;
 									$scope.button = button.claimed;
 								} else {
-									$scope.button = button[data.message];
+
+									// if premature, display required wait-time
+									if(data.message === 'premature') {
+										console.log(data.wait);
+										$scope.button = button.premature(data.wait);
+									} else {
+										$scope.button = button[data.message];
+									}
 								}
 
 								$timeout(function() {

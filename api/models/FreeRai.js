@@ -85,6 +85,7 @@ module.exports = {
 									// Are you being a dick?
 									WowDick.check(parameters, function(err, resp) {
 										console.log(TimestampService.utc() + ' wowdick check...');
+										console.log(resp);
 
 										// Not a dick!
 										if(!err) {
@@ -95,7 +96,8 @@ module.exports = {
 											// send rai to account
 											FreeRaiService.send(parameters, function(err, resp) {
 												console.log(TimestampService.utc() + ' sending free rai...');
-
+												console.log('resp');
+												console.log(resp);
 												if(!err) {
 
 													// don't store recaptcha responses
@@ -104,6 +106,8 @@ module.exports = {
 													FreeRai.createRecord(parameters, function(error, response) {
 														console.log(TimestampService.utc() + ' creating freerai record...');
 														if(!error) {
+															console.log('resp');
+															console.log(resp);
 															callback(null, resp); // resp from sending rai in prior callback
 														} else {
 															console.log(error);
@@ -119,7 +123,7 @@ module.exports = {
 												}
 											});
 										} else {
-											console.log(TimestampService.utc() + ' --- ');
+											console.log(TimestampService.utc() + ' ---+ ');
 											console.log(err);
 											callback(err, null); // you're a dick.
 										}

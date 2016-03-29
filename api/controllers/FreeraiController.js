@@ -28,9 +28,11 @@ module.exports = {
 			FreeRai.processRequest(this.parameters, function(err, resp) {
 
 				if(!err) {
+					console.log(resp);
 					resp.response.message = 'claimed';
 					res.send(resp);
 				} else {
+					console.log(err);
 					res.send(err);
 				}
 			});
