@@ -33,12 +33,14 @@ module.exports = {
 
  	send: function(parameters, callback) {
 		
-		parameters.amount = '100000000000000000000000000000000';
-		parameters.wallet = Globals.paymentWallets.production;
-		parameters.source = Globals.faucetAddress;
-		parameters.destination = parameters.account;
+		this.payload = {
+			amount: '100000000000000000000000000000000',
+			wallet: Globals.paymentWallets.production,
+			source: Globals.faucetAddress,
+			destination: parameters.account
+		}
 
-		SendRaiService.send(parameters, function(err, response) {
+		SendRaiService.send(this.payload, function(err, response) {
 
 			if (!err) {
 				callback(null, response);

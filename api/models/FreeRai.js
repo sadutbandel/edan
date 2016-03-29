@@ -17,9 +17,15 @@ module.exports = {
 			unique: true
 		},
 
+		unixtime: {
+			type:'integer',
+			required:true,
+			unique: false
+		},
+
 		response: {
 			type:'string',
-			required:true,
+			required:false,
 			unique: true
 		},
 
@@ -92,9 +98,17 @@ module.exports = {
 
 												if(!err) {
 
-													console.log(TimestampService.utc() + ' --- ');
-													console.log(resp);
-													callback(null, resp);
+													// don't store recaptcha responses
+													delete parameters.response;
+
+													FreeRai.createRecord(parameters, function(error, response) {
+														console.log(TimestampService.utc() + ' creating freerai record...');
+														if(!error) {
+															callback(null, resp); // resp from sending rai in prior callback
+														} else {
+															callback(error, null); // this error if it exists
+														}
+													});
 
 												} else {
 
@@ -136,6 +150,17 @@ module.exports = {
 				callback(err, null); // one or more params failed!
 			}
 		});
-	}
+	},
+
+	createRecord: function(payload, callback) {
+
+ 		FreeRai.create(payload).exec(function (err, results) {
+ 			if(!err) {
+ 				callback(null, results);
+ 			} else {
+ 				callback(err, null);
+ 			}
+		});
+ 	}
 
 };

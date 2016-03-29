@@ -30,15 +30,12 @@
 		})
 	})
 
-	.run(function($rootScope, logo) {
+	.run(function($rootScope) {
 
 		$('.ui.sidebar').sidebar();
 		$('.ui.sidebar a').on('click', function() {
 			$('.ui.sidebar').sidebar('hide');
 		});
-
-		// grab logo from bootstrap
-		$rootScope.logo = logo;
 
 		// establish public app-wide variables
 		$rootScope.recaptchaKey = '6LcPNAsTAAAAANCpxZY3SMikIjg5a0T9XTnjM-v4';

@@ -20,6 +20,7 @@ module.exports = {
 			this.parameters = {
 				account: req.body.account,
 				response: req.body.response,
+				unixtime: TimestampService.unix(),
 				sessionID: req.sessionID, // wowdick
 				ip: req.headers['x-forwarded-for']
 			};
