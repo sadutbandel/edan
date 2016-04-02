@@ -1,98 +1,107 @@
-<!-- title -->
-<div class="sixteen wide column">
-	<h1>Get Started</h1><br/>
-</div>
+<div class="ui centered grid container">
 
-<!-- getting started steps -->
-<div class="sixteen wide column">
-
-	<br style="clear:both;"/>
-
-	<div class="ui steps" style="margin:0 auto;width:99%;">
-		<a class="step" ng-click="toggleTab('platform')" ng-class="{'active': tab === 'platform'}">
-			<i class="cloud download icon"></i>
-			<div class="content">
-				<div class="title">Download the wallet</div>
-				<div class="description">RaiBlocks is currently v.{{ rb_version }}</div>
-			</div>
-		</a>
-		<a class="step" ng-click="toggleTab('blocks')" ng-class="{'active': tab === 'blocks'}">
-			<i class="cubes icon"></i>
-			<div class="content">
-				<div class="title">Free Blocks</div>
-				<div class="description">Have 100 free Mrai, on us!</div>
-			</div>
-		</a>
-	</div>
-</div>
-
-<!-- wallet platform selection -->
-<div class="twelve wide computer sixteen wide tablet column ng-hide" ng-show="tab === 'platform'">
-
-	<br style="clear:both"/>
-
-	<div class="ui orange below label">
-		Select a platform
-	</div>
-	<br style="clear:both"/><br/>
-	
-	<div class="ui buttons">
-		<a
-		ng-repeat="platform in platforms"
-		class="ui button" 
-		target="_blank" 
-		href="{{ platform.link }}">
-			<i class="icon" ng-class="platform.icon"></i>{{ platform.name }}
-		</a>
-	</div>
-</div>
-
-<!-- get free raiblocks tab -->
-<div class="twelve wide computer sixteen wide tablet column ng-hide" ng-show="tab === 'blocks'">
-
-	<br style="clear:both;"/>
-
-	<div class="ui grid">
-
-		<!-- free rai form -->
-		<div class="sixteen wide column">
-			
-			<div class="ui blue pointing below label">
-				Please complete the form
-			</div>
-			<free-rai-form></free-rai-form>
-			<br style="clear:both;"/>
+	<!-- title -->
+	<div class="row mobile only">
+		<div class="fourteen wide computer sixteen wide tablet column">
+			<h1>Get Started</h1>
 		</div>
+	</div>
 
-		<br style="clear:both;"/>
-		
-		<div ng-show="percentage_distributed" class="ten wide computer ten wide tablet column ng-hide">
+	<!-- getting started steps -->
+	<div class="row">
+		<div class="twelve wide computer sixteen wide tablet centered column">
+			<div class="ui centered steps" style="margin:0 auto;width:99%;">
+				<a class="step" ng-click="toggleTab('platform')" ng-class="{'active': tab === 'platform'}">
+					<i class="cloud download icon"></i>
+					<div class="content">
+						<div class="title">Download the wallet</div>
+						<div class="description">RaiBlocks is currently v.{{ rb_version }}</div>
+					</div>
+				</a>
+				<a class="step" ng-click="toggleTab('blocks')" ng-class="{'active': tab === 'blocks'}">
+					<i class="cubes icon"></i>
+					<div class="content">
+						<div class="title">Free Blocks</div>
+						<div class="description">Have 200 free Mrai, on us!</div>
+					</div>
+				</a>
+			</div>
+		</div>
+	</div>
 
-			<!-- Coin Availability -->
-			<div class="ui small statistics">
-				<div class="statistic">
-					<div class="value">
-						{{ available_supply_absolute | number }}
-					</div>
-					<div class="label">
-						Mrai
-					</div>
-				</div>
-				<div class="statistic">
-					<div class="value">
-						{{ percentage_distributed }}%
-					</div>
-					<div class="label">
-						Distributed (<a target="_blank" href="/api/available_supply" target="_bank">API</a>)
-					</div>
-				</div>
+	<!-- wallet platform selection -->
+	<div ng-show="tab === 'platform'" class="row ng-hide">
+		<div class="eight wide computer sixteen wide tablet column">
+
+			<br style="clear:both"/>
+
+			<div class="ui orange below label">
+				Select a platform
 			</div>
 
-			<br style="clear:both;"/>
+			<br style="clear:both"/><br/>
 			
-			<!-- Distributed Progress Bar -->
-			<div class="ui green progress" id="distributed_perc">
-				<div class="bar"></div>
+			<div class="ui buttons">
+				<a
+				ng-repeat="platform in platforms"
+				class="ui button" 
+				target="_blank" 
+				href="{{ platform.link }}">
+					<i class="icon" ng-class="platform.icon"></i>{{ platform.name }}
+				</a>
+			</div>
+		</div>
+	</div>
+
+	<!-- get free raiblocks tab -->
+	<div ng-show="tab === 'blocks'" class="row ng-hide">
+		<div class="ten wide computer sixteen wide tablet column">
+
+			<br style="clear:both"/>
+			
+			<div class="ui grid">
+
+				<!-- free rai form -->
+				<div class="sixteen wide column">
+					
+					<div class="ui blue pointing below label">
+						Please complete the form
+					</div>
+					<free-rai-form></free-rai-form>
+					<br style="clear:both;"/>
+				</div>
+
+				<br style="clear:both;"/><br/>
+				
+				<div ng-show="percentage_distributed" class="ten wide computer ten wide tablet column ng-hide">
+
+					<!-- Coin Availability -->
+					<div class="ui small statistics">
+						<div class="statistic">
+							<div class="value">
+								{{ available_supply_absolute | number }}
+							</div>
+							<div class="label">
+								Mrai
+							</div>
+						</div>
+						<div class="statistic">
+							<div class="value">
+								{{ percentage_distributed }}%
+							</div>
+							<div class="label">
+								Distributed (<a target="_blank" href="/api/available_supply" target="_bank">API</a>)
+							</div>
+						</div>
+					</div>
+
+					<br style="clear:both;"/>
+					
+					<!-- Distributed Progress Bar -->
+					<div class="ui large active green progress" id="distributed_perc">
+						<div class="bar"></div>
+					</div>
+				</div>
 			</div>
 		</div>
 	</div>

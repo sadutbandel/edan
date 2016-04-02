@@ -24,9 +24,7 @@ module.exports = {
 				}
 			});
 		} else {
-			var message = 'No account balance to recapture';
-			console.log(TimestampService.utc() + ' ' + message);
-			callback(null, { response: message });
+			callback(null, { response: 'No account balance to recapture' });
 		}
  	}
 };

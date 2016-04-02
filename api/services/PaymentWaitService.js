@@ -17,8 +17,7 @@ module.exports = {
 			action: 'payment_wait',
 			account: account,
 			amount: '100000000000000000000000000000000',
-			timeout: '120000' // 2-min timeout for production
-			//timeout: '10000' // 10 seconds timeout for testing
+			timeout: '120000' // 2-min timeout
 		};
 		
 		RpcService.callRpc(this.payload, function(err, resp) {

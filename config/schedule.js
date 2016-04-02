@@ -1,5 +1,5 @@
 /**
- * Created by jaumard on 27/02/2015.
+ * Schedule tasks like a Crontab
  */
 module.exports.schedule = {
     sailsInContext: true,
@@ -7,10 +7,7 @@ module.exports.schedule = {
         firstTask : {
         cron : "* * * * *",
         task : function (context, sails) {
-
-            //console.log('Task running');
-            WowDick.removeOldRecords();
-
+            //WowDick.cleanupOldRecords();
         },
         context : {}
         }

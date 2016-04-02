@@ -1,44 +1,56 @@
-<!-- title -->
-<div class="sixteen wide column">
-	<h1>Explore Blocks</h1><br/>
-</div>
+<div class="ui centered grid container">
 
-<!-- hash search -->
-<div ng-show="!submitted" class="ui form field hash_search twelve wide computer sixteen wide tablet centered column ng-hide">
-	<textarea ng-model="hash" placeholder="Enter a hash number" rows="2" autocomplete="off"></textarea>
-</div>
+	<!-- title -->
+	<div class="row mobile only">
+		<div class="fourteen wide computer sixteen wide tablet column">
+			<h1>Explore Blocks</h1>
+		</div>
+	</div>
 
-<!-- hash explorer submission -->
-<div ng-show="!submitted" class="twelve wide computer sixteen wide tablet centered column ng-hide">
-	<button
-	ng-disabled="button.disabled == true"
-	ng-class="button.class"
-	class="ui fluid button"
-	ng-click="explore()">
-		<i ng-class="button.icon" class="icon"></i>&nbsp;{{ button.title }}
-	</button>
-</div>
+	<!-- hash search -->
+	<div ng-show="!submitted" class="row ng-hide">
+		<div class="ui form field hash_search ten wide computer sixteen wide tablet centered column">
+			<textarea ng-model="hash" placeholder="Enter a hash number" rows="2" autocomplete="off"></textarea>
+		</div>
+	</div>
 
-<!-- new search button -->
-<div ng-show="submitted" class="twelve wide computer sixteen wide tablet centered column ng-hide">
-	<button
-	class="ui green button"
-	ng-click="newSearch()">
-		<i class="search icon"></i>New Search
-	</button>
-</div>
+	<!-- hash explorer submission -->
+	<div ng-show="!submitted" class="row ng-hide">
+		<div class="ten wide computer sixteen wide tablet centered column">
+			<button
+			ng-disabled="button.disabled == true"
+			ng-class="button.class"
+			class="ui fluid button"
+			ng-click="explore()">
+				<i ng-class="button.icon" class="icon"></i>&nbsp;{{ button.title }}
+			</button>
+		</div>
+	</div>
 
-<!-- response -->
-<div ng-show="submitted" class="twelve wide computer sixteen wide tablet centered column ng-hide">
-	<br/>
-	<div class="ui piled segment">
-		<h4 class="ui header">Exploring: {{ hash }}</h4>
-		<div class="ui relaxed divided list">
-			<div class="item" ng-repeat="(key, obj) in response track by $index">
-				<i ng-class="obj.icon" class="large middle aligned icon"></i>
-				<div class="content">
-					<span class="header capitalize">{{ key }}</span>
-					<div class="description break-word">{{ obj.value }}</div>
+	<!-- new search button -->
+	<div ng-show="submitted" class="row ng-hide">
+		<div class="twelve wide computer sixteen wide tablet centered column">
+			<button
+			class="ui green button"
+			ng-click="newSearch()">
+				<i class="search icon"></i>New Search
+			</button>
+		</div>
+	</div>
+
+	<!-- response -->
+	<div ng-show="submitted" class="row ng-hide">
+		<div class="twelve wide computer sixteen wide tablet centered column">
+			<div class="ui piled segment">
+				<h4 class="ui header">Exploring: <span class="word-wrap">{{ hash }}</span></h4>
+				<div class="ui relaxed divided list">
+					<div class="item" ng-repeat="(key, obj) in response track by $index">
+						<i ng-class="obj.icon" class="large middle aligned icon"></i>
+						<div class="content">
+							<span class="header capitalize">{{ key }}</span>
+							<div class="description break-word">{{ obj.value }}</div>
+						</div>
+					</div>
 				</div>
 			</div>
 		</div>

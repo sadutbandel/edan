@@ -1,3 +1,4 @@
+
 /**
  * DemoController
  *
@@ -17,19 +18,13 @@ module.exports = {
 
 		// send rai to account
 		FreeRaiService.send(this.parameters, function(err, resp) {
-
-			console.log(TimestampService.utc() + ' sending demo payment...');
-
+			
 			if(!err) {
-
-				console.log(TimestampService.utc() + ' --- ');
-				console.log(resp);
-				res.send(resp);
+				console.log(TimestampService.utc() + ' [DemoController.js] (!err) sending free rai... ' + JSON.stringify(resp));
+				res.send(resp); // demo payment made!
 
 			} else {
-
-				console.log(TimestampService.utc() + ' --- ');
-				console.log(err);
+				console.log(TimestampService.utc() + ' [DemoController.js] (err) sending free rai... ' + JSON.stringify(err));
 				res.send(err); // demo payment not made...
 			}
 		});

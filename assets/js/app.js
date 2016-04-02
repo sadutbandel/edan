@@ -24,9 +24,9 @@
 			templateUrl : 'templates/start.html',
 			controller  : 'startCtrl'
 		})
-		.when('/block', {
-			templateUrl : 'templates/block.html',
-			controller  : 'blockCtrl'
+		.when('/process', {
+			templateUrl : 'templates/process.html',
+			controller  : 'processCtrl'
 		})
 	})
 
@@ -41,7 +41,7 @@
 		$rootScope.recaptchaKey = '6LcPNAsTAAAAANCpxZY3SMikIjg5a0T9XTnjM-v4';
 		$rootScope.faucetNumber = 'xrb_35jjmmmh81kydepzeuf9oec8hzkay7msr6yxagzxpcht7thwa5bus5tomgz9';
 		$rootScope.rb_version = '7.4.3';
-		$rootScope.total_faucet = 340282366;
+		$rootScope.total_faucet = 340282366; // used for visual display of distribution # on get started
 	})
 
 	.directive('freeRaiForm', function() {
@@ -69,7 +69,7 @@
 				};
 
 		  		// define the different button states
-		  		button = {
+		  		var button = {
 
 		  			default: {
 		  				disabled: false,
@@ -110,6 +110,20 @@
 		  				disabled: true,
 		  				icon: 'thumbs down',
 		  				title: 'RaiBlocks valuable',
+		  				class: 'red'
+		  			},
+
+		  			wait: {
+		  				disabled: true,
+		  				icon: 'warning sign',
+		  				title: 'Please try again',
+		  				class: 'yellow'
+		  			},
+
+		  			faucetoff: {
+		  				disabled: true,
+		  				icon: 'warning sign',
+		  				title: 'Faucet is off',
 		  				class: 'red'
 		  			},
 
@@ -162,12 +176,12 @@
 
 						$scope.button = button.claiming;
 
-						payload = {
+						this.payload = {
 							account: $scope.account,
 							response: $scope.response
 						};
 						
-						$http.post('/freerai', payload).success(function(data) {
+						$http.post('/freerai', this.payload).success(function(data) {
 
 							$timeout(function() {
 
@@ -178,7 +192,6 @@
 
 									// if premature, display required wait-time
 									if(data.message === 'premature') {
-										console.log(data.wait);
 										$scope.button = button.premature(data.wait);
 									} else {
 										$scope.button = button[data.message];
@@ -230,6 +243,7 @@
 			$scope.available_supply_absolute = resData;
 			var percentage_distributed = resData / $rootScope.total_faucet * 100;
 			$scope.percentage_distributed = $filter('number')(percentage_distributed, 3);
+
 			$scope.$apply();
 			$('#distributed_perc').progress({
 				showActivity: false,
@@ -250,7 +264,12 @@
 			link: githubLink + 'Darwin.dmg'
 		},
 		{
-			name: 'Windows',
+			name: 'Win32',
+			icon: 'windows',
+			link: githubLink + 'win32.exe'
+		},
+		{
+			name: 'Win64',
 			icon: 'windows',
 			link: githubLink + 'win64.exe'
 		},
@@ -263,40 +282,38 @@
 	})
 
 	// block chain page
-	.controller('blockCtrl', ['$rootScope', '$scope', '$http', '$timeout', function($http, $rootScope, $scope, $timeout) {
+	.controller('processCtrl', function($rootScope, $scope, $http, $timeout) {
 
 		// define the different button states
-		button = {
+		var button = {
 
 			default: {
 				disabled: false,
-				icon: 'fa-plus-circle',
+				icon: 'plus',
 				title: 'Process Block Chain',
-				class: 'btn-primary'
+				class: 'blue'
 			},
 
 			processing: {
 				disabled: true,
-				icon: 'fa-spin fa-spinner',
+				icon: 'loading spinner',
 				title: 'Processing Block Chain',
-				class: 'btn-default'
+				class: 'grey'
 			},
 
 			processed: {
 				disabled: true,
-				icon: 'fa-thumbs-up',
+				icon: 'thumbs up',
 				title: 'Block Chain Processed',
-				class: 'btn-success'
+				class: 'green'
 			},
 
 			empty_block: {
 				disabled: true,
-				icon: 'fa-thumbs-down',
+				icon: 'thumbs down',
 				title: 'Block Chain Empty',
-				class: 'btn-danger'
-			},
-
-			state
+				class: 'red'
+			}
 		};
 
 		$scope.button = button.default;
@@ -304,7 +321,7 @@
 		// ensure the block chain entered is not null, undefined, or empty.
 		$scope.validate = function(a) {
 
-			if(a === undefined || a === null || a === '') {
+			if(a === undefined || a === null || a === '' || a == '' || typeof a == 'undefined') {
 				return false;
 			} else {
 				return true;
@@ -314,8 +331,8 @@
 		// submit block chain
 		$scope.submit = function() {
 
-			// if the block chain passes validation...
-			if($scope.validate($scope.blockChain)) {
+			// if the block chain doesn't pass validation...
+			if(!$scope.validate($scope.blockChain)) {
 
 				// change the button
 				$scope.button = button.empty_block;
@@ -324,19 +341,18 @@
 				}, 3000);
 			}
 
+			// if the block chain passes validation...
 			else {
 
 				$scope.button = button.processing;
 
 				var blockStr = JSON.stringify($scope.blockChain);
 
-				payload = { 
+				this.payload = { 
 					block: blockStr.substring(1, blockStr.length - 1)
 				}
 
-				$http.post('/api/processBlockChain', payload)
-
-				.success(function(data, status, headers, config) {
+				$http.post('/api/processBlockChain', this.payload).success(function(data, status, headers, config) {
 
 					$scope.button = button.processed;
 
@@ -347,6 +363,6 @@
 			}
 
 		}
-	}])
+	})
 
 })();

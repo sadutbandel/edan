@@ -11,10 +11,10 @@
 
 module.exports.bootstrap = function(cb) {
 
-   // allows us to retrieve the client IP
+   // allows us to retrieve the remote-client IP and not localhost
    sails.hooks.http.app.set('trust proxy', true);
 
-   // I need to resolve an issue with minification before I can use the built-in prod/env flag
+   // payment wallet is different for dev and prod
    // dev env
    if(sails.config.port === 1337) {
       sails.config.wallet = Globals.paymentWallets.development;
@@ -24,16 +24,14 @@ module.exports.bootstrap = function(cb) {
       sails.config.wallet = Globals.paymentWallets.production;
    }
 
+   // payment_init rpc
    PaymentInitService.init(function(err, resp) {
-      console.log(TimestampService.utc() + ' Payment_init');
       if(!err) {
-         console.log(TimestampService.utc() + ' ' + JSON.stringify(resp));
+         //console.log(TimestampService.utc() + ' [Bootstrap.js] (!err) RPC payment_init ' + JSON.stringify(resp));
       } else {
-         console.log(TimestampService.utc() + ' ' + JSON.stringify(err));
+         console.log(TimestampService.utc() + ' [Bootstrap.js] (err) RPC payment_init ' + JSON.stringify(err));
       }
    });
-
-   //sails.hooks.http.app.set('trust proxy', true);
    
    // It's very important to trigger this callback method when you are finished
    // with the bootstrap!  (otherwise your server will never lift, since it's waiting on the bootstrap)

@@ -9,12 +9,12 @@ module.exports = {
 	
 	append: function (req, res) {
 
-		// only create if it doesn't exist
+		// create a new session timer if it does not exist
 		if(!req.session.started) {
-			console.log('Setting new-session timer');
+			console.log(TimestampService.utc() + ' ' + req.headers['x-forwarded-for'] + ' ' + req.sessionID + ' [SessionController.js] Creating new-session timer');
 			req.session.started = TimestampService.unix();
 		} else {
-			console.log('New-session timer already set');
+			console.log(TimestampService.utc() + ' ' + req.headers['x-forwarded-for'] + ' ' + req.sessionID + ' [SessionController.js] Recycling new-session timer');
 		}
 
 		// return the app view

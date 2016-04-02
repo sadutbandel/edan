@@ -1,0 +1,25 @@
+<!-- title -->
+<div class="fourteen wide computer sixteen wide tablet column">
+	<h1>Process Block-Chain</h1><br/>
+</div>
+
+<div class="sixteen wide column">
+	<div class="ui">
+		<!-- process block chain form -->
+		<form>
+			<!-- block chain -->
+			<div class="ui form field account_textarea">
+				<textarea ng-model="blockChain" rows="2" autocomplete="off"></textarea>
+			</div>
+
+			<button
+			ng-disabled="button.disabled == true"
+			ng-class="button.class"
+			ng-click="submit()"
+			class="ui fluid button"
+			type="submit">
+				<i ng-class="button.icon" class="icon"></i>&nbsp;{{ button.title }}
+			</button>
+		</form>
+	</div>
+</div>

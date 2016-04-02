@@ -105,14 +105,22 @@
 			io.socket.post('/paymentFinish', { account: account });
 		}
 
-		$scope.initialize = function() {
+		$scope.initialize = function(bool) {
 
-			$scope.initialized = true; // triggers showing of demo itself. only reset on refresh or demo "quit"
-			$scope.payment_account = undefined; // no payment account by default
-			$scope.paid = false; // not paid by default
-			$scope.paymentBegin().then(function() {
-				$scope.paymentWait();
-			});
+			// start demo
+			if(bool) {
+				$scope.initialized = true; // triggers showing of demo itself. only reset on refresh or demo "quit"
+				$scope.payment_account = undefined; // no payment account by default
+				$scope.paid = false; // not paid by default
+				$scope.paymentBegin().then(function() {
+					$scope.paymentWait();
+				});
+			} 
+			// read again
+			else {
+				$scope.initialized = false;
+				$scope.paid = false;
+			}
 		}
 	});
 

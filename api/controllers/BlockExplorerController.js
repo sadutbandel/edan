@@ -9,21 +9,15 @@ module.exports = {
 
 	create: function(req, res) {
 
-		console.log(TimestampService.utc() + ' retrieving block ' + req.body.hash);
-
 		RetrieveBlockService.init(req.body.hash, function(err, resp) {
 
-			console.log(TimestampService.utc() + ' retrieve block responded');
-
 			if(!err) {
-				console.log(TimestampService.utc() + ' retrieve block success');
+				console.log(TimestampService.utc() + ' [BlockExplorerController.js] (!err) retrieving block... ' + JSON.stringify(resp));
 				res.send(resp);
 			} else {
-				console.log(TimestampService.utc() + ' retrieve block error');
-				console.log(err);
+				console.log(TimestampService.utc() + ' [BlockExplorerController.js] (err) retrieving block... ' + JSON.stringify(err));
 				res.send(err);
 			}
 		});
-	}
-	
+	}	
 };
