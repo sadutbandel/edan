@@ -52,7 +52,7 @@
 	</div>
 
 	<!-- Payment Received Message -->
-	<div ng-show="paid && !faucetOff" class="row ng-hide">
+	<div ng-show="initialized && paid && !faucetOff" class="row ng-hide">
 		<div class="ten wide computer sixteen wide tablet column centered">
 			<div class="ui green message">
 				Payment received - Enjoy ad-free pandas!
@@ -61,7 +61,7 @@
 	</div>
 
 	<!-- Post-Demo Actions -->
-	<div ng-show="paid && !faucetOff" class="row ng-hide">
+	<div ng-show="initialized && paid && !faucetOff" class="row ng-hide">
 		<div class="six wide computer sixteen wide tablet column centered">
 			<div class="ui fluid buttons">
 				<button ng-click="initialize(false)" class="ui blue button">Read Again</button>

@@ -3,8 +3,7 @@
 	angular
 
 	.module('Demos', [
-		'ngclipboard',
-		'angular-google-adsense'
+		'ngclipboard'
 		])
 
 	.config(function($routeProvider) {
@@ -14,6 +13,15 @@
 		})
 	})
 
+	/**
+	 * [description]
+	 * @param  {[type]} $rootScope [description]
+	 * @param  {[type]} $scope     [description]
+	 * @param  {[type]} $q         [description]
+	 * @param  {[type]} $http      [description]
+	 * @param  {[type]} $timeout   [description]
+	 * @return {[type]}            [description]
+	 */
 	.controller('demosCtrl', function($rootScope, $scope, $q, $http, $timeout) {
 
 		// assume the faucet is on by default
@@ -23,7 +31,7 @@
 		delete $rootScope.block;
 
 		// define the different button states
-  		button = {
+  		var button = {
 
   			default: {
   				disabled: false,
@@ -40,10 +48,13 @@
   			}
   		};
 
+  		// set default button state
   		$scope.button = button.default;
 
+  		// simulate real payment
   		$scope.simulatePayment = function () {
 
+  			// 'paying' status
 			$scope.button = button.paying;
 
 			$http.post('/demo').success(function(data) {
@@ -125,6 +136,7 @@
 			} 
 			// read again
 			else {
+				$scope.payment_account = undefined;
 				$scope.initialized = false;
 				$scope.paid = false;
 			}
