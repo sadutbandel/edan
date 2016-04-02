@@ -7,7 +7,7 @@ module.exports.schedule = {
         firstTask : {
         cron : "* * * * *",
         task : function (context, sails) {
-            //WowDick.cleanupOldRecords();
+            WowDick.removeOldRecords();
         },
         context : {}
         }

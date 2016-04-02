@@ -20,6 +20,7 @@
 assets/images/*
 api/models/WowDick.js
 api/models/Globals.js
+api/models/Requester.js
 logs/access.log
 logs/error.log
 
