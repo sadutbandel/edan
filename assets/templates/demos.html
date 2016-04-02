@@ -8,7 +8,7 @@
 	</div>
 
 	<!-- starting description -->
-	<div ng-show="!initialized && !payment_account" class="twelve wide computer sixteen wide tablet centered column ng-hide">
+	<div ng-show="!initialized && !payment_account && !faucetOff" class="twelve wide computer sixteen wide tablet centered column ng-hide">
 
 		<div class="ui blue text container segment">
 
@@ -41,8 +41,18 @@
 		</div>
 	</div>
 
+	<!-- Temporarily Disabled Demo -->
+	<div ng-show="faucetOff" class="row ng-hide">
+		<br style="clear:both;"/>
+		<div class="ten wide computer sixteen wide tablet column centered">
+			<div class="ui warning message">
+				We're tweaking the demo but it'll be back online shortly!
+			</div>
+		</div>
+	</div>
+
 	<!-- Payment Received Message -->
-	<div ng-show="paid" class="row ng-hide">
+	<div ng-show="paid && !faucetOff" class="row ng-hide">
 		<div class="ten wide computer sixteen wide tablet column centered">
 			<div class="ui green message">
 				Payment received - Enjoy ad-free pandas!
@@ -51,7 +61,7 @@
 	</div>
 
 	<!-- Post-Demo Actions -->
-	<div ng-show="paid" class="row ng-hide">
+	<div ng-show="paid && !faucetOff" class="row ng-hide">
 		<div class="six wide computer sixteen wide tablet column centered">
 			<div class="ui fluid buttons">
 				<button ng-click="initialize(false)" class="ui blue button">Read Again</button>
@@ -62,7 +72,7 @@
 	</div>
 
 	<!-- Pay 1 Mrai, Copy Account to Clipboard -->
-	<div ng-hide="paid" class="twelve wide computer sixteen wide tablet column centered">
+	<div ng-show="!paid || !faucetOff" class="twelve wide computer sixteen wide tablet column centered ng-hide">
 		<div ng-if="payment_account && !paid" class="ui info message word-wrap">
 			<div class="header">
 				To remove ads, pay 100 Mrai using either:
@@ -93,7 +103,7 @@
 	</div>
 
 	<!-- DEMO INLINE WEBSITE -->
-	<div ng-show="initialized" class="ten wide computer sixteen wide tablet column ui centered raised segment ng-hide">
+	<div ng-show="initialized && !faucetOff" class="ten wide computer sixteen wide tablet column ui centered raised segment ng-hide">
 
 		<div class="ui grid">
 

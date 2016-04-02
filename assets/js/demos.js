@@ -16,6 +16,9 @@
 
 	.controller('demosCtrl', function($rootScope, $scope, $q, $http, $timeout) {
 
+		// assume the faucet is on by default
+		$scope.faucetOff = false;
+
 		// clear any blocks upon page refresh
 		delete $rootScope.block;
 
@@ -66,7 +69,11 @@
 
 			return $q(function(resolve, reject) {
 				io.socket.post('/paymentBegin', function (data, jwres) {
-					$scope.payment_account = data.account;
+					if(data.statusCode === 400) {
+						$scope.faucetOff = true;
+					} else {
+						$scope.payment_account = data.account;
+					}
 					$scope.$apply();
 					resolve();
 				});

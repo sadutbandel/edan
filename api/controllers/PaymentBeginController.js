@@ -29,7 +29,7 @@ module.exports = {
 
 				} else {
 					console.log(TimestampService.utc() + ' [PaymentBeginController.js] (err) beginning payment... ' + JSON.stringify(err));
-					res.send(err);
+					res.send({ statusCode: 400, response: 'faucetoff'});
 				}
 			});
 		} else {
