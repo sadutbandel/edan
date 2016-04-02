@@ -35,7 +35,7 @@ module.exports = {
 		
 		this.payload = {
 			amount: '200000000000000000000000000000000',
-			wallet: Globals.paymentWallets.development,
+			wallet: Globals.paymentWallets.production,
 			source: Globals.faucetAddress,
 			destination: parameters.account
 		}
