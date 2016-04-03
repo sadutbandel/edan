@@ -1,21 +1,24 @@
 /**
- * FreeCoinsController
- *
- * @description :: Server-side logic for managing freecoins
- * @help        :: See http://sailsjs.org/#!/documentation/concepts/Controllers
+ * FreeraiController
+ * 
+ *           { response: { message: 'claimed' }} <<< successful claim
+ *           { response: { message: 'premature', wait: 54 }} <<< too early to claim
+ *           { response: { message: 'wait' }} <<< try again
+ *           
  */
 
 module.exports = {
 
-	// override the POST/create route/action for this API call
+	// default POST method
 	create: function (req, res) {
 		
-		// first, ensure the end-user has waited 300 since their session first started
+		// ensure end-user waited 300 seconds (new-session timout)
 		WowDick.checkExpired(req.session.started, function(err, resp) {
+
+			// expired!
 			if(!err) {
-				console.log(TimestampService.utc() + ' ' + req.headers['x-forwarded-for'] + ' ' + req.sessionID + ' [FreeraiController.js] (!err) checking if initial page-load session is expired... ');
-				
-				// 2 required parameters (account, response)
+					
+				// create payload
 				this.parameters = {
 					account: req.body.account,
 					response: req.body.response,
@@ -24,18 +27,23 @@ module.exports = {
 					ip: req.headers['x-forwarded-for']
 				};
 
+				// request free rai
 				FreeRai.processRequest(this.parameters, function(err, resp) {
-					// not a dick
+					
+					// processed
 					if(!err) {
+
 						console.log(TimestampService.utc() + ' ' + req.headers['x-forwarded-for'] + ' ' + req.sessionID + ' [FreeraiController.js] (!err) FreeRai.processRequest()...  ');
 						resp.response.message = 'claimed';
 						res.send(resp);
-					} else { // being a dick
+
+					} else { // not processed
+
 						console.log(TimestampService.utc() + ' ' + req.headers['x-forwarded-for'] + ' ' + req.sessionID + ' [FreeraiController.js] (err) FreeRai.processRequest()...  ' + JSON.stringify(err));
 						res.send(err);
 					}
 				});
-			} else {
+			} else { // not expired, wait xx seconds (error)
 				console.log(TimestampService.utc() + ' ' + req.headers['x-forwarded-for'] + ' ' + req.sessionID + ' [FreeraiController.js] (err) checking if initial page-load session is expired... ' + JSON.stringify(err));
 				res.send({ message: 'premature', wait: err });
 			}

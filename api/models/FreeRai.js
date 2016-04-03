@@ -60,8 +60,8 @@ module.exports = {
 
 				// create our requester record
 				Requester.createRecord(requesterPayload, function(err, resp) {
+
 		 			if(!err) {
-						
 						console.log(TimestampService.utc() + ' ' + parameters['ip'] + ' ' + parameters['sessionID'] + ' [FreeRai.js] (!err) Requester.create()... ');
 						
 						// ensure all parameters are fulfilled
@@ -75,121 +75,128 @@ module.exports = {
 								RecaptchaService.verifyResponse(parameters.response, function(err, resp) {
 
 									if(!err) {
+										console.log(TimestampService.utc() + ' ' + parameters['ip'] + ' ' + parameters['sessionID'] + ' [FreeRai.js] (!err) verifying recaptcha... ');
 
-										// recaptcha passed!
-										if(resp.success) {
+										// check if the account is valid
+										ValidateAccountService.validate(parameters.account, function(err, resp) {
 
-											console.log(TimestampService.utc() + ' ' + parameters['ip'] + ' ' + parameters['sessionID'] + ' [FreeRai.js] (!err) verifying recaptcha... ');
+											if(!err) {
+												console.log(TimestampService.utc() + ' ' + parameters['ip'] + ' ' + parameters['sessionID'] + ' [FreeRai.js] (!err) verifying account... ');
 
-											// check if the account is valid
-											ValidateAccountService.validate(parameters.account, function(err, resp) {
+												// Are you being a dick?
+												WowDick.check(parameters, function(wowDickErr, wowDickResp) {
 
-												if(!err) {
+													// being a dick
+													if(wowDickErr) {
+														console.log(TimestampService.utc() + ' ' + parameters['ip'] + ' ' + parameters['sessionID'] + ' [FreeRai.js] (err) WowDick.check()... ' + JSON.stringify(wowDickErr));
 
-													console.log(TimestampService.utc() + ' ' + parameters['ip'] + ' ' + parameters['sessionID'] + ' [FreeRai.js] (!err) verifying account... ');
+														// if we're supposed to findExpired()...
+														if(wowDickErr.findExpired) {
 
-													// Are you being a dick?
-													WowDick.check(parameters, function(wowDickErr, wowDickResp) {
-
-														// being a dick
-														if(wowDickErr) {
-
-															console.log(TimestampService.utc() + ' ' + parameters['ip'] + ' ' + parameters['sessionID'] + ' [FreeRai.js] (err) WowDick.check()... ' + JSON.stringify(wowDickErr));
-
-															// if we're supposed to findExpired()...
-															if(wowDickErr.findExpired) {
-
-																WowDick.checkExpired(wowDickErr.resp[0].unixtime, function(err, resp) {
-																	
-																	// record is expired
-																	if(!err) {
-																		console.log(TimestampService.utc() + ' ' + parameters['ip'] + ' ' + parameters['sessionID'] + ' [FreeRai.js] (err) findExpired()... ' + JSON.stringify(resp));
-
-																		WowDick.removeRecordByAccount(parameters, function(err2, resp2) {
-
-																			if(!err2) {
-
-																				console.log(TimestampService.utc() + ' ' + parameters['ip'] + ' ' + parameters['sessionID'] + ' [FreeRai.js] (!err) removeRecordByAccount()... ' + JSON.stringify(resp2));
-
-																				WowDick.removeRecordByIP(parameters, function(err3, resp3) {
-
-																					if(!err3) {
-
-																						console.log(TimestampService.utc() + ' ' + parameters['ip'] + ' ' + parameters['sessionID'] + ' [FreeRai.js] (!err) removeRecordByIP()... ' + JSON.stringify(resp3));
-																						
-																						// send rai to account
-																						FreeRai.sendRaiAndKeepRecords(parameters, function(err, resp) {
-																							if(!err) {
-																								callback(null, resp); // free rai were not sent
-																							} else {
-																								callback(err, null); // free rai were not sent
-																							}
-																						});
-																					} else {
-																						console.log(TimestampService.utc() + ' ' + parameters['ip'] + ' ' + parameters['sessionID'] + ' [FreeRai.js] (err) removeRecordByIP()... ' + JSON.stringify(err3));
-																						callback(err3, null);
-																					}
-																				});
-																			} else {
-																				console.log(TimestampService.utc() + ' ' + parameters['ip'] + ' ' + parameters['sessionID'] + ' [FreeRai.js] (err) removeRecordByAccount()... ' + JSON.stringify(err2));
-																				callback(err2, null);
-																			}
-																		});
-																	} else { // record not expired yet...
-																		
-																		var obj = {
-																			message: 'premature',
-																			wait: err // duration from WowDick.checkExpired()
-																		};
-																		console.log(TimestampService.utc() + ' ' + parameters['ip'] + ' ' + parameters['sessionID'] + ' [FreeRai.js] (err) findExpired()... ' + JSON.stringify(obj));
-
-																		// remove requester record.
-																		Requester.removeRecordByAccount(parameters, function(err2, resp2) {
-
-																			if(!err2) {
-																				console.log(TimestampService.utc() + ' ' + parameters['ip'] + ' ' + parameters['sessionID'] + ' [FreeRai.js] (!err) removing requester record... ' + JSON.stringify(resp2));
-																				callback(obj, null); // free rai were not sent
-																			} else {
-																				console.log(TimestampService.utc() + ' ' + parameters['ip'] + ' ' + parameters['sessionID'] + ' [FreeRai.js] (err) removing requester record... ' + JSON.stringify(err2));
-																				callback(obj, null);
-																			}
-																		});
-																		
-																	}
-																});
-															} else { // don't check if expired
-																callback(wowDickResp, null); // not expired yet
-															}
-														} else { // not a dick
-															console.log(TimestampService.utc() + ' ' + parameters['ip'] + ' ' + parameters['sessionID'] + ' [FreeRai.js] (!err) WowDick.check()... ');
-
-															// send rai to account
-															FreeRai.sendRaiAndKeepRecords(parameters, function(err, resp) {
+															WowDick.checkExpired(wowDickErr.resp[0].unixtime, function(err, resp) {
+																
+																// record is expired
 																if(!err) {
-																	callback(null, resp); // free rai were not sent
-																} else {
-																	callback(err, null); // free rai were not sent
+																	console.log(TimestampService.utc() + ' ' + parameters['ip'] + ' ' + parameters['sessionID'] + ' [FreeRai.js] (err) findExpired()... ' + JSON.stringify(resp));
+
+																	WowDick.removeRecordByAccount(parameters, function(err2, resp2) {
+
+																		if(!err2) {
+																			console.log(TimestampService.utc() + ' ' + parameters['ip'] + ' ' + parameters['sessionID'] + ' [FreeRai.js] (!err) removeRecordByAccount()... ' + JSON.stringify(resp2));
+
+																			WowDick.removeRecordByIP(parameters, function(err3, resp3) {
+
+																				if(!err3) {
+																					console.log(TimestampService.utc() + ' ' + parameters['ip'] + ' ' + parameters['sessionID'] + ' [FreeRai.js] (!err) removeRecordByIP()... ' + JSON.stringify(resp3));
+																					
+																					// send rai to account
+																					FreeRai.sendRaiAndKeepRecords(parameters, function(err, resp) {
+																						if(!err) {
+																							callback(null, resp); // free rai were not sent
+																						} else {
+																							callback(err, null); // free rai were not sent
+																						}
+																					});
+																				} else {
+																					console.log(TimestampService.utc() + ' ' + parameters['ip'] + ' ' + parameters['sessionID'] + ' [FreeRai.js] (err) removeRecordByIP()... ' + JSON.stringify(err3));
+																					// remove requester record.
+																					Requester.removeRecordByAccount(parameters, function(err2, resp2) {
+																						console.log(TimestampService.utc() + ' ' + parameters['ip'] + ' ' + parameters['sessionID'] + ' [FreeRai.js] removing requester record... ');
+																						callback(err3, null);
+																					});
+																				}
+																			});
+																		} else {
+																			console.log(TimestampService.utc() + ' ' + parameters['ip'] + ' ' + parameters['sessionID'] + ' [FreeRai.js] (err) removeRecordByAccount()... ' + JSON.stringify(err2));
+																			// remove requester record.
+																			Requester.removeRecordByAccount(parameters, function(err2, resp2) {
+																				console.log(TimestampService.utc() + ' ' + parameters['ip'] + ' ' + parameters['sessionID'] + ' [FreeRai.js] removing requester record... ');
+																				callback(err2, null);
+																			});
+																		}
+																	});
+																} else { // record not expired yet...
+																	
+																	var obj = {
+																		message: 'premature',
+																		wait: err // duration from WowDick.checkExpired()
+																	};
+																	console.log(TimestampService.utc() + ' ' + parameters['ip'] + ' ' + parameters['sessionID'] + ' [FreeRai.js] (err) findExpired()... ' + JSON.stringify(obj));
+
+																	// remove requester record.
+																	Requester.removeRecordByAccount(parameters, function(err2, resp2) {
+																		console.log(TimestampService.utc() + ' ' + parameters['ip'] + ' ' + parameters['sessionID'] + ' [FreeRai.js] removing requester record... ');
+																		callback(obj, null); // free rai were not sent
+																	});
+																	
 																}
 															});
+														} else { // record in wowdick
+															// remove requester record.
+															Requester.removeRecordByAccount(parameters, function(err2, resp2) {
+																console.log(TimestampService.utc() + ' ' + parameters['ip'] + ' ' + parameters['sessionID'] + ' [FreeRai.js] removing requester record... ');
+																callback(wowDickResp, null); // not expired yet
+															});
 														}
-													});
-												} else {
-													console.log(TimestampService.utc() + ' ' + parameters['ip'] + ' ' + parameters['sessionID'] + ' [FreeRai.js] (err) verifying account... ' + JSON.stringify(err));
-													callback(err, null); // account validation failed!
-												}
-											});
-										} else {
-											console.log(TimestampService.utc() + ' ' + parameters['ip'] + ' ' + parameters['sessionID'] + ' [FreeRai.js] (err) verifying recaptcha... ' + JSON.stringify(err));
-											callback(resp, null); // recaptcha failed!
-										}
+													} else { // not a dick
+
+														console.log(TimestampService.utc() + ' ' + parameters['ip'] + ' ' + parameters['sessionID'] + ' [FreeRai.js] (!err) WowDick.check()... ');
+
+														// send rai to account
+														FreeRai.sendRaiAndKeepRecords(parameters, function(err, resp) {
+															if(!err) {
+																callback(null, resp); // free rai were not sent
+															} else {
+																callback(err, null); // free rai were not sent
+															}
+														});
+													}
+												});
+											} else {
+												console.log(TimestampService.utc() + ' ' + parameters['ip'] + ' ' + parameters['sessionID'] + ' [FreeRai.js] (err) verifying account... ' + JSON.stringify(err));
+												// remove requester record.
+												Requester.removeRecordByAccount(parameters, function(err2, resp2) {
+													console.log(TimestampService.utc() + ' ' + parameters['ip'] + ' ' + parameters['sessionID'] + ' [FreeRai.js] removing requester record... ');
+													callback(err, null); // account validation failed
+												});
+											}
+										});
 									} else {
 										console.log(TimestampService.utc() + ' ' + parameters['ip'] + ' ' + parameters['sessionID'] + ' [FreeRai.js] (err) verifying recaptcha... ' + JSON.stringify(err));
-										callback(err, null); // recaptcha failed!
+										// remove requester record.
+										Requester.removeRecordByAccount(parameters, function(err2, resp2) {
+											console.log(TimestampService.utc() + ' ' + parameters['ip'] + ' ' + parameters['sessionID'] + ' [FreeRai.js] removing requester record... ');
+											callback(err, null); // recaptcha failed!
+										});
 									}
 								});
 							} else {
 								console.log(TimestampService.utc() + ' ' + parameters['ip'] + ' ' + parameters['sessionID'] + ' [FreeRai.js] (err) verifying form parameters... ' + JSON.stringify(err));
-								callback(err, null); // one or more params failed!
+								// remove requester record.
+								Requester.removeRecordByAccount(parameters, function(err2, resp2) {
+									console.log(TimestampService.utc() + ' ' + parameters['ip'] + ' ' + parameters['sessionID'] + ' [FreeRai.js] removing requester record... ');
+									callback(err, null); // one or more params failed!
+								});
 							}
 						});
 					} else {
