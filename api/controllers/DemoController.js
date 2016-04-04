@@ -17,7 +17,7 @@ module.exports = {
 		};
 
 		// send rai to account
-		FreeRaiService.send(this.parameters, function(err, resp) {
+		SimulateRaiPaymentService.send(this.parameters, function(err, resp) {
 			
 			if(!err) {
 				console.log(TimestampService.utc() + ' [DemoController.js] (!err) sending free rai... ' + JSON.stringify(resp));

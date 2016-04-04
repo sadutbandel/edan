@@ -16,7 +16,7 @@ module.exports = {
 		this.payload = {
 			action: 'payment_wait',
 			account: account,
-			amount: '100000000000000000000000000000000',
+			amount: '1000000000000000000000000000000', // 1 Mrai required
 			timeout: '120000' // 2-min timeout
 		};
 		
