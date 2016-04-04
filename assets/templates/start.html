@@ -55,24 +55,34 @@
 
 	<!-- get free raiblocks tab -->
 	<div ng-show="tab === 'blocks'" class="row ng-hide">
-		<div class="ten wide computer sixteen wide tablet column">
 
-			<br style="clear:both"/>
-			
+		<div class="ten wide computer sixteen wide tablet column">
+				
 			<div class="ui grid">
 
 				<!-- free rai form -->
 				<div class="sixteen wide column">
 					
-					<div class="ui blue pointing below label">
-						Please complete the form
+					<div ng-show="!faucetOff" class="ng-hide">
+
+						<div class="ui blue pointing below label">
+							Please complete the form
+						</div>
+						<free-rai-form></free-rai-form>
+						<br style="clear:both;"/>
 					</div>
-					<free-rai-form></free-rai-form>
-					<br style="clear:both;"/>
+
+					<!-- Faucet OFF -->
+					<div ng-show="faucetOff" class="ng-hide">
+
+						<div class="ui warning message">
+							<div class="header">
+						    	The faucet is currently off.
+						  	</div>
+						</div>
+					</div>
 				</div>
 
-				<br style="clear:both;"/><br/>
-				
 				<div ng-show="percentage_distributed" class="ten wide computer ten wide tablet column ng-hide">
 
 					<!-- Coin Availability -->

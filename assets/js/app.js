@@ -137,8 +137,10 @@
 		  			}
 		  		};
 
-		  		$scope.button = button.default;
-
+		  		//$scope.button = button.default;
+		  		$scope.button = button.faucetoff;
+		  		$scope.faucetOff = true;
+		  		
 		  		$scope.validateAccount = function() {
 		  			if($scope.account === null || $scope.account === '') {
 		  				$scope.button = button.account_error;

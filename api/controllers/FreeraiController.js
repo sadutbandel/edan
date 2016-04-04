@@ -11,8 +11,9 @@ module.exports = {
 
 	// default POST method
 	create: function (req, res) {
-		
+		res.send({ message: 'faucetoff' });
 		// ensure end-user waited 300 seconds (new-session timout)
+		/*
 		WowDick.checkExpired(req.session.started, function(err, resp) {
 
 			// expired!
@@ -48,5 +49,6 @@ module.exports = {
 				res.send({ message: 'premature', wait: err });
 			}
 		});
+		*/
 	}
 };
