@@ -18,9 +18,9 @@
 ################################################
 
 assets/images/*
-api/models/WowDick.js
 api/models/Globals.js
-api/models/Requester.js
+api/controllers/TestController.js
+api/models/Test.js
 logs/access.log
 logs/error.log
 

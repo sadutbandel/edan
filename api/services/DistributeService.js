@@ -124,12 +124,6 @@ module.exports = {
 				 */
 				var tenSecondsAgo = TimestampService.unix() - Globals.distributionTimeout;
 
-				console.log('parameters.createdID');
-				console.log(parameters.createdID);
-
-				console.log('tenSecondsAgo');
-				console.log(tenSecondsAgo);
-
 				var payload = {
 
 					'$or': [
@@ -146,7 +140,7 @@ module.exports = {
 			 			},
 			 			{ 
 			 				_id: { 
-			 					'$ne': Distribute.mongo.ObjectId(parameters.createdID)
+			 					'$ne': Distribute.mongo.objectId(parameters.createdID)
 			 				}
 			 			}
 		 			]
@@ -191,12 +185,12 @@ module.exports = {
 						});							 								
 					}
 					/**
-					 * Violations found!!!
+					 * Violations found!
 					 *
 					 * Continue with marking the status 'violation'
 					 */
 					else {
-						callback({ message: 'violation' }, null);
+						callback({ message: 'try_again', status: 'violation' }, null);
 					}
 				});
 			} 

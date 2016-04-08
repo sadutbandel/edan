@@ -113,18 +113,19 @@ module.exports = {
 							 				 * Validation & Violation Layer
 							 				 *
 							 				 * Returns true for success
-							 				 * Returns an object for failures with information as to why
+							 				 * Returns an object with 'message' containing the error reason
 							 				 */
-							 				DistributeService.process(parameters, function(err, resp) {
+							 				DistributeService.process(parameters, function(error, resp) {
 
-							 					if(!err) {
+							 					if(!error) {
 							 						callback(null, resp);
 							 					} else {
 							 						
 							 						/**
-									 				 * Violation occurred...
+									 				 * Validation fail OR Violation occurred...
 									 				 *
 									 				 * Update the 'pending' distribute record as 'violation'
+									 				 * OR as 'parameters' or 'recaptcha' or 'account'
 									 				 * Returns true for success
 									 				 * Returns an object for failures with information as to why
 									 				 */
@@ -133,12 +134,13 @@ module.exports = {
 														account: parameters.account,
 														ip: parameters.ip,
 														sessionID: parameters.sessionID,
-														status: err.message
+														status: error.status
 													};
 
 													Distribute.update({ id:results.id }, payload).exec(function (err, updated){
 														if (!err) {
-															callback(null, updated[0]);
+															// disregard the record object response 
+															callback(null, error); // use err from .process()
 														} else {
 															callback({ error: err }, null); // error Distribute.update()
 														}
