@@ -1,0 +1,29 @@
+<div class="ui centered grid container">
+
+	<!-- title -->
+	<div class="row mobile only">
+		<div class="fourteen wide computer sixteen wide tablet column">
+			<h1>Wallet</h1>
+		</div>
+	</div>
+
+	<!-- content -->
+	<div class="eight wide computer sixteen wide tablet column">
+
+		<div class="ui orange below label">
+			Select a platform
+		</div>
+
+		<br style="clear:both"/><br/>
+
+		<div class="ui buttons">
+			<a
+			ng-repeat="platform in platforms"
+			class="ui button" 
+			target="_blank" 
+			href="{{ platform.link }}">
+				<i class="icon" ng-class="platform.icon"></i>{{ platform.name }}
+			</a>
+		</div>
+	</div>
+</div>

@@ -13,15 +13,6 @@
 		})
 	})
 
-	/**
-	 * [description]
-	 * @param  {[type]} $rootScope [description]
-	 * @param  {[type]} $scope     [description]
-	 * @param  {[type]} $q         [description]
-	 * @param  {[type]} $http      [description]
-	 * @param  {[type]} $timeout   [description]
-	 * @return {[type]}            [description]
-	 */
 	.controller('demosCtrl', function($rootScope, $scope, $q, $http, $timeout) {
 
 		// assume the faucet is on by default
@@ -142,5 +133,4 @@
 			}
 		}
 	});
-
 })();

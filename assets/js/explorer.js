@@ -5,8 +5,8 @@
 	.module('Explorer', [])
 
 	.config(function($routeProvider) {
-		$routeProvider.when('/block-explorer', {
-			templateUrl : 'templates/block-explorer.html',
+		$routeProvider.when('/explorer', {
+			templateUrl : 'templates/explorer.html',
 			controller: 'explorerCtrl'
 		})
 	})

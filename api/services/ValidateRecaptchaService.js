@@ -5,7 +5,7 @@
  module.exports = {
 
  	// make sure the recaptcha response is valid with Google
- 	verifyResponse: function(response, callback) {
+ 	validate: function(response, callback) {
 
  		var 
  		https = require('https'),
@@ -16,6 +16,7 @@
  			path : '/recaptcha/api/siteverify?secret=' + secret + '&response=' + response,
  			method : 'GET'
  		},
+
  		req = https.request(options, function(res) {
 
 		    // response data
@@ -34,7 +35,7 @@
 		    });
 		});
 
-		//perform curl and end
+		//perform curl
 		req.end();
 
 		// watch for errors

@@ -68,7 +68,7 @@
         <a href="/#/" class="item header">RaiBlocks.net</a>
         <a href="/#/start" ng-class="{'active': path === 'start'}" class="item">Get Started</a>
         <a href="/#/demos" ng-class="{'active': path === 'demos'}" class="item">See Demos</a>
-        <a href="/#/block-explorer" ng-class="{'active': path === 'block-explorer'}" class="item">Explore Blocks</a>
+        <a href="/#/explorer" ng-class="{'active': path === 'explorer'}" class="item">Explore Blocks</a>
         <a target="_blank" href="https://github.com/clemahieu/raiblocks/wiki" class="item">
             <i class="github icon"></i>Wiki
         </a>
@@ -88,7 +88,7 @@
                 <a href="/#/" class="item mobile header">RaiBlocks.net</a>
                 <a href="/#/start" ng-class="{'active': path === 'start'}" class="item">Get Started</a>
                 <a href="/#/demos" ng-class="{'active': path === 'demos'}" class="item">See Demos</a>
-                <a href="/#/block-explorer" ng-class="{'active': path === 'block-explorer'}" class="item">Explore Blocks</a>
+                <a href="/#/explorer" ng-class="{'active': path === 'explorer'}" class="item">Explore Blocks</a>
                 <a target="_blank" href="https://github.com/clemahieu/raiblocks/wiki" class="item">
                     Wiki
                 </a>
@@ -118,10 +118,16 @@
                         <a class="item" href="/#/start" ng-class="{'active': path === 'start'}">
                             <i class="play icon"></i>Get Started
                         </a>
-                        <a class="item" href="/#/demos" ng-class="{'active': path === 'demos'}">
-                            <i class="file outline icon"></i>See Demos
+                        <a class="item" href="/#/wallet" ng-class="{'active': path === 'wallet'}">
+                            <i class="download icon"></i>Download Wallet
                         </a>
-                        <a class="item" href="/#/block-explorer" ng-class="{'active': path === 'block-explorer'}">
+                        <a class="item" href="/#/distribution" ng-class="{'active': path === 'distribution'}">
+                            <i class="theme icon"></i>Distribution Faucet
+                        </a>
+                        <a class="item" href="/#/demos" ng-class="{'active': path === 'demos'}">
+                            <i class="eye icon"></i>See Demos
+                        </a>
+                        <a class="item" href="/#/explorer" ng-class="{'active': path === 'explorer'}">
                             <i class="cube icon"></i>Explore Blocks
                         </a>
                     </div>
@@ -173,12 +179,17 @@
     <script src="/js/dependencies/07.ngclipboard.min.js"></script>
     <script src="/js/dependencies/08.angular-google-adsense.min.js"></script>
     <script src="/js/dependencies/angular-route-helper.1.0.js"></script>
+    <script src="/js/dependencies/angular-time.1.3.min.js"></script>
     <script src="/js/dependencies/sails.io.js"></script>
     <script src="/js/app.js"></script>
     <script src="/js/bootstrap.js"></script>
+    <script src="/js/chain.js"></script>
     <script src="/js/demos.js"></script>
+    <script src="/js/distribution.js"></script>
     <script src="/js/explorer.js"></script>
     <script src="/js/semantic.min.js"></script>
+    <script src="/js/start.js"></script>
+    <script src="/js/wallet.js"></script>
     <script src="/js/components/accordion.min.js"></script>
     <script src="/js/components/api.min.js"></script>
     <script src="/js/components/checkbox.min.js"></script>

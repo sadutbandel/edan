@@ -1,0 +1,106 @@
+<div class="ui centered grid container">
+
+	<!-- title -->
+	<div class="row mobile only">
+		<div class="fourteen wide computer sixteen wide tablet column">
+			<h1>Distribution</h1>
+		</div>
+	</div>
+
+	<div class="ten wide computer sixteen wide tablet column">	
+		<div class="ui grid">
+
+			<!-- free rai form -->
+			<div class="sixteen wide column">
+				
+				<div ng-show="!faucetOff" class="ng-hide">
+
+					<div ng-show="freeRaiVisible" class="ng-hide ui blue pointing below label">
+						Please complete the form
+					</div>
+					
+					<form>
+						<div ng-show="freeRaiVisible" class="ng-hide">
+							<!-- account id -->
+							<div class="ui form field account_textarea">
+								<textarea ng-model="account" placeholder="Account #" rows="2" autocomplete="off"></textarea>
+							</div>
+
+							<br style="clear:both"/>
+
+							<!-- recaptcha -->
+							<div
+							vc-recaptcha
+							theme="'light'"
+							key="recaptchaKey"
+							on-create="setWidgetId(widgetId)"
+							on-success="setResponse(response)"></div>
+
+							<br style="clear:both"/>
+						</div>
+
+						<!-- submission button -->
+						<button
+						ng-disabled="button.disabled == true"
+						ng-class="button.class"
+						ng-click="submit()"
+						class="ui button"
+						type="submit">
+							<i ng-class="button.icon" class="icon"></i>&nbsp;{{ button.title }}
+						</button>
+						<button 
+						class="ng-hide ui teal button"
+						ng-show="block"
+						ng-click="exploreBlock()">
+							Explore Last Block
+						</button>
+					</form>
+					<br style="clear:both;"/>
+				</div>
+
+				<!-- Faucet OFF -->
+				<div ng-show="faucetOff" class="ng-hide">
+
+					<div class="ui icon teal message">
+						<i class="theme icon"></i>
+						<div class="content">
+							<div class="header">
+								An improved faucet is coming soon!
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<div ng-show="percentage_distributed" class="twelve wide computer ten wide tablet column ng-hide">
+
+				<!-- Coin Availability -->
+				<div class="ui small statistics">
+					<div class="statistic">
+						<div class="value">
+							{{ available_supply_absolute | number }}
+						</div>
+						<div class="label">
+							Mrai
+						</div>
+					</div>
+					<div class="statistic">
+						<div class="value">
+							{{ percentage_distributed }}%
+						</div>
+						<div class="label">
+							Distributed (<a target="_blank" href="/api/available_supply" target="_bank">API</a>)
+						</div>
+					</div>
+				</div>
+
+				<br style="clear:both;"/>
+				
+				<!-- Distributed Progress Bar -->
+				<div class="ui large active green progress" id="distributed_perc">
+					<div class="bar"></div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
