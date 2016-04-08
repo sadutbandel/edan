@@ -69,7 +69,6 @@ module.exports = {
 						
 						if(Object.keys(results).length === 0) {
 							callback(null, true);
-							console.log('DistributeService.js - No results for collection.aggregate()');
 						}
 						/**
 						 * Matches found. (bad) HALT request!
@@ -81,18 +80,12 @@ module.exports = {
 						 */
 						else {
 							callback(true, null);
-							console.log('DistributeService.js - Results for collection.aggregate()');
-							console.log(JSON.stringify(results));
 						}
 					} else {
-						console.log('DistributeService.js - Problem with collection.aggregate()');
-						console.log(err);
 						callback({ error: err }, null);
 					}
 				});
 			} else {
-				console.log('DistributeService.js - Problem with Distribute.native()');
-				console.log(err);
 				callback({ error: err }, null);
 			}
 		});
@@ -146,8 +139,6 @@ module.exports = {
 		 			]
 				};
 
-				console.log(payload);
-
 				DistributeService.violators(payload, function(err, resp) {
 
 					/**
@@ -179,7 +170,6 @@ module.exports = {
 								};
 								callback(null, success);
 							} else {
-								console.log(err);
 								callback({ message: err }, null); // there was a problem updating 'accepted' record?
 							}
 						});							 								
@@ -196,7 +186,6 @@ module.exports = {
 			} 
 
 			else {
-				console.log(err);
 				callback({ message: err }, null); // message can only equal 'parameters' or 'recaptcha' or 'account'
 			}
 		});

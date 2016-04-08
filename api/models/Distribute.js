@@ -180,8 +180,6 @@ module.exports = {
 			 * is brand new, opened a private-browsing (incognito) window, or cleared cache.
 			 */	
 			else {
-
-				console.log(TimestampService.utc() + ' ' + req.headers['x-forwarded-for'] + ' ' + req.sessionID + ' [FreeraiController.js] Distribute.checkExpired() (err) ... session timer not expired ... ' + JSON.stringify(err));
 				res.send({ message: 'wait', wait: err });
 			}
 		});

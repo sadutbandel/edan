@@ -29,13 +29,11 @@ module.exports = {
 			
 			// processed
 			if(!err) {
-
-				console.log(TimestampService.utc() + ' ' + req.headers['x-forwarded-for'] + ' ' + req.sessionID + ' [DistributeController.js] (!err) Distribute.request()... ' + JSON.stringify(resp));
+				console.log(TimestampService.utc() + ' ' + req.headers['x-forwarded-for'] + ' ' + req.sessionID + ' (success) ' + JSON.stringify(resp));
 				res.send(resp);
 
 			} else { // not processed
-
-				console.log(TimestampService.utc() + ' ' + req.headers['x-forwarded-for'] + ' ' + req.sessionID + ' [DistributeController.js] (err) Distribute.request()... ' + JSON.stringify(err));
+				console.log(TimestampService.utc() + ' ' + req.headers['x-forwarded-for'] + ' ' + req.sessionID + ' (errors!) ' + JSON.stringify(err));
 				res.send(err);
 			}
 		});

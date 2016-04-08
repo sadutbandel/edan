@@ -12,32 +12,42 @@
 
 			<!-- free rai form -->
 			<div class="sixteen wide column">
-				
-				<div ng-show="!faucetOff" class="ng-hide">
+					
+				<div ng-show="!freeRaiVisible" class="ng-hide ui icon green message">
+					<i class="thumbs up icon"></i>
+					<div class="content">
+						<div class="header">
+							{{ wait_hdr }}
+						</div>
+						<p>
+							{{ wait_msg }}
+						</p>
+					</div>
+				</div>
 
-					<div ng-show="freeRaiVisible" class="ng-hide ui blue pointing below label">
+				<div ng-show="!faucetOff && freeRaiVisible" class="ng-hide">
+
+					<div class="ui blue pointing below label">
 						Please complete the form
 					</div>
 					
 					<form>
-						<div ng-show="freeRaiVisible" class="ng-hide">
-							<!-- account id -->
-							<div class="ui form field account_textarea">
-								<textarea ng-model="account" placeholder="Account #" rows="2" autocomplete="off"></textarea>
-							</div>
-
-							<br style="clear:both"/>
-
-							<!-- recaptcha -->
-							<div
-							vc-recaptcha
-							theme="'light'"
-							key="recaptchaKey"
-							on-create="setWidgetId(widgetId)"
-							on-success="setResponse(response)"></div>
-
-							<br style="clear:both"/>
+						<!-- account id -->
+						<div class="ui form field account_textarea">
+							<textarea ng-model="account" placeholder="Account #" rows="2" autocomplete="off"></textarea>
 						</div>
+
+						<br style="clear:both"/>
+
+						<!-- recaptcha -->
+						<div
+						vc-recaptcha
+						theme="'light'"
+						key="recaptchaKey"
+						on-create="setWidgetId(widgetId)"
+						on-success="setResponse(response)"></div>
+
+						<br style="clear:both"/>
 
 						<!-- submission button -->
 						<button

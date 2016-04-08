@@ -33,7 +33,6 @@
 		});
 
 		$scope.init = function () {
-			$scope.account = null;
 			$scope.response = null;
 			$scope.widgetId = null;
 		}
@@ -98,51 +97,44 @@
   				icon: 'warning sign',
   				title: 'Try again',
   				class: 'orange'
-  			},
-
-  			wait: function(until) {
-
-  				// define mutual properties
-  				var obj = {
-  					disabled: true,
-  					icon: 'warning sign',
-  					class: 'orange'
-  				};
-
-  				// if a unix timestamp was passed...
-				if(until) {
-
-					// every second, re-calculate the time to wait
-					var waitUntilPromise = $interval(function() {
-
-						var untilThen = until - Math.floor(Date.now() / 1000);
-
-						// if the wait timer has expired, show the form again
-						if(untilThen <= 0) {
-							$interval.cancel(waitUntilPromise);
-							$scope.freeRaiVisible = true;
-							$scope.button = button.default;
-
-						} else {
-	  						obj.title = 'Please wait ' + untilThen + ' seconds';
-	  						$scope.button = obj;
-								$scope.freeRaiVisible = false;
-								vcRecaptchaService.reload($scope.widgetId);
-								$scope.init();
-	  					}
-  					},1000);
-  				} 
-	  			// no unix timestamp passed...
-	  			else {
-		  			$scope.button = button.try_again;
-		  			$timeout(function() {
-		  				vcRecaptchaService.reload($scope.widgetId);
-		  				$scope.init();
-						$scope.button = button.default;
-					}, 3000);
-  				}
   			}
   		};
+
+  		$scope.wait = function(until) {
+
+			// if a unix timestamp was passed...
+			if(until) {
+
+				// every second, re-calculate the time to wait
+				var waitUntilPromise = $interval(function() {
+
+					var untilThen = until - Math.floor(Date.now() / 1000);
+
+					// if the wait timer has expired, show the form again
+					if(untilThen <= 0) {
+						$interval.cancel(waitUntilPromise);
+						$scope.freeRaiVisible = true;
+						$scope.button = button.default;
+
+					} else {
+						$scope.wait_hdr = 'Request succeeded';
+						$scope.wait_msg = 'Please wait ' + untilThen + ' seconds';
+						$scope.freeRaiVisible = false;
+						vcRecaptchaService.reload($scope.widgetId);
+						$scope.init();
+  					}
+					},1000);
+				} 
+  			// no unix timestamp passed...
+  			else {
+	  			$scope.button = button.try_again;
+	  			$timeout(function() {
+	  				vcRecaptchaService.reload($scope.widgetId);
+	  				$scope.init();
+					$scope.button = button.default;
+				}, 3000);
+			}
+		}
 
   		$scope.button = button.default;
   		
@@ -197,7 +189,7 @@
 
 						// if there is an 'until' time to wait for, run dynamic
 						if(data.until) {
-							button.wait(data.until); // a unique, dynamic function
+							$scope.wait(data.until); // a unique, dynamic function
 						} else {
 							$scope.button = button[data.message];
 							$timeout(function() {
