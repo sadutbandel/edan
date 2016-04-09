@@ -41,19 +41,48 @@ module.exports = {
 	},
 
 	/**
-	 * Count total success records since the last tracking.
+	 * Count total success records per account since the last tracking.
 	 */
 	calculate: function(callback) {
 
-		// Find the last time we tracked totals and stored counts
+		// find the last time we calculated & stored totals per account
+		// if we find results (we always will except the first time we run this), then use the most recent end timestamp
+		// as the 'greater than or equal to', with the hour that just passed being the 'less than'.
+		// 
 		TrackCounter.last(function(err, resp) {
 	         
 	      	if(!err) {
 
-				// Find records where status is 'accepted'
-				// Then group by 'account' with a count
+	      		var lastRan;
+
+	      		// if there are results(99.9% of cases)
+	      		if(resp[0]) {
+	      			lastRan = resp[0].end_unix; // the last time the calculation script ended
+	      		} else {// 1st-time running script, assume all records to start up until last hour.
+	      			lastRan = 0; // 0 is the beginning of unix time.
+	      		}
+
+				// Find records where status is 'accepted' and the modified time is greater than 
+				// or equal to the end time of when the last time totals were calculated but also
+				// less than the end of the most recent hour, which the function is using as the end.
+				// Also, group by 'account' with a total count.
 				var match = {
-					status: 'accepted'
+
+					'$and': [
+						{
+							modified : { 
+			 					'$lt': TimestampService.lastHour()
+			 				}
+			 			},
+						{
+							modified : { 
+			 					'$gte': lastRan
+			 				}
+			 			},
+			 			{ 
+			 				status: 'accepted'
+			 			}
+		 			]
 				};
 				var group = {
 					_id: '$account',
@@ -83,6 +112,8 @@ module.exports = {
 								 * If matches ARE found, then we should get a list of accounts with counts.
 								 */
 								else {
+
+									// store results in Totals.
 									callback(null, results);
 								}
 							} else {

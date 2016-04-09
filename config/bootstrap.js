@@ -15,17 +15,20 @@ module.exports.bootstrap = function(cb) {
    ****** START SCRIPT TESTS ******
    *******************************/
 
-   Totals.calculate(function(err, resp) {
-         
-      if(!err) {
-         //console.log(JSON.stringify(resp));
+   calculateTotals = function() {
+      Totals.calculate(function(err, resp) {
+            
+         if(!err) {
+            console.log(JSON.stringify(resp));
 
-      } else {
-         //console.log(JSON.stringify(err));
-      }
-   });
+         } else {
+            //console.log(JSON.stringify(err));
+         }
+      });
+   };calculateTotals();
 
    // finds the total mrai to payout
+   /*
    PayoutSchedule.native(function(err, collection) {
       if (!err){
 
@@ -48,18 +51,19 @@ module.exports.bootstrap = function(cb) {
          console.log(JSON.stringify(err));
       }
    });
+*/
 
    // Load the TrackCounter collection with sample data.
    loadTrackCounter = function() {
       // Insert some test data to create mongo collection
       var payload = {
-         //created_unix: TimestampService.unix(),
-         created_unix: 1460219532, // 9:35am
-         start_unix: 1460196000, // 3am
-         end_unix: 1460217600, // 9am
+         created_unix: TimestampService.unix(),
+         start_unix: 0, // 1st record ever would have 0 here.
+         end_unix: 1460232000, // 1pm
          accounts: 149,
          successes: 2943
       };
+      /*
       var payload = {
          //created_unix: TimestampService.unix(),
          created_unix: 1460160009, // 12:00:09am
@@ -68,7 +72,7 @@ module.exports.bootstrap = function(cb) {
          accounts: 99,
          successes: 2231
       };
-
+      */
       TrackCounter.create(payload, function(err, resp) {
             
          // processed
@@ -82,6 +86,7 @@ module.exports.bootstrap = function(cb) {
    }
    //loadTrackCounter();
       
+   // (this is rarely done)
    loadPayoutSchedule = function() {
 
       var payload = {
@@ -101,8 +106,7 @@ module.exports.bootstrap = function(cb) {
             console.log(JSON.stringify(err));
          }
       });
-   }
-   //loadPayoutSchedule();
+   }//loadPayoutSchedule();
 
    /*****************************
    ****** END SCRIPT TESTS ******

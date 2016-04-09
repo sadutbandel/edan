@@ -21,5 +21,12 @@ module.exports = {
 	// remaining seconds of a duration
 	remaining: function(duration) {
 		return 60 - duration;
+	},
+	// grab the most recent hour that passed
+	lastHour: function() {
+		var d = new Date();
+		d.setMinutes(0);
+		d.setSeconds(0);
+		return Math.floor(d.getTime() / 1000);
 	}
 }
