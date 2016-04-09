@@ -1,23 +1,37 @@
 module.exports = {
 
- 	// make sure parameters aren't undefined or zero-length
  	validate: function(parameters, callback) {
 
- 		// no problems by default
- 		var problems = 0;
+ 		// 0 problems to start
+ 		var problems = [];
 
- 		// iterate through all parameters and count problems
- 		for(param in parameters) {
- 			if(parameters[param] === undefined || parameters[param].length === 0) {
- 				problems++;
+ 		// only go through account and recaptcha response
+ 		var params = {
+ 			account: parameters.account,
+ 			recaptcha: parameters.response,
+ 		};
+
+ 		// iterate through all params and identify problems
+ 		// can't be undefined or equal nothing
+ 		for(param in params) {
+
+ 			if(params[param] === null || params[param] === undefined || params[param].length === 0) {
+ 				problems.push(param);
  			}
  		}
 
- 		// no problems!
- 		if(problems === 0) {
+ 		// ensure the account is prefixed with 'xrb_'
+ 		if(param === 'account') {
+ 			if(param.lastIndexOf('xrb_', 0) !== 0) {
+ 				problems.push(param);
+ 			}
+ 		}
+
+ 		// in the array of problems, output the first one found.
+ 		if(problems.length > 0) {
+ 			callback(problems[0], null);
+ 		} else {
  			callback(null, true);
- 		} else { // problems...
- 			callback(true, null);
  		}
  	}
 }

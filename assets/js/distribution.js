@@ -138,8 +138,9 @@
 
   		$scope.button = button.default;
   		
+  		// account can't be null, nothing, or starting with anything but 'xrb_'
   		$scope.validateAccount = function() {
-  			if($scope.account === null || $scope.account === '') {
+  			if($scope.account === undefined || $scope.account === null || $scope.account === '' || $scope.account.lastIndexOf('xrb_', 0) !== 0) {
   				$scope.button = button.account_error;
   				return false;
   			} else {
@@ -148,7 +149,7 @@
   		}
 
   		$scope.validateResponse = function() {
-  			if($scope.response === null || $scope.response === '') {
+  			if($scope.response === undefined || $scope.response === null || $scope.response === '') {
   				$scope.button = button.recaptcha_error;
   				return false;
   			} else {

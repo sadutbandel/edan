@@ -33,15 +33,15 @@ module.exports = {
 							if(!err) {
 								callback(null, true);
 							} else {
-								callback('account' , null);
+								callback('account_error' , null);
 							}
 						});
 					} else {
-						callback('recaptcha', null);
+						callback('recaptcha_error', null);
 					}
 				});
 			} else {
-				callback('parameters', null);			
+				callback(err + '_error', null);			
 			}
 		});
 	},
@@ -219,14 +219,13 @@ module.exports = {
 										 * Continue with marking the status 'violation'
 										 */
 										else {
-											console.log('1');
 											callback({ message: 'try_again', status: 'violation' }, null);
 										}
 									});
 								} 
 
 								else {
-									callback({ message: err }, null); // message can only equal 'parameters' or 'recaptcha' or 'account'
+									callback({ message: err, status: 'violation' }, null); // message can only equal 'parameters' or 'recaptcha' or 'account'
 								}
 							});
 						} 
@@ -239,7 +238,6 @@ module.exports = {
 						 * Because of this we know we can't proceed with a distribution request.
 						 */
 						else {
-							console.log('2');
 							callback({ message: 'try_again', status: 'violation' }, null);
 						}
 					} else {

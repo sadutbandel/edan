@@ -10,7 +10,7 @@ module.exports = {
 
 		account: {
 			type:'string',
-			required:true,
+			required:false,
 			unique: false
 		},
 		// unix timestamp
