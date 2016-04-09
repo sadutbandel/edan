@@ -223,9 +223,9 @@ module.exports = {
 										}
 									});
 								} 
-
+								// err contains the validation that failed for the front-end form message
 								else {
-									callback({ message: err, status: 'violation' }, null); // message can only equal 'parameters' or 'recaptcha' or 'account'
+									callback({ message: err, status: 'violation' }, null);
 								}
 							});
 						} 

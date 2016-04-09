@@ -18,10 +18,34 @@ module.exports.bootstrap = function(cb) {
    Totals.calculate(function(err, resp) {
          
       if(!err) {
-         console.log(JSON.stringify(resp));
+         //console.log(JSON.stringify(resp));
 
       } else {
          //console.log(JSON.stringify(err));
+      }
+   });
+
+   // finds the total mrai to payout
+   PayoutSchedule.native(function(err, collection) {
+      if (!err){
+
+         collection.find({ expired: false }).limit(1).sort({'$natural': -1}).toArray(function (err, results) {
+            if (!err) {
+
+               MraiFromRawService.convert(results[0].total_mrai, function(err, resp) {
+
+                  if(!err) {
+                     console.log(JSON.stringify(resp.response.amount));
+                  } else {
+                     console.log(JSON.stringify(err));
+                  }
+               });
+            } else {
+               console.log(JSON.stringify(err));
+            }
+         });
+      } else {
+         console.log(JSON.stringify(err));
       }
    });
 
@@ -57,7 +81,29 @@ module.exports.bootstrap = function(cb) {
       });
    }
    //loadTrackCounter();
-   
+      
+   loadPayoutSchedule = function() {
+
+      var payload = {
+         created_unix: TimestampService.unix(),
+         total_mrai: '450000000000000000000000000000000000', //450k
+         hour_interval: 6,
+         expired: false
+      };
+
+      PayoutSchedule.create(payload, function(err, resp) {
+            
+         // processed
+         if(!err) {
+            console.log(JSON.stringify(resp));
+
+         } else { // not processed
+            console.log(JSON.stringify(err));
+         }
+      });
+   }
+   //loadPayoutSchedule();
+
    /*****************************
    ****** END SCRIPT TESTS ******
    *****************************/

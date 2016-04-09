@@ -6,7 +6,7 @@
  * Request:
  * { "action": "available_supply" }
  * Response:
- * { "amount": "10000" }
+ * { "amount": "450000" }
  */
 
 module.exports = {
@@ -19,7 +19,13 @@ module.exports = {
 		
 		RpcService.callRpc(this.payload, function(err, resp) {
 			if(!err) {
-				callback(null, resp);
+				MraiFromRawService.convert(resp.response.available, function(err, resp) {
+					if(!err) {
+						callback(null, resp.response.amount);
+					} else {
+						callback(err, null);
+					}
+				});
 			} else {
 				callback(err, null);
 			}
