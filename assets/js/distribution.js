@@ -180,7 +180,7 @@
 					response: $scope.response
 				};
 				
-				$http.post('/distribute', this.payload).success(function(data) {
+				$http.post('/distribution', this.payload).success(function(data) {
 
 					if(data.statusCode === 200) {
 						$rootScope.block = data.response.block;

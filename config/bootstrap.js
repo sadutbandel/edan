@@ -11,6 +11,57 @@
 
 module.exports.bootstrap = function(cb) {
 
+   /*******************************
+   ****** START SCRIPT TESTS ******
+   *******************************/
+
+   Totals.calculate(function(err, resp) {
+         
+      if(!err) {
+         console.log(JSON.stringify(resp));
+
+      } else {
+         //console.log(JSON.stringify(err));
+      }
+   });
+
+   // Load the TrackCounter collection with sample data.
+   loadTrackCounter = function() {
+      // Insert some test data to create mongo collection
+      var payload = {
+         //created_unix: TimestampService.unix(),
+         created_unix: 1460219532, // 9:35am
+         start_unix: 1460196000, // 3am
+         end_unix: 1460217600, // 9am
+         accounts: 149,
+         successes: 2943
+      };
+      var payload = {
+         //created_unix: TimestampService.unix(),
+         created_unix: 1460160009, // 12:00:09am
+         start_unix: 1460138400, // 6:00pm
+         end_unix: 1460160000, // 12:00am
+         accounts: 99,
+         successes: 2231
+      };
+
+      TrackCounter.create(payload, function(err, resp) {
+            
+         // processed
+         if(!err) {
+            console.log(JSON.stringify(resp));
+
+         } else { // not processed
+            console.log(JSON.stringify(err));
+         }
+      });
+   }
+   //loadTrackCounter();
+   
+   /*****************************
+   ****** END SCRIPT TESTS ******
+   *****************************/
+
    // allows us to retrieve the remote-client IP and not localhost
    sails.hooks.http.app.set('trust proxy', true);
 

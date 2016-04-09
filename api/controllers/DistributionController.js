@@ -1,5 +1,5 @@
 /**
- * DistributeController.js
+ * DistributionController.js
  * 
  * 
  * Returns a response object with properties:
@@ -25,7 +25,7 @@ module.exports = {
 		};
 
 		// send request for free rai distribution
-		Distribute.request(this.parameters, function(err, resp) {
+		Distribution.request(this.parameters, function(err, resp) {
 			
 			// processed
 			if(!err) {

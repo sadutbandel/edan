@@ -14,13 +14,13 @@ module.exports = {
 			required:true,
 			unique: false
 		},
-		// start of time range of the Distribute records considered
+		// start of time range of the Distribution records considered
 		start_unix: {
 			type:'integer',
 			required:true,
 			unique: false
 		},
-		// end of time range of the Distribute records considered
+		// end of time range of the Distribution records considered
 		end_unix: {
 			type:'integer',
 			required:true,
@@ -41,58 +41,61 @@ module.exports = {
 	},
 
 	/**
-	 * Count totals by xrb_account
+	 * Count total success records since the last tracking.
 	 */
 	calculate: function(callback) {
 
-		// date object rounded off at the last hour that just passed convered to unixtime
-		var lastHour = new Date();
-		lastHour.setMinutes(0);
-		lastHour.setSeconds(0);
-		var unix = Math.floor(lastHour.getTime() / 1000);
-		console.log(unix);
+		// Find the last time we tracked totals and stored counts
+		TrackCounter.last(function(err, resp) {
+	         
+	      	if(!err) {
 
-		// where status is 'accepted' then group by 'account' and count the total records by 'account'
-		var match = {
-			status: 'accepted'
-		};
-		var group = {
-			_id: '$account',
-			count: { 
-				'$sum': 1
-			}
-		};
+				// Find records where status is 'accepted'
+				// Then group by 'account' with a count
+				var match = {
+					status: 'accepted'
+				};
+				var group = {
+					_id: '$account',
+					count: { 
+						'$sum': 1
+					}
+				};
 
-		Distribute.native(function(err, collection) {
-			if (!err){
+				Distribution.native(function(err, collection) {
+					if (!err){
 
-				collection.aggregate([{ '$match' : match }, { '$group' : group }]).toArray(function (err, results) {
-					if (!err) {
+						collection.aggregate([{ '$match' : match }, { '$group' : group }]).toArray(function (err, results) {
+							if (!err) {
 
-						/**
-						 * No matches found. (bad) HALT request!
-						 * 
-						 * If NO matches are found, then there are no Distribute records yet.
-						 */
-						
-						if(Object.keys(results).length === 0) {
-							callback(null, results);
-						}
-						/**
-						 * Matches found. (good) CONTINUE request!
-						 * 
-						 * If matches ARE found, then we should get a list of accounts with counts.
-						 */
-						else {
-							callback(results, null);
-						}
+								/**
+								 * No matches found. (bad) HALT request!
+								 * 
+								 * If NO matches are found, then there are no Distribution records yet.
+								 */
+								
+								if(Object.keys(results).length === 0) {
+									callback(true, null);
+								}
+								/**
+								 * Matches found. (good) CONTINUE request!
+								 * 
+								 * If matches ARE found, then we should get a list of accounts with counts.
+								 */
+								else {
+									callback(null, results);
+								}
+							} else {
+								callback({ error: err }, null);
+							}
+						});
 					} else {
 						callback({ error: err }, null);
 					}
 				});
 			} else {
-				callback({ error: err }, null);
-			}
-		});
+	         	callback({ error: err }, null);
+	      	}
+	   	});
 	}
 };
