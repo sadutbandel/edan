@@ -1,7 +1,7 @@
 /**
 * Totals.js
 *
-* @description :: Totals model
+* @description :: Count the total distribution records per account
 */
 
 module.exports = {
@@ -14,25 +14,24 @@ module.exports = {
 			required:true,
 			unique: false
 		},
-		// start of time range of Distribute records considered
+		// start of time range of the Distribute records considered
 		start_unix: {
 			type:'integer',
 			required:true,
 			unique: false
 		},
-		// end of time range of Distribute records considered
+		// end of time range of the Distribute records considered
 		end_unix: {
 			type:'integer',
 			required:true,
 			unique: false
 		},
-		// total 'accepted' distribute records count for time range
+		// the total count of distribution records for this payee where status = 'accepted'
 		total_count: {
 			type:'integer',
 			required:true,
 			unique: false
 		},
-
 		// time when they were paid
 		paid_unix: {
 			type:'integer',
@@ -53,6 +52,7 @@ module.exports = {
 		var unix = Math.floor(lastHour.getTime() / 1000);
 		console.log(unix);
 
+		// where status is 'accepted' then group by 'account' and count the total records by 'account'
 		var match = {
 			status: 'accepted'
 		};

@@ -14,17 +14,6 @@ module.exports = {
 			req.session.started = TimestampService.unix();
 		}
 
-		Totals.calculate(function(err, resp) {
-
-	      // processed
-	      if(!err) {
-	         console.log(JSON.stringify(resp));
-
-	      } else { // not processed
-	         console.log(JSON.stringify(err));
-	      }
-	   });
-
 		// return the app view
 		res.view('application');
 	}

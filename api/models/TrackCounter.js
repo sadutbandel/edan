@@ -1,7 +1,8 @@
 /**
 * TrackCounter.js
 *
-* @description :: Tracks the time-ranges and t
+* @description :: Tracks the time-ranges that Totals.js ran to save counts.
+* 
 */
 
 module.exports = {
@@ -21,5 +22,12 @@ module.exports = {
 			required:true,
 			unique: false
 		}
+	},
+
+	/**
+	 * Count totals by xrb_account
+	 */
+	track: function(callback) {
+
 	}
 };
