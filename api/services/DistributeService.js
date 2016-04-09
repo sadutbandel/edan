@@ -115,7 +115,7 @@ module.exports = {
 				 * Find matches of xrb account, ip, or sessionID that occured less than 10s ago
 				 * Matches are records that are expired indicating the user is NOT in violation.
 				 */
-				var tenSecondsAgo = TimestampService.unix() - Globals.distributionTimeout;
+				var requirement = TimestampService.unix() - Globals.distributionTimeout;
 
 				var payload = {
 
@@ -128,7 +128,7 @@ module.exports = {
 					'$and': [
 						{
 							modified : { 
-			 					'$gt': tenSecondsAgo
+			 					'$gt': requirement
 			 				}
 			 			},
 			 			{ 
