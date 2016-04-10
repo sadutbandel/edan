@@ -9,7 +9,8 @@ module.exports = {
 	
 	append: function (req, res) {
 
-		// create a new session timer if it does not exist
+		// create a new session timer if it does not exist.
+		// this is important because it's a requirement for Distribution
 		if(!req.session.started) {
 			req.session.started = TimestampService.unix();
 		}

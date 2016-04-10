@@ -1,8 +1,6 @@
 /**
-* Distribution.js
-*
-* @description :: Distribution model
-*/
+ * Distribution.js
+ */
 
 module.exports = {
 
@@ -40,7 +38,8 @@ module.exports = {
 	},
 
 	/**
-	 * Request distribution 
+	 * Distribution Request
+ 	 * @param  parameters  object
 	 */
 	request: function(parameters, callback) {
 
@@ -131,10 +130,13 @@ module.exports = {
 		});
 	},
 
- 	// determines if a record is expired or not (300s currently)
- 	checkExpired: function(timestamp, callback) {
+ 	/**
+ 	 * Determine if record is expired (6s)
+ 	 * @param  unixtime  integer
+ 	 */
+ 	checkExpired: function(unixtime, callback) {
 
-		var elapsedTime = TimestampService.unix() - timestamp;
+		var elapsedTime = TimestampService.unix() - unixtime;
 
 		// (!err) record is expired, returns success
 		if (elapsedTime >= Globals.distributionTimeout) {

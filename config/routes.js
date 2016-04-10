@@ -39,6 +39,7 @@ module.exports.routes = {
   'POST /blockExplorer': 'BlockExplorerController.create',
   'POST /clear': 'ClearController.create',
   'POST /demo': 'DemoController.create',
+  'GET /distribution': '/',
   'GET /api/available_supply': 'AvailableSupplyController.fetch',
   'GET /test': 'TestController.fetch'
 

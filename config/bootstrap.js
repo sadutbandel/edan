@@ -15,43 +15,74 @@ module.exports.bootstrap = function(cb) {
    ****** START SCRIPT TESTS ******
    *******************************/
 
-   calculateTotals = function() {
-      Totals.calculate(function(err, resp) {
+   // load the Distribution table with dummy data.
+   loadDistribution = function() {
+
+      // prepare for storing record objects
+      var records = [];
+
+      // return a random number 0 to amt ( for ips )
+      rand = function(amount) {
+         return Math.floor((Math.random() * amount) + 0);
+      }
+
+      // create a fake ip
+      buildIP = function(n) {
+         return rand(n) + '.' + rand(n) + '.' + rand(n) + '.' + rand(n);
+      }
+
+      randomString = function(length) {
+         return Math.round((Math.pow(36, length + 1) - Math.random() * Math.pow(36, length))).toString(36).slice(1);
+      }
+
+      buildSession = function() {
+         return randomString(30);
+      }
+
+      buildAccount = function() {
+         return 'xrb_' + randomString(60);
+      }
+
+      buildStatus = function() {
+         var status;
+         if(rand(100)>=5) {
+            status = 'accepted';
+         } else {
+            status = 'violation';
+         }
+         return status;
+      }
+
+      // generate records
+      for(i = 1; i < 50; i++) {
+
+
+         var obj = {
+            account: buildAccount(),
+            ip: buildIP(255),
+            sessionID: buildSession(),
+            status: buildStatus()
+         }
+         
+         records.push(obj);
+      }
+
+      console.log(records);
+
+   };loadDistribution();
+
+   processTotals = function() {
+      Totals.process(function(err, resp) {
             
          if(!err) {
+            console.log('processTotals success')
             console.log(JSON.stringify(resp));
-
          } else {
-            //console.log(JSON.stringify(err));
+            console.log('processTotals error')
+            console.log(JSON.stringify(err));
          }
       });
-   };calculateTotals();
-
-   // finds the total mrai to payout
-   /*
-   PayoutSchedule.native(function(err, collection) {
-      if (!err){
-
-         collection.find({ expired: false }).limit(1).sort({'$natural': -1}).toArray(function (err, results) {
-            if (!err) {
-
-               MraiFromRawService.convert(results[0].total_mrai, function(err, resp) {
-
-                  if(!err) {
-                     console.log(JSON.stringify(resp.response.amount));
-                  } else {
-                     console.log(JSON.stringify(err));
-                  }
-               });
-            } else {
-               console.log(JSON.stringify(err));
-            }
-         });
-      } else {
-         console.log(JSON.stringify(err));
-      }
-   });
-*/
+   };//processTotals();
 
    // Load the TrackCounter collection with sample data.
    loadTrackCounter = function() {
@@ -83,8 +114,7 @@ module.exports.bootstrap = function(cb) {
             console.log(JSON.stringify(err));
          }
       });
-   }
-   //loadTrackCounter();
+   };//loadTrackCounter();
       
    // (this is rarely done)
    loadPayoutSchedule = function() {
@@ -106,7 +136,7 @@ module.exports.bootstrap = function(cb) {
             console.log(JSON.stringify(err));
          }
       });
-   }//loadPayoutSchedule();
+   };//loadPayoutSchedule();
 
    /*****************************
    ****** END SCRIPT TESTS ******

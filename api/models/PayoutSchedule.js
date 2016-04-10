@@ -7,6 +7,7 @@
 module.exports = {
 
 	attributes: {
+		
 		// total mrai to payout
 		total_mrai: {
 			type:'string',

@@ -1,41 +1,36 @@
 /**
  * DistributionController.js
- * 
- * 
- * Returns a response object with properties:
  *
- * 'message' (required)
- * 'wait' (optional) a duration to wait in seconds
- * 
+ * Create a distribution request
  */
 
 module.exports = {
 
-	// overrides default POST method
 	create: function (req, res) {
 
-		// create payload
-		this.parameters = {
-			account: req.body.account,
-			response: req.body.response,
-			modified: TimestampService.unix(),
-			sessionID: req.sessionID,
-			sessionStarted: req.session.started,
-			ip: req.headers['x-forwarded-for']
-		};
+		if(req.session.started) {
 
-		// send request for free rai distribution
-		Distribution.request(this.parameters, function(err, resp) {
-			
-			// processed
-			if(!err) {
-				console.log(TimestampService.utc() + ' ' + req.headers['x-forwarded-for'] + ' ' + req.sessionID + ' (success) ' + JSON.stringify(resp));
-				res.send(resp);
+			this.parameters = {
+				account: req.body.account,
+				response: req.body.response,
+				modified: TimestampService.unix(),
+				sessionID: req.sessionID,
+				sessionStarted: req.session.started,
+				ip: req.headers['x-forwarded-for']
+			};
 
-			} else { // not processed
-				console.log(TimestampService.utc() + ' ' + req.headers['x-forwarded-for'] + ' ' + req.sessionID + ' (errors!) ' + JSON.stringify(err));
-				res.send(err);
-			}
-		});
+			Distribution.request(this.parameters, function(err, resp) {
+
+				if(!err) {
+					console.log(TimestampService.utc() + ' ' + req.headers['x-forwarded-for'] + ' ' + req.sessionID + ' (success) ' + JSON.stringify(resp));
+					res.send(resp);
+				} else {
+					console.log(TimestampService.utc() + ' ' + req.headers['x-forwarded-for'] + ' ' + req.sessionID + ' (errors!) ' + JSON.stringify(err));
+					res.send(err);
+				}
+			});
+		} else {
+			res.send('Goodbye'); // prevent curl POSTs, they don't have session start times from visiting the site.
+		}
 	}
 };

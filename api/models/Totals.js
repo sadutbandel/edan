@@ -32,33 +32,49 @@ module.exports = {
 			required:true,
 			unique: false
 		},
+		// based on total_count and PayoutSchedule
+		percentage_owed: {
+			type:'double',
+			required:false,
+			unique: false
+		},
+		mrai_owed: {
+			type:'string',
+			required:true,
+			unique: false
+		},
 		// time when they were paid
 		paid_unix: {
 			type:'integer',
-			required:true,
+			required:false,
+			unique: false
+		},
+		// block hash receipt after they were paid
+		receipt_hash: {
+			type:'string',
+			required:false,
 			unique: false
 		}
 	},
 
 	/**
-	 * Count total success records per account since the last tracking.
+	 * Count total success records per account
 	 */
 	calculate: function(callback) {
 
-		// find the last time we calculated & stored totals per account
-		// if we find results (we always will except the first time we run this), then use the most recent end timestamp
-		// as the 'greater than or equal to', with the hour that just passed being the 'less than'.
-		// 
+		// First, find the last time we ran the calculation script
 		TrackCounter.last(function(err, resp) {
-	         
+	        
+	        // this is used to store per individual account in Totals collection
 	      	if(!err) {
 
+	      		var lastHour = TimestampService.lastHour();
 	      		var lastRan;
 
-	      		// if there are results(99.9% of cases)
+	      		// if there are results (99.9% of cases)
 	      		if(resp[0]) {
 	      			lastRan = resp[0].end_unix; // the last time the calculation script ended
-	      		} else {// 1st-time running script, assume all records to start up until last hour.
+	      		} else { // 1st-time running script, assume all records to start up until last hour.
 	      			lastRan = 0; // 0 is the beginning of unix time.
 	      		}
 
@@ -71,7 +87,7 @@ module.exports = {
 					'$and': [
 						{
 							modified : { 
-			 					'$lt': TimestampService.lastHour()
+			 					'$lt': lastHour
 			 				}
 			 			},
 						{
@@ -112,9 +128,8 @@ module.exports = {
 								 * If matches ARE found, then we should get a list of accounts with counts.
 								 */
 								else {
-
 									// store results in Totals.
-									callback(null, results);
+									callback(null, { lastHour: lastHour, lastRan: lastRan, results: results });
 								}
 							} else {
 								callback({ error: err }, null);
@@ -125,8 +140,129 @@ module.exports = {
 					}
 				});
 			} else {
+
 	         	callback({ error: err }, null);
 	      	}
 	   	});
+	},
+
+	/**
+	 * Calculate successes by account since the last time we've run the script.
+	 */
+	process: function(callback) {
+
+		Totals.totalMrai(function(err, resp) {
+
+			/**
+			 * Results found! (GOOD) CONTINUE request
+			 * We have the total Mrai being paid out
+			 */
+			if(!err) {
+
+				var totalMraiPayout = resp;
+
+				Totals.calculate(function(err, resp) {
+
+					/**
+					 * Results found! (GOOD) CONTINUE request
+					 * We have a list of accounts with counts for successfully solved captchas
+					 */
+					if(!err) {
+
+						/**
+						 * Iterate through each account and their success count
+						 * We want to store their payload into Totals collection
+						 * example: { _id: 'xrb_3efamcqebsbtxxk6hz48buqjq9b1d9kpy6k8c5j5ibm9adxx9wyj4bphwn87', count: 6 }
+						 */
+						for(key in resp.results) {
+
+							var payload = {
+								account: resp.results[key]._id,
+								total_count: resp.results[key].count,
+								start_unix: resp.lastRan,
+								end_unix: resp.lastHour,
+								mrai_owed: totalMraiPayout
+							};
+
+							console.log(payload);
+						}
+					} 
+
+					/**
+					 * No results found! (BAD) HALT request
+					 * For some reason, calculations failed. Don't process saving records.
+					 */		
+					else {
+						callback(err, null);
+					}
+				});
+			}
+
+			/**
+			 * No rsults found! (BAD) HALT request
+			 * For some reason, we could not receive an amount. An RPC could have failed or mongoDB.
+			 */
+			else {
+				callback(err, null);
+			}
+		});
+	},
+
+	/**
+	 * Find the total amount of Mrai currently being paid out
+	 */
+	totalMrai: function(callback) {
+
+		PayoutSchedule.native(function(err, collection) {
+			if (!err){
+
+				collection.find({ expired: false }).limit(1).sort({'$natural': -1}).toArray(function (err, results) {
+					if (!err) {
+
+						MraiFromRawService.convert(results[0].total_mrai, function(err, resp) {
+
+							if(!err) {
+								callback(null, resp.response.amount);
+							} else {
+								callback(err, null);
+							}
+						});
+					} else {
+						callback(err, null);
+					}
+				});
+			} else {
+				callback(err, null);
+			}
+   		});
+	},
+
+	/**
+	 * Find the complete count of totals for a grand total
+	 */
+	grandTotal: function(callback) {
+
+		PayoutSchedule.native(function(err, collection) {
+			if (!err){
+
+				collection.find({ expired: false }).limit(1).sort({'$natural': -1}).toArray(function (err, results) {
+					if (!err) {
+
+						MraiFromRawService.convert(results[0].total_mrai, function(err, resp) {
+
+							if(!err) {
+								callback(null, resp.response.amount);
+							} else {
+								callback(err, null);
+							}
+						});
+					} else {
+						callback(err, null);
+					}
+				});
+			} else {
+				callback(err, null);
+			}
+   		});
 	}
 };

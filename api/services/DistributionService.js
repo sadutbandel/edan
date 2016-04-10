@@ -1,10 +1,6 @@
 /**
-* DistributionService.js
-*
-* validate();
-* violators();
-* process(); (runs both and update record)
-*/
+ * DistributionService.js
+ */
 
 module.exports = {
 
@@ -13,10 +9,8 @@ module.exports = {
 	 * 2nd, validate the ReCaptcha response
 	 * 3rd, validate the account
 	 *
-	 * Returns a response object with properties:
-	 *
-	 * 'valid' (required) whether or not all validators passed
-	 * 'item' (optional) name of the item that failed validation
+	 * SUCCESS: Returns true
+	 * ERROR: Returns a string containing the message we'll send to the front-end of the app
 	 */
 	validate: function(parameters, callback) {
 
@@ -82,32 +76,22 @@ module.exports = {
 							callback(true, null);
 						}
 					} else {
-						callback({ error: err }, null);
+						callback({ error: err }, null); // query-error
 					}
 				});
 			} else {
-				callback({ error: err }, null);
+				callback({ error: err }, null); // query-error
 			}
 		});
 	},
 
 	/**
-	 * Attempt to process the distribution request after validating input and checking for violations
+	 * Process the distribution request
 	 */
 	process: function(parameters, callback) {
 
 		/**
-		 * Validation Security-Layer Elements
-		 * parameters
-		 * recaptcha response
-		 * account
-		 *
-		 * Returns true for success
-		 * Returns object with 'field' property for item that failed
-		 */
-		
-		/**
-		 * Find any matches on account, ip, sessionID AND 
+		 * Find any matches on account or ip or sessionID, AND 
 		 * where status is 'pending' AND _id does not belong to me
 		 */
 		var payload = {
