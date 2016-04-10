@@ -16,59 +16,105 @@ module.exports.bootstrap = function(cb) {
    *******************************/
 
    // load the Distribution table with dummy data.
+   // a specific amount of accounts receives a random amount of counts.
+   // each account has a 50% chance of having a 2nd IP.
    loadDistribution = function() {
 
-      // prepare for storing record objects
-      var records = [];
+      // things we are storing
+      var things = ['accounts', 'ips', 'sessions'];
 
-      // return a random number 0 to amt ( for ips )
-      rand = function(amount) {
-         return Math.floor((Math.random() * amount) + 0);
+      /*
+      Start Time:
+      Human time (GMT): Sun, 10 Apr 2016 00:00:00 GMT
+      Human time (your time zone): 4/9/2016, 5:00:00 PM
+       */
+      var start = 1460246400; 
+
+      /*
+      End Time:
+      Human time (GMT): Mon, 11 Apr 2016 00:00:00 GMT
+      Human time (your time zone): 4/10/2016, 5:00:00 PM
+      */
+      var end = 1460332800; 
+
+      // things turn into arrays inside this object
+      var arrays = {};
+      for(key in things) {
+         arrays[things[key]] = [];
       }
 
-      // create a fake ip
-      buildIP = function(n) {
-         return rand(n) + '.' + rand(n) + '.' + rand(n) + '.' + rand(n);
-      }
-
-      randomString = function(length) {
-         return Math.round((Math.pow(36, length + 1) - Math.random() * Math.pow(36, length))).toString(36).slice(1);
-      }
-
-      buildSession = function() {
-         return randomString(30);
-      }
-
+      // xrb_ prefixed accounts
       buildAccount = function() {
          return 'xrb_' + randomString(60);
       }
 
+      // return a random between two amounts
+      randNum = function(min, max) {
+         return Math.floor(Math.random()*(max-min+1)+min);
+         //return Math.floor((Math.random() * max) + min);
+      }
+
+      // create a fake ip
+      buildIP = function(n) {
+         return randNum(0,n) + '.' + randNum(0,n) + '.' + randNum(0,n) + '.' + randNum(0,n);
+      }
+
+      // random string based on length
+      randomString = function(length) {
+         return Math.round((Math.pow(36, length + 1) - Math.random() * Math.pow(36, length))).toString(36).slice(1);
+      }
+
+      // random session string
+      buildSession = function() {
+         return randomString(30);
+      }
+
+      // 5% chance to be marked as a violation, 95% chance to be marked as accepted.
       buildStatus = function() {
-         var status;
-         if(rand(100)>=5) {
-            status = 'accepted';
+
+         if(randNum(0,100)>5) {
+            return 'accepted';
          } else {
-            status = 'violation';
+            return 'violation';
          }
-         return status;
       }
 
-      // generate records
-      for(i = 1; i < 50; i++) {
-
-
-         var obj = {
-            account: buildAccount(),
-            ip: buildIP(255),
-            sessionID: buildSession(),
-            status: buildStatus()
-         }
-         
-         records.push(obj);
+      // pick a random array value
+      randomArrVal = function(array) {
+         return array[Math.floor(Math.random() * array.length)];
       }
 
-      console.log(records);
+      // generate 1500 random accounts, sessions, and ips.
+      // realistically we'd have more IPs and what not, but
+      // this test is purely for counting / calculating payouts
+      var amount = 1500;
 
+      for(i = 1; i < amount; i++) {
+         arrays.accounts.push(buildAccount());
+      }
+      for(i = 1; i < amount; i++) {
+         arrays.sessions.push(buildSession());
+      }
+      for(i = 1; i < amount; i++) {
+         arrays.ips.push(buildIP(255));
+      }
+
+      // Generate distribution records by picking a random 
+      // account, ip, and session values from our master
+      // arrays created above. We use a random unix time
+      // stamp for the modified time between the range shown
+      // above.
+      var records = 10000;
+      for(i = 0; i < records; i++) {
+
+         Distribution.create({
+            account: randomArrVal(arrays.accounts),
+            ip: randomArrVal(arrays.ips),
+            sessionID: randomArrVal(arrays.sessions),
+            status: buildStatus(),
+            modified: randNum(start, end-1)
+         },function(err, resp){if(!err){}else {}});
+      }     
    };loadDistribution();
 
    processTotals = function() {
