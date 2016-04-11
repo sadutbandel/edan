@@ -34,8 +34,8 @@ module.exports = {
 		},
 		// based on total_count and PayoutSchedule
 		percentage_owed: {
-			type:'double',
-			required:false,
+			type:'string',
+			required:true,
 			unique: false
 		},
 		mrai_owed: {
@@ -43,16 +43,21 @@ module.exports = {
 			required:true,
 			unique: false
 		},
+		mrai_owed_raw: {
+			type:'string',
+			required:true,
+			unique: false
+		},
 		// time when they were paid
 		paid_unix: {
 			type:'integer',
-			required:false,
+			required:true,
 			unique: false
 		},
 		// block hash receipt after they were paid
 		receipt_hash: {
 			type:'string',
-			required:false,
+			required:true,
 			unique: false
 		}
 	},
@@ -151,6 +156,7 @@ module.exports = {
 	 */
 	process: function(callback) {
 
+		// Find the total amount of Mrai currently being paid out
 		Totals.totalMrai(function(err, resp) {
 
 			/**
@@ -159,7 +165,8 @@ module.exports = {
 			 */
 			if(!err) {
 
-				var totalMraiPayout = resp;
+				var total_mrai = resp.total_mrai,
+				hour_interval = resp.hour_interval;
 
 				Totals.calculate(function(err, resp) {
 
@@ -169,6 +176,9 @@ module.exports = {
 					 */
 					if(!err) {
 
+						var recordsCount = 0;
+						var records = [];
+
 						/**
 						 * Iterate through each account and their success count
 						 * We want to store their payload into Totals collection
@@ -177,14 +187,36 @@ module.exports = {
 						for(key in resp.results) {
 
 							var payload = {
+								paid_unix: 0, // filled upon payout
+								receipt_hash: 0, // filled upon payout
 								account: resp.results[key]._id,
 								total_count: resp.results[key].count,
 								start_unix: resp.lastRan,
-								end_unix: resp.lastHour,
-								mrai_owed: totalMraiPayout
+								end_unix: resp.lastHour
 							};
 
-							console.log(payload);
+							records.push(payload);
+							recordsCount += payload.total_count;
+						}
+
+						/**
+						 * Iterate through all records and calculate percentage owed
+						 */
+						for(key in records) {
+							records[key].percentage_owed = records[key].total_count / recordsCount;
+							records[key].mrai_owed = Math.floor(records[key].percentage_owed * (total_mrai / (24 / hour_interval)));
+							records[key].mrai_owed_raw = records[key].mrai_owed + '' + Globals.rawMrai;
+							//console.log(records[key]);
+
+							Totals.create(records[key], function(err, resp) {
+
+								// processed
+								if(!err) {
+									console.log(JSON.stringify(resp));
+								} else { // not processed
+									console.log(JSON.stringify(err));
+								}
+							});
 						}
 					} 
 
@@ -222,7 +254,7 @@ module.exports = {
 						MraiFromRawService.convert(results[0].total_mrai, function(err, resp) {
 
 							if(!err) {
-								callback(null, resp.response.amount);
+								callback(null, { total_mrai: resp.response.amount, hour_interval: results[0].hour_interval });
 							} else {
 								callback(err, null);
 							}

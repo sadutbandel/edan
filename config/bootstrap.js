@@ -25,17 +25,20 @@ module.exports.bootstrap = function(cb) {
 
       /*
       Start Time:
-      Human time (GMT): Sun, 10 Apr 2016 00:00:00 GMT
-      Human time (your time zone): 4/9/2016, 5:00:00 PM
+      Epoch timestamp: 1460271600
+      Timestamp in milliseconds: 1460271600000
+      Human time (your time zone): 4/10/2016, 12:00:00 AM
+      Human time (GMT): Sun, 10 Apr 2016 07:00:00 GMT
        */
-      var start = 1460246400; 
+      var start = 1460271600; 
 
       /*
-      End Time:
-      Human time (GMT): Mon, 11 Apr 2016 00:00:00 GMT
-      Human time (your time zone): 4/10/2016, 5:00:00 PM
+      Epoch timestamp: 1460358000
+      Timestamp in milliseconds: 1460358000000
+      Human time (your time zone): 4/11/2016, 12:00:00 AM
+      Human time (GMT): Mon, 11 Apr 2016 07:00:00 GMT
       */
-      var end = 1460332800; 
+      var end = 1460358000; 
 
       // things turn into arrays inside this object
       var arrays = {};
@@ -112,23 +115,26 @@ module.exports.bootstrap = function(cb) {
             ip: randomArrVal(arrays.ips),
             sessionID: randomArrVal(arrays.sessions),
             status: buildStatus(),
-            modified: randNum(start, end-1)
+            modified: randNum(start, end)
          },function(err, resp){if(!err){}else {}});
       }     
-   };loadDistribution();
+   };
+   //loadDistribution();
 
+   // calculate counts by account
    processTotals = function() {
       Totals.process(function(err, resp) {
             
          if(!err) {
-            console.log('processTotals success')
+            console.log('processTotals success');
             console.log(JSON.stringify(resp));
          } else {
-            console.log('processTotals error')
+            console.log('processTotals error');
             console.log(JSON.stringify(err));
          }
       });
-   };//processTotals();
+   };
+   //processTotals();
 
    // Load the TrackCounter collection with sample data.
    loadTrackCounter = function() {
@@ -160,7 +166,8 @@ module.exports.bootstrap = function(cb) {
             console.log(JSON.stringify(err));
          }
       });
-   };//loadTrackCounter();
+   };
+   //loadTrackCounter();
       
    // (this is rarely done)
    loadPayoutSchedule = function() {
@@ -182,7 +189,8 @@ module.exports.bootstrap = function(cb) {
             console.log(JSON.stringify(err));
          }
       });
-   };//loadPayoutSchedule();
+   };
+   //loadPayoutSchedule();
 
    /*****************************
    ****** END SCRIPT TESTS ******
