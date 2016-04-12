@@ -15,7 +15,7 @@ module.exports = {
 				response: req.body.response,
 				modified: TimestampService.unix(),
 				sessionID: req.sessionID,
-				sessionStarted: req.session.started,
+				sessionStarted: req.session.started, // are we using this?
 				ip: req.headers['x-forwarded-for']
 			};
 

@@ -1,7 +1,14 @@
 /**
 * Totals.js
 *
+* WARNING: This must contain a compound index to prevent duplicate records.
+* 		   Anytime the collection is destroyed, the index must be recreated
+* 		   using:
+* 		   
+* 		   db.totals.createIndex( { account: 1, ended_unix: 1 }, { unique: true } )
+* 		   
 * @description :: Count the total distribution records per account
+* 
 */
 
 module.exports = {
@@ -15,13 +22,13 @@ module.exports = {
 			unique: false
 		},
 		// start of time range of the Distribution records considered
-		start_unix: {
+		started_unix: {
 			type:'integer',
 			required:true,
 			unique: false
 		},
 		// end of time range of the Distribution records considered
-		end_unix: {
+		ended_unix: {
 			type:'integer',
 			required:true,
 			unique: false
@@ -68,20 +75,22 @@ module.exports = {
 	calculate: function(callback) {
 
 		// First, find the last time we ran the calculation script
-		TrackCounter.last(function(err, resp) {
+		DistributionTracker.last(function(err, resp) {
 	        
 	        // this is used to store per individual account in Totals collection
 	      	if(!err) {
 
-	      		var lastHour = TimestampService.lastHour();
-	      		var lastRan;
+	      		var lastHour = TimestampService.lastHour(),
+	      		lastRan;
 
 	      		// if there are results (99.9% of cases)
 	      		if(resp[0]) {
-	      			lastRan = resp[0].end_unix; // the last time the calculation script ended
+	      			lastRan = resp[0].ended_unix; // the last time the calculation script ended
 	      		} else { // 1st-time running script, assume all records to start up until last hour.
 	      			lastRan = 0; // 0 is the beginning of unix time.
 	      		}
+
+	      		var hoursSinceLastRan = (lastHour - lastRan) / 60 / 60;
 
 				// Find records where status is 'accepted' and the modified time is greater than 
 				// or equal to the end time of when the last time totals were calculated but also
@@ -134,7 +143,7 @@ module.exports = {
 								 */
 								else {
 									// store results in Totals.
-									callback(null, { lastHour: lastHour, lastRan: lastRan, results: results });
+									callback(null, { lastHour: lastHour, lastRan: lastRan, hoursSinceLastRan: hoursSinceLastRan, results: results });
 								}
 							} else {
 								callback({ error: err }, null);
@@ -145,18 +154,20 @@ module.exports = {
 					}
 				});
 			} else {
-
 	         	callback({ error: err }, null);
 	      	}
 	   	});
 	},
 
 	/**
-	 * Calculate successes by account since the last time we've run the script.
+	 * Calculate totals successes by account since the last time we ran this
+	 *
+	 * #1 - Find the total amount of Mrai currently being paid out
+	 * #2 - Calculate total success records by account & find percentages / mrai owed
+	 * #3 - Store record in DistributionTracker of the time range we ran this for future reference
 	 */
-	process: function(callback) {
+	processTotals: function(callback) {
 
-		// Find the total amount of Mrai currently being paid out
 		Totals.totalMrai(function(err, resp) {
 
 			/**
@@ -165,8 +176,7 @@ module.exports = {
 			 */
 			if(!err) {
 
-				var total_mrai = resp.total_mrai,
-				hour_interval = resp.hour_interval;
+				var total_mrai = resp.total_mrai;
 
 				Totals.calculate(function(err, resp) {
 
@@ -176,8 +186,11 @@ module.exports = {
 					 */
 					if(!err) {
 
-						var recordsCount = 0;
-						var records = [];
+						var hoursSinceLastRan = resp.hoursSinceLastRan,
+						hourly_payout_amount = (total_mrai / 24) * hoursSinceLastRan,
+						recordsCount = 0,
+						accountsCount = 0,
+						records = [];
 
 						/**
 						 * Iterate through each account and their success count
@@ -191,22 +204,24 @@ module.exports = {
 								receipt_hash: 0, // filled upon payout
 								account: resp.results[key]._id,
 								total_count: resp.results[key].count,
-								start_unix: resp.lastRan,
-								end_unix: resp.lastHour
+								started_unix: resp.lastRan,
+								ended_unix: resp.lastHour
 							};
 
+							accountsCount++;
 							records.push(payload);
 							recordsCount += payload.total_count;
 						}
 
 						/**
-						 * Iterate through all records and calculate percentage owed
+						 * Iterate through all records, calculate percentage / mrai owed & create record
+						 * Totals is compound-unique-indexed on ended_unix time
 						 */
 						for(key in records) {
+
 							records[key].percentage_owed = records[key].total_count / recordsCount;
-							records[key].mrai_owed = Math.floor(records[key].percentage_owed * (total_mrai / (24 / hour_interval)));
+							records[key].mrai_owed = Math.floor(records[key].percentage_owed * hourly_payout_amount);
 							records[key].mrai_owed_raw = records[key].mrai_owed + '' + Globals.rawMrai;
-							//console.log(records[key]);
 
 							Totals.create(records[key], function(err, resp) {
 
@@ -218,6 +233,26 @@ module.exports = {
 								}
 							});
 						}
+
+						/**
+						 * Create a new DistributionTracker record for the calculations in the given time-frame
+						 */
+						var payload = {
+							created_unix: TimestampService.unix(),
+							started_unix: resp.lastRan,
+							ended_unix: resp.lastHour,
+							accounts: accountsCount,
+							successes: recordsCount
+						}
+						
+						DistributionTracker.create(payload, function(err, resp) {
+							// processed
+							if(!err) {
+								callback(null, resp);
+							} else {
+								callback(err, null);
+							}
+						});
 					} 
 
 					/**
@@ -248,42 +283,13 @@ module.exports = {
 		PayoutSchedule.native(function(err, collection) {
 			if (!err){
 
-				collection.find({ expired: false }).limit(1).sort({'$natural': -1}).toArray(function (err, results) {
+				collection.find().limit(1).sort({'$natural': -1}).toArray(function (err, results) {
 					if (!err) {
 
 						MraiFromRawService.convert(results[0].total_mrai, function(err, resp) {
 
 							if(!err) {
 								callback(null, { total_mrai: resp.response.amount, hour_interval: results[0].hour_interval });
-							} else {
-								callback(err, null);
-							}
-						});
-					} else {
-						callback(err, null);
-					}
-				});
-			} else {
-				callback(err, null);
-			}
-   		});
-	},
-
-	/**
-	 * Find the complete count of totals for a grand total
-	 */
-	grandTotal: function(callback) {
-
-		PayoutSchedule.native(function(err, collection) {
-			if (!err){
-
-				collection.find({ expired: false }).limit(1).sort({'$natural': -1}).toArray(function (err, results) {
-					if (!err) {
-
-						MraiFromRawService.convert(results[0].total_mrai, function(err, resp) {
-
-							if(!err) {
-								callback(null, resp.response.amount);
 							} else {
 								callback(err, null);
 							}

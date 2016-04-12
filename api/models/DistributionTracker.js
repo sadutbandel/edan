@@ -1,7 +1,7 @@
 /**
-* TrackCounter.js
+* DistributionTracker.js
 *
-* @description :: Tracks the time-ranges that Totals.js ran to save counts.
+* @description :: Keeps track of distribution calculations
 * 
 */
 
@@ -9,23 +9,22 @@ module.exports = {
 
 	attributes: {
 		
-		// created unixtime
 		created_unix: {
 			type:'integer',
 			required:true,
 			unique: false
 		},
-		// start unixtime the counter used
-		start_unix: {
+		// started unixtime the counter used
+		started_unix: {
 			type:'integer',
 			required:true,
 			unique: false
 		},
 		// end unixtime the counter used
-		end_unix: {
+		ended_unix: {
 			type:'integer',
 			required:true,
-			unique: false
+			unique: true
 		},
 		// the total number of xrb_accounts (distinct) for this counted period of time
 		accounts: {
@@ -42,15 +41,16 @@ module.exports = {
 	},
 
 	/**
-	 * Grab the most recent tracked count
+	 * Grab the most recent tracked distribution
 	 */
 	last: function(callback) {
 
-		TrackCounter.native(function(err, collection) {
+		DistributionTracker.native(function(err, collection) {
 			if (!err){
 
 				collection.find().limit(1).sort({'$natural': -1}).toArray(function (err, results) {
 					if (!err) {
+
 						/**
 						 * No matches found. (that's fine) CONTINUE request
 						 */

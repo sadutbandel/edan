@@ -25,20 +25,17 @@ module.exports.bootstrap = function(cb) {
 
       /*
       Start Time:
-      Epoch timestamp: 1460271600
-      Timestamp in milliseconds: 1460271600000
-      Human time (your time zone): 4/10/2016, 12:00:00 AM
-      Human time (GMT): Sun, 10 Apr 2016 07:00:00 GMT
+      Human time (your time zone): 4/11/2016, 12:00:00 AM
+      Human time (GMT): Sun, 11 Apr 2016 07:00:00 GMT
        */
-      var start = 1460271600; 
+      var start = 1460358000; 
 
       /*
-      Epoch timestamp: 1460358000
-      Timestamp in milliseconds: 1460358000000
-      Human time (your time zone): 4/11/2016, 12:00:00 AM
-      Human time (GMT): Mon, 11 Apr 2016 07:00:00 GMT
+      End Time:
+      Human time (your time zone): 4/12/2016, 12:00:00 AM
+      Human time (GMT): Mon, 12 Apr 2016 07:00:00 GMT
       */
-      var end = 1460358000; 
+      var end = 1460444400; 
 
       // things turn into arrays inside this object
       var arrays = {};
@@ -54,7 +51,6 @@ module.exports.bootstrap = function(cb) {
       // return a random between two amounts
       randNum = function(min, max) {
          return Math.floor(Math.random()*(max-min+1)+min);
-         //return Math.floor((Math.random() * max) + min);
       }
 
       // create a fake ip
@@ -74,7 +70,6 @@ module.exports.bootstrap = function(cb) {
 
       // 5% chance to be marked as a violation, 95% chance to be marked as accepted.
       buildStatus = function() {
-
          if(randNum(0,100)>5) {
             return 'accepted';
          } else {
@@ -87,10 +82,10 @@ module.exports.bootstrap = function(cb) {
          return array[Math.floor(Math.random() * array.length)];
       }
 
-      // generate 1500 random accounts, sessions, and ips.
+      // generate 1000 random accounts, sessions, and ips.
       // realistically we'd have more IPs and what not, but
       // this test is purely for counting / calculating payouts
-      var amount = 1500;
+      var amount = 1000;
 
       for(i = 1; i < amount; i++) {
          arrays.accounts.push(buildAccount());
@@ -123,7 +118,7 @@ module.exports.bootstrap = function(cb) {
 
    // calculate counts by account
    processTotals = function() {
-      Totals.process(function(err, resp) {
+      Totals.processTotals(function(err, resp) {
             
          if(!err) {
             console.log('processTotals success');
@@ -136,47 +131,91 @@ module.exports.bootstrap = function(cb) {
    };
    //processTotals();
 
-   // Load the TrackCounter collection with sample data.
-   loadTrackCounter = function() {
-      // Insert some test data to create mongo collection
-      var payload = {
-         created_unix: TimestampService.unix(),
-         start_unix: 0, // 1st record ever would have 0 here.
-         end_unix: 1460232000, // 1pm
-         accounts: 149,
-         successes: 2943
-      };
-      /*
-      var payload = {
-         //created_unix: TimestampService.unix(),
-         created_unix: 1460160009, // 12:00:09am
-         start_unix: 1460138400, // 6:00pm
-         end_unix: 1460160000, // 12:00am
-         accounts: 99,
-         successes: 2231
-      };
-      */
-      TrackCounter.create(payload, function(err, resp) {
+   // process payouts
+   // 
+   processPayouts = function() {
+
+      /**
+       * Find any totals records where they are no paid yet (no receipt_hash)
+       */
+      Totals.find({ receipt_hash: "0" }, function(err, resp) {
             
          // processed
          if(!err) {
-            console.log(JSON.stringify(resp));
 
+            console.log(resp);
+
+            /**
+             * Iterate through all the non-paid records results and create a payload to send them mrai
+             */
+            for(key in resp) {
+
+               // retain this record's IP for 
+               var recordID = resp[key].id;
+               console.log(recordID);
+
+               var payload = {
+                  amount: resp[key].mrai_owed_raw,
+                  wallet: sails.config.wallet,
+                  source: Globals.faucetAddress,
+                  destination: resp[key].account
+               };
+
+               /*
+               SendRaiService.sendXXXXXXXXXXX(payload, function(err, resp) {
+                  if (!err) {
+
+                     // mark totals with receipt hash and paid unix time.
+
+                     Totals.update()
+
+
+                     callback(null, resp);
+                  } else {
+                     callback(err, null);
+                  }
+               });
+               */
+
+               // faking a success response from SendRaiService (above)
+               var testResp = {
+                  statusCode: 200,
+                  hash:'YI123UB123IUG125G1205102851G2508G125'
+               };
+
+               if (!err) {
+
+                  /**
+                   * Update this totals record after we verify the send has completed.
+                   * @type {Object}
+                   */
+                  var payload = {
+                     paid_unix : TimestampService.unix(),
+                     receipt_hash : testResp.hash,
+                  };
+
+                  Totals.update({ id: recordID }, payload).exec(function (err, updated){
+                     if (!err) {
+                        console.log(updated[0]);
+                     } else {
+                        console.log(err);
+                     }
+                  });
+               }// end dummy resp
+            }// end FOR loop
          } else { // not processed
             console.log(JSON.stringify(err));
          }
       });
-   };
-   //loadTrackCounter();
-      
-   // (this is rarely done)
+   }
+   processPayouts();
+
+   // This can be a script
    loadPayoutSchedule = function() {
 
       var payload = {
          created_unix: TimestampService.unix(),
-         total_mrai: '450000000000000000000000000000000000', //450k
-         hour_interval: 6,
-         expired: false
+         total_mrai: '450000000000000000000000000000000000' //450k
       };
 
       PayoutSchedule.create(payload, function(err, resp) {
