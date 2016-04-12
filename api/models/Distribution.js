@@ -83,8 +83,32 @@ module.exports = {
 		 				DistributionService.process(parameters, function(error, resp) {
 
 		 					if(!error) {
-		 						callback(null, resp);
-		 					} else {
+
+		 						/**
+		 						 * All checks passed and distribution records processed successfully!
+		 						 *
+		 						 * At this point resp = { until: <timestamp to wait until, 6 seconds in future?>, message: 'wait' }
+		 						 * 
+		 						 */
+ 								Totals.calculate(parameters.account, function(err, results) {
+
+									/**
+									 * Results found! (GOOD) CONTINUE request
+									 * We have a list of accounts with counts for successfully solved captchas
+									 */
+									if(!err) {
+
+										/* store total count for period, time since last period, time last ran */
+										resp.count = results.results[0].count;
+										resp.lastRan = results.lastRan;
+										resp.hoursSinceLastRan = results.hoursSinceLastRan;
+			 							callback(null, resp);
+			 						} 
+			 						else {
+			 							callback(err, null);
+			 						}
+			 					});
+		 					} else {	
 		 						
 		 						/**
 				 				 * Validation fail OR Violation occurred...

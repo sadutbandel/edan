@@ -72,25 +72,13 @@ module.exports = {
 	/**
 	 * Count total success records per account
 	 */
-	calculate: function(callback) {
+	calculate: function(account, callback) {
 
 		// First, find the last time we ran the calculation script
 		DistributionTracker.last(function(err, resp) {
 	        
 	        // this is used to store per individual account in Totals collection
 	      	if(!err) {
-
-	      		var lastHour = TimestampService.lastHour(),
-	      		lastRan;
-
-	      		// if there are results (99.9% of cases)
-	      		if(resp[0]) {
-	      			lastRan = resp[0].ended_unix; // the last time the calculation script ended
-	      		} else { // 1st-time running script, assume all records to start up until last hour.
-	      			lastRan = 0; // 0 is the beginning of unix time.
-	      		}
-
-	      		var hoursSinceLastRan = (lastHour - lastRan) / 60 / 60;
 
 				// Find records where status is 'accepted' and the modified time is greater than 
 				// or equal to the end time of when the last time totals were calculated but also
@@ -101,19 +89,35 @@ module.exports = {
 					'$and': [
 						{
 							modified : { 
-			 					'$lt': lastHour
+			 					'$lt': resp.lastHour
 			 				}
 			 			},
 						{
 							modified : { 
-			 					'$gte': lastRan
+			 					'$gte': resp.lastRan
 			 				}
 			 			},
 			 			{ 
 			 				status: 'accepted'
-			 			}
+			 			},
 		 			]
 				};
+
+				// if account is -1, we are filtering for all accounts and not a single one.
+				// if it's NOT -1, then add more AND requirements for our mongo query. this let's us
+				// recycle the totals.calculate function being used for all users, for just 1 user.
+				if(account !== -1) {
+					/* 
+						Delete the 1st element in the array, so we can replace it LESS THAN OR EQUAL TO below.
+						This will remain LESS THAN for calculations for Totals though because obviously if the clock rolls over to the next 
+						hour, we shouldn't count any 0-second records as apart of the prior hour... This is only for including in the count 
+						we show users immediately after they submit the Distribution form and it is successful.
+					*/
+					delete match['$and'][0].modified['$lt']; // deletes the 'modified' property inside the first object / array element.
+					match['$and'].push({ account: account }); // add the single account to search for
+					match['$and'][0].modified['$lte'] = TimestampService.unix(); // overwrite less-than last hour with less than now for a realtime count	
+				}
+
 				var group = {
 					_id: '$account',
 					count: { 
@@ -142,8 +146,9 @@ module.exports = {
 								 * If matches ARE found, then we should get a list of accounts with counts.
 								 */
 								else {
-									// store results in Totals.
-									callback(null, { lastHour: lastHour, lastRan: lastRan, hoursSinceLastRan: hoursSinceLastRan, results: results });
+									// add 'results' property to our return response object
+									resp.results = results;
+									callback(null, resp);
 								}
 							} else {
 								callback({ error: err }, null);
@@ -178,7 +183,7 @@ module.exports = {
 
 				var hourly_mrai = resp.hourly_mrai;
 
-				Totals.calculate(function(err, resp) {
+				Totals.calculate(-1, function(err, resp) {
 
 					/**
 					 * Results found! (GOOD) CONTINUE request
