@@ -195,7 +195,7 @@
 						if(data.hoursSinceLastRan) {
 							$scope.hoursSinceLastRan = data.hoursSinceLastRan;
 						}
-						
+
 						// if there is an 'until' time to wait for, run dynamic
 						if(data.until) {
 							$scope.wait(data.until); // a unique, dynamic function

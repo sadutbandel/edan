@@ -3,7 +3,7 @@
 	<!-- title -->
 	<div class="row mobile only">
 		<div class="fourteen wide computer sixteen wide tablet column">
-			<h1>Distribution</h1>
+			<h1>Distribution Faucet</h1>
 		</div>
 	</div>
 
@@ -83,52 +83,58 @@
 			</div>
 
 			<!-- Statistics -->
-			<div ng-show="count || hoursSinceLastRan" class="ng-hide">
-				<div class="ui mini horizontal statistic">
-					<div class="value">
-						{{ count }}
+			<div ng-show="count || hoursSinceLastRan" class="ten wide computer sixteen wide tablet column ng-hide">
+				<div class="ui segment">
+					<h4 class="ui header">Your Metrics:</h4>
+					<div class="ui mini green horizontal statistic">
+						<div class="value">
+							{{ count }}
+						</div>
+						<div class="label">
+							<span ng-show="count > 1" class="ng-hide">successes</span><span ng-show="count === 1" class=-"ng-hide">success</span> this period
+						</div>
 					</div>
-					<div class="label">
-						successful solves this period
-					</div>
-				</div>
-				<div class="ui tiny horizontal statistic">
-					<div class="value">
-						{{ hoursSinceLastRan }}
-					</div>
-					<div class="label">
-						hours since we last distributed
+					<div ng-show="hoursSinceLastRan !== 'Never'" class="ng-hide ui tiny horizontal statistic">
+						<div class="value">
+							{{ hoursSinceLastRan }}
+						</div>
+						<div class="label">
+							hours since last distribution
+						</div>
 					</div>
 				</div>
 			</div>
 
-			<div ng-show="percentage_distributed" class="twelve wide computer ten wide tablet column ng-hide">
+			<div ng-show="percentage_distributed" class="fourteen wide computer sixteen wide tablet column ng-hide">
 
-				<!-- Coin Availability -->
-				<div class="ui small statistics">
-					<div class="statistic">
-						<div class="value">
-							{{ available_supply_absolute | number }}
+				<div class="ui piled segment">
+					<h4 class="ui header">Faucet Metrics:</h4>
+					<!-- Coin Availability -->
+					<div class="ui small statistics">
+						<div class="statistic">
+							<div class="value">
+								{{ available_supply_absolute | number }}
+							</div>
+							<div class="label">
+								Mrai
+							</div>
 						</div>
-						<div class="label">
-							Mrai
+						<div class="statistic">
+							<div class="value">
+								{{ percentage_distributed }}%
+							</div>
+							<div class="label">
+								Distributed (<a target="_blank" href="/api/available_supply" target="_bank">API</a>)
+							</div>
 						</div>
 					</div>
-					<div class="statistic">
-						<div class="value">
-							{{ percentage_distributed }}%
-						</div>
-						<div class="label">
-							Distributed (<a target="_blank" href="/api/available_supply" target="_bank">API</a>)
-						</div>
-					</div>
-				</div>
 
-				<br style="clear:both;"/>
-				
-				<!-- Distributed Progress Bar -->
-				<div class="ui large active green progress" id="distributed_perc">
-					<div class="bar"></div>
+					<br style="clear:both;"/>
+					
+					<!-- Distributed Progress Bar -->
+					<div class="ui large active green progress" id="distributed_perc">
+						<div class="bar"></div>
+					</div>
 				</div>
 			</div>
 		</div>

@@ -17,22 +17,19 @@
 
 		$scope.platforms = [
 			{
-				name: 'OSX',
 				icon: 'apple',
 				link: githubLink + 'Darwin.dmg'
 			},
 			{
-				name: 'Win32',
+				name: '64-bit',
+				icon: 'windows',
+				link: githubLink + 'win64.exe'
+			},			{
+				name: '32-bit',
 				icon: 'windows',
 				link: githubLink + 'win32.exe'
 			},
 			{
-				name: 'Win64',
-				icon: 'windows',
-				link: githubLink + 'win64.exe'
-			},
-			{
-				name: 'Linux',
 				icon: 'linux',
 				link: githubLink + 'Linux.tar.bz2'
 			}

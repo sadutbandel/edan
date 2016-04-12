@@ -3,27 +3,28 @@
 	<!-- title -->
 	<div class="row mobile only">
 		<div class="fourteen wide computer sixteen wide tablet column">
-			<h1>Wallet</h1>
+			<h1>Wallet Download</h1>
 		</div>
 	</div>
 
 	<!-- content -->
-	<div class="eight wide computer sixteen wide tablet column">
+	<div class="ten wide computer sixteen wide tablet centered column">
 
 		<div class="ui orange below label">
-			Select a platform
+			Select your platform
 		</div>
 
 		<br style="clear:both"/><br/>
 
-		<div class="ui buttons">
-			<a
-			ng-repeat="platform in platforms"
-			class="ui button" 
-			target="_blank" 
-			href="{{ platform.link }}">
-				<i class="icon" ng-class="platform.icon"></i>{{ platform.name }}
-			</a>
+		<div class="ui basic buttons">
+  			<a ng-repeat="platform in platforms" class="ui button" target="_blank" href="{{ platform.link }}">
+  				<i class="icon" ng-class="platform.icon"></i> {{ platform.name }}
+  			</a>
 		</div>
+
+		<br style="clear:both"/><br/>
+		<a class"fluid ui button" href="https://github.com/clemahieu/raiblocks/releases" target="_blank">
+			<i class="github icon"></i>View Release Notes
+		</a>
 	</div>
 </div>

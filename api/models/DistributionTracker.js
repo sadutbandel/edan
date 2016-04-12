@@ -54,7 +54,8 @@ module.exports = {
 					if (!err) {
 
 						var lastHour = TimestampService.lastHour(),
-						lastRan;
+						lastRan,
+						hoursSinceLastRan;
 
 			      		// there are always results, unless it's the first time we're running this
 			      		if(results[0]) {
@@ -63,7 +64,12 @@ module.exports = {
 			      			lastRan = 0; // 0 is the beginning of unix time.
 			      		}
 
-			      		var hoursSinceLastRan = (lastHour - lastRan) / 60 / 60;
+			      		// never ran before
+			      		if(lastRan === 0) {
+			      			hoursSinceLastRan = 'Never';
+			      		} else {
+			      			hoursSinceLastRan = (lastHour - lastRan) / 60 / 60;
+			      		}
 
 			      		var response = {
 			      			hoursSinceLastRan: hoursSinceLastRan,
