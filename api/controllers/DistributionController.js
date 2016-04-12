@@ -8,6 +8,7 @@ module.exports = {
 
 	create: function (req, res) {
 
+		// ensure session is set. non-users won't get sessions (command-line CURLs for example)
 		if(req.session.started) {
 
 			this.parameters = {
@@ -15,7 +16,7 @@ module.exports = {
 				response: req.body.response,
 				modified: TimestampService.unix(),
 				sessionID: req.sessionID,
-				sessionStarted: req.session.started, // are we using this?
+				sessionStarted: req.session.started,
 				ip: req.headers['x-forwarded-for']
 			};
 
@@ -30,7 +31,7 @@ module.exports = {
 				}
 			});
 		} else {
-			res.send('Goodbye'); // prevent curl POSTs, they don't have session start times from visiting the site.
+			res.send('Goodbye');
 		}
 	}
 };

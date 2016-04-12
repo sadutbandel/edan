@@ -11,20 +11,15 @@ module.exports = {
 
 			if(!err) {
 
-				console.log(TimestampService.utc() + ' [PaymentFinishService.js] (!err) rpc account_balance... ' + JSON.stringify(resp));
-
 				// pass balance of account and account to recapture service
 				PaymentRecaptureService.init({ account: account, balance: resp.response.balance }, function(err, resp) {
 
 					if(!err) {
 
-						console.log(TimestampService.utc() + ' [PaymentFinishService.js] (!err) payment recaptured! ' + JSON.stringify(resp));
-
 						// end payment account
 						PaymentEndService.init(account, function(err, resp) {
 
 							if(!err) {
-								console.log(TimestampService.utc() + ' [PaymentFinishService.js] (!err) payment_end success... ' + JSON.stringify(resp));
 								callback(null, resp);
 							} else {
 								console.log(TimestampService.utc() + ' [PaymentFinishService.js] (err) payment_end error... ' + JSON.stringify(err));

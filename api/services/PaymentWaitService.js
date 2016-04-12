@@ -1,7 +1,8 @@
 /**
- * payment_wait RPC
+ * RPC for 'payment_wait'
  *
  * Wait for payment to arrive in 'account' or until 'timeout' milliseconds have elapsed.
+ * After timeout has been exceeded, it's on the application to paymentWait again, which it does.
  * 
  * Request:
  * 		{ "action": "payment_wait", "account": "U63Kt3B7yp2iQB4GsVWriGv34kk2qwhT7acKvn8yWZGdNVesJ8", "amount": "1", "timeout": "1000" }

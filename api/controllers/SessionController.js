@@ -1,21 +1,21 @@
 /**
  * SessionController
  *
- * @description :: Responsible for creating a 1-minute timer on all new sessions
- * @help        :: See http://sailsjs.org/#!/documentation/concepts/Controllers
+ * @description :: Responsible for creating an initial-timer on all new sessions
+ *                 Returning users don't require a new session.started time.
+ *                 Distribution uses this timer to ensure new-sessions can't be
+ *                 created at a whim for use in the distribution form.
  */
 
 module.exports = {
 	
 	append: function (req, res) {
 
-		// create a new session timer if it does not exist.
-		// this is important because it's a requirement for Distribution
 		if(!req.session.started) {
 			req.session.started = TimestampService.unix();
 		}
 
-		// return the app view
+		// return the user to the SPA
 		res.view('application');
 	}
 };

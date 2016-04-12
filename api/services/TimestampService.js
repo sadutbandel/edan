@@ -47,4 +47,4 @@ module.exports = {
 		d.setSeconds(0);
 		return TimestampService.unix(d.getTime());
 	}
-}
+};

@@ -1,4 +1,3 @@
-
 /**
  * payment_init RPC
  *

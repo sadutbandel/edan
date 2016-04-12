@@ -6,6 +6,7 @@
 
 module.exports = {
 	
+	// override the GET/fetch route/action
 	fetch: function (req, res) {
 
 		AvailableSupplyService.fetch(function(err, resp) {

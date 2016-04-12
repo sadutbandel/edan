@@ -2,6 +2,7 @@
 
 This [SPA](https://en.wikipedia.org/wiki/Single-page_application) was built using:
 
+- [Node.JS](https://nodejs.org)
 - [SailsJS](http://sailsjs.org)
 - [AngularJS](https://angularjs.org)
-- [Bootstrap 3](http://getbootstrap.com)
+- [Semantic-UI](http://semantic-ui.com/)

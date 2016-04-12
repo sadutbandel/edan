@@ -11,9 +11,6 @@
 
 module.exports.bootstrap = function(cb) {
 
-   console.log('Current Timestamp');
-   console.log(TimestampService.unix());
-
    /*******************************
    ****** START SCRIPT TESTS ******
    *******************************/
@@ -153,7 +150,7 @@ module.exports.bootstrap = function(cb) {
          }
       });
    };
-   processTotals();
+   //processTotals();
 
    // process payouts
    // 

@@ -1,8 +1,8 @@
 /**
  * PaymentWaitController
  *
- * @description :: 
- * @help        :: See http://sailsjs.org/#!/documentation/concepts/Controllers
+ * @description :: Begin waiting on a payment account to receive a payment.
+ *              
  */
 
 module.exports = {
@@ -10,8 +10,8 @@ module.exports = {
 	create: function(req, res) {
 		
 		if(req.session.payment) {
-			PaymentWaitService.init(req.session.payment.account, function(err, resp) {
 
+			PaymentWaitService.init(req.session.payment.account, function(err, resp) {
 				if(!err) {
 
 					if(resp.statusCode === 200) {
@@ -26,13 +26,11 @@ module.exports = {
 							// without needing to wait for the server to complete the prior
 							delete req.session.payment;
 							resp.response.paid = true;
-							
+							res.send(resp);
 						} else {
 							resp.response.paid = false;
+							res.send(resp);
 						}
-
-						console.log(TimestampService.utc() + ' [PaymentWaitController.js] (!err) payment_wait success... ' + JSON.stringify(resp));
-						res.send(resp);
 					} else {
 						console.log(TimestampService.utc() + ' [PaymentWaitController.js] (err) payment_wait error... ' + JSON.stringify(resp));
 						res.send('Non-200 Response Code' + resp.statusCode);// <<<<<<<< ???????????????????????????????

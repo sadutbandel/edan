@@ -2,30 +2,26 @@
 /**
  * DemoController
  *
- * @description :: Server-side logic for managing demo payments
- * @help        :: See http://sailsjs.org/#!/documentation/concepts/Controllers
+ * @description :: Simulate a payment for the end-user by sending a 1 Mrai payment to the payment account
  */
 
 module.exports = {
 
-	// override the POST/create route/action for this API call
+	// override the POST/create route/action
 	create: function (req, res) {
 
-		// 2 required parameters (account, response)
 		this.parameters = {
 			account: req.session.payment.account,
 		};
 
-		// send rai to account
 		SimulateRaiPaymentService.send(this.parameters, function(err, resp) {
 			
 			if(!err) {
-				console.log(TimestampService.utc() + ' [DemoController.js] (!err) sending free rai... ' + JSON.stringify(resp));
-				res.send(resp); // demo payment made!
+				res.send(resp);
 
 			} else {
 				console.log(TimestampService.utc() + ' [DemoController.js] (err) sending free rai... ' + JSON.stringify(err));
-				res.send(err); // demo payment not made...
+				res.send(err);
 			}
 		});
 	}

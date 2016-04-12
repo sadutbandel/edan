@@ -17,16 +17,15 @@ module.exports = {
 				if(resp.statusCode === 200) {
 
 					delete req.session.payment;
-					console.log(TimestampService.utc() + ' [PaymentFinishController.js] (!err) finishing payment... ' + JSON.stringify(resp));
 					res.send(resp);
 				}
 				else {
-					console.log(TimestampService.utc() + ' [PaymentFinishController.js] (!err) finishing payment... ' + JSON.stringify(resp));
+					console.log(TimestampService.utc() + ' [PaymentFinishController.js] (err) finishing payment... ' + JSON.stringify(resp));
 					res.send('Non-200 Response Code' + resp.statusCode);// <<<<<<<< ???????????????????????????????
 				}
 				
 			} else {
-				console.log(TimestampService.utc() + ' [PaymentFinishController.js] (!err) finishing payment... ' + JSON.stringify(err));
+				console.log(TimestampService.utc() + ' [PaymentFinishController.js] (err) finishing payment... ' + JSON.stringify(err));
 				res.send(err);
 			}
 		});

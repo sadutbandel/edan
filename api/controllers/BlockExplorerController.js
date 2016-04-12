@@ -1,18 +1,17 @@
 /**
  * BlockExplorerController
  *
- * @description :: Server-side logic for managing blockexplorers
- * @help        :: See http://sailsjs.org/#!/documentation/concepts/Controllers
+ * @description :: Allow exploration of blocks and eventually accounts and more.
  */
 
 module.exports = {
 
+	// override the POST/create route/action
 	create: function(req, res) {
 
 		RetrieveBlockService.init(req.body.hash, function(err, resp) {
 
 			if(!err) {
-				console.log(TimestampService.utc() + ' [BlockExplorerController.js] (!err) retrieving block... ' + JSON.stringify(resp));
 				res.send(resp);
 			} else {
 				console.log(TimestampService.utc() + ' [BlockExplorerController.js] (err) retrieving block... ' + JSON.stringify(err));

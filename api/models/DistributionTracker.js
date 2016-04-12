@@ -42,6 +42,8 @@ module.exports = {
 
 	/**
 	 * Grab the most recent tracked distribution
+	 *
+	 * Returns lastHour, lastRan, & hoursSinceLastRan
 	 */
 	last: function(callback) {
 
@@ -51,20 +53,25 @@ module.exports = {
 				collection.find().limit(1).sort({'$natural': -1}).toArray(function (err, results) {
 					if (!err) {
 
-						/**
-						 * No matches found. (that's fine) CONTINUE request
-						 */
-						if(Object.keys(results).length === 0) {
-							callback(null, true);
-						}
-						/**
-						 * Matches found. (that's fine) CONTINUE request
-						 * 
-						 * If matches ARE found, then we should get a list of accounts with counts.
-						 */
-						else {
-							callback(null, results);
-						}
+						var lastHour = TimestampService.lastHour(),
+						lastRan;
+
+			      		// there are always results, unless it's the first time we're running this
+			      		if(results[0]) {
+			      			lastRan = results[0].ended_unix; // the last time the calculation script ended
+			      		} else { // 1st-time running script, assume all records to start up until last hour.
+			      			lastRan = 0; // 0 is the beginning of unix time.
+			      		}
+
+			      		var hoursSinceLastRan = (lastHour - lastRan) / 60 / 60;
+
+			      		var response = {
+			      			hoursSinceLastRan: hoursSinceLastRan,
+			      			lastHour: lastHour,
+			      			lastRan: lastRan
+			      		};
+
+			      		callback(null, response);
 					} else {
 						callback(err, null);
 					}

@@ -43,5 +43,4 @@
 			callback(err, null);
 		});
 	}
-	
-}
+};
