@@ -82,6 +82,26 @@
 				</div>
 			</div>
 
+			<!-- Statistics -->
+			<div ng-show="count || hoursSinceLastRan" class="ng-hide">
+				<div class="ui mini horizontal statistic">
+					<div class="value">
+						{{ count }}
+					</div>
+					<div class="label">
+						successful solves this period
+					</div>
+				</div>
+				<div class="ui tiny horizontal statistic">
+					<div class="value">
+						{{ hoursSinceLastRan }}
+					</div>
+					<div class="label">
+						hours since we last distributed
+					</div>
+				</div>
+			</div>
+
 			<div ng-show="percentage_distributed" class="twelve wide computer ten wide tablet column ng-hide">
 
 				<!-- Coin Availability -->

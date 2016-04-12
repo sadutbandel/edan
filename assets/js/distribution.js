@@ -188,6 +188,14 @@
 						$scope.button = button.processed;
 					} else {
 
+						// possible response: {"until":1460488859,"message":"wait","count":6,"lastRan":1460422800,"hoursSinceLastRan":18}
+						if(data.count) {
+							$scope.count = data.count;
+						}
+						if(data.hoursSinceLastRan) {
+							$scope.hoursSinceLastRan = data.hoursSinceLastRan;
+						}
+						
 						// if there is an 'until' time to wait for, run dynamic
 						if(data.until) {
 							$scope.wait(data.until); // a unique, dynamic function
