@@ -9,8 +9,8 @@ module.exports = {
 
 	attributes: {
 		
-		// total mrai to payout
-		total_mrai: {
+		// total mrai to pay out per hour
+		hourly_mrai: {
 			type:'string',
 			required:true,
 			unique: false

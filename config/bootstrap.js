@@ -11,9 +11,33 @@
 
 module.exports.bootstrap = function(cb) {
 
+   console.log('Current Timestamp');
+   console.log(TimestampService.unix());
+
    /*******************************
    ****** START SCRIPT TESTS ******
    *******************************/
+
+   // enter the desired payout amount per day here
+   loadPayoutSchedule = function() {
+
+      var payload = {
+         created_unix: TimestampService.unix(),
+         hourly_mrai: '21000000000000000000000000000000000' // 21,000/hr
+      };
+
+      PayoutSchedule.create(payload, function(err, resp) {
+            
+         // processed
+         if(!err) {
+            console.log(JSON.stringify(resp));
+
+         } else { // not processed
+            console.log(JSON.stringify(err));
+         }
+      });
+   };
+   //loadPayoutSchedule();
 
    // load the Distribution table with dummy data.
    // a specific amount of accounts receives a random amount of counts.
@@ -25,17 +49,17 @@ module.exports.bootstrap = function(cb) {
 
       /*
       Start Time:
-      Human time (your time zone): 4/11/2016, 12:00:00 AM
-      Human time (GMT): Sun, 11 Apr 2016 07:00:00 GMT
+      Human time (GMT): Mon, 11 Apr 2016 00:00:00 GMT
+      Human time (your time zone): 4/10/2016, 5:00:00 PM
        */
-      var start = 1460358000; 
+      var start = 1460332800; 
 
       /*
       End Time:
-      Human time (your time zone): 4/12/2016, 12:00:00 AM
-      Human time (GMT): Mon, 12 Apr 2016 07:00:00 GMT
+      Human time (GMT): Tue, 12 Apr 2016 00:00:00 GMT
+      Human time (your time zone): 4/11/2016, 5:00:00 PM
       */
-      var end = 1460444400; 
+      var end = 1460419200; 
 
       // things turn into arrays inside this object
       var arrays = {};
@@ -129,7 +153,7 @@ module.exports.bootstrap = function(cb) {
          }
       });
    };
-   //processTotals();
+   processTotals();
 
    // process payouts
    // 
@@ -208,28 +232,7 @@ module.exports.bootstrap = function(cb) {
          }
       });
    }
-   processPayouts();
-
-   // This can be a script
-   loadPayoutSchedule = function() {
-
-      var payload = {
-         created_unix: TimestampService.unix(),
-         total_mrai: '450000000000000000000000000000000000' //450k
-      };
-
-      PayoutSchedule.create(payload, function(err, resp) {
-            
-         // processed
-         if(!err) {
-            console.log(JSON.stringify(resp));
-
-         } else { // not processed
-            console.log(JSON.stringify(err));
-         }
-      });
-   };
-   //loadPayoutSchedule();
+   //processPayouts();
 
    /*****************************
    ****** END SCRIPT TESTS ******

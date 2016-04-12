@@ -1,7 +1,7 @@
 /**
 * DistributionTracker.js
 *
-* @description :: Keeps track of distribution calculations
+* @description :: Keeps track of distribution calculations for a given time range
 * 
 */
 

@@ -176,7 +176,7 @@ module.exports = {
 			 */
 			if(!err) {
 
-				var total_mrai = resp.total_mrai;
+				var hourly_mrai = resp.hourly_mrai;
 
 				Totals.calculate(function(err, resp) {
 
@@ -187,7 +187,7 @@ module.exports = {
 					if(!err) {
 
 						var hoursSinceLastRan = resp.hoursSinceLastRan,
-						hourly_payout_amount = (total_mrai / 24) * hoursSinceLastRan,
+						hourly_payout_amount = hourly_mrai * hoursSinceLastRan,
 						recordsCount = 0,
 						accountsCount = 0,
 						records = [];
@@ -266,7 +266,7 @@ module.exports = {
 			}
 
 			/**
-			 * No rsults found! (BAD) HALT request
+			 * No results found! (BAD) HALT request
 			 * For some reason, we could not receive an amount. An RPC could have failed or mongoDB.
 			 */
 			else {
@@ -286,10 +286,10 @@ module.exports = {
 				collection.find().limit(1).sort({'$natural': -1}).toArray(function (err, results) {
 					if (!err) {
 
-						MraiFromRawService.convert(results[0].total_mrai, function(err, resp) {
+						MraiFromRawService.convert(results[0].hourly_mrai, function(err, resp) {
 
 							if(!err) {
-								callback(null, { total_mrai: resp.response.amount, hour_interval: results[0].hour_interval });
+								callback(null, { hourly_mrai: resp.response.amount });
 							} else {
 								callback(err, null);
 							}
