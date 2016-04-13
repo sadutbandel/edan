@@ -12,7 +12,14 @@
 
 			<!-- free rai form -->
 			<div class="sixteen wide column">
-					
+
+				<div ng-show="freeRaiVisible" class="ng-hide">
+					<button ng-click="howFaucet(true)" class="ui basic button">
+						How does this work?
+					</button>
+					<br style="clear:both;"/><br/>
+				</div>
+
 				<div ng-show="!freeRaiVisible" class="ng-hide ui icon green message">
 					<i class="thumbs up icon"></i>
 					<div class="content">
@@ -136,6 +143,37 @@
 						<div class="bar"></div>
 					</div>
 				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div id="how-faucet" class="ui basic modal">
+	<i class="close icon"></i>
+	<div class="header">
+		How does the distribution faucet work?
+	</div>
+	<div class="image content">
+		<div class="image">
+			<i class="theme icon"></i>
+		</div>
+		<div class="description">
+			<p>
+				We're currently distributing Mrai at a rate of <strong>21,000 Mrai per hour</strong>. Every successful faucet attempt will increase your overall count for the <strong>current undistributed period</strong>. When calculating distribution amounts, we consider your total count against the overall count of successful faucet attempts by everyone for that period.
+			</p>
+			<p>
+				<strong>Mrai Owed =</strong> ( My Count / Total Count ) * ( 21,000 * Hours Since Last Distributed )
+			</p>
+			<p>
+				We are aiming to pay out every 2-6 hours. In the event that payouts take longer than normal, don't worry. All of your successful ReCaptcha solves are recorded and you will receive distribution for all of your work.
+			</p>
+		</div>
+	</div>
+	<div class="actions">
+		<div class="one fluid ui inverted buttons">
+			<div ng-click="howFaucet(false)" class="ui green basic remove inverted button">
+				<i class="close icon"></i>
+				Close
 			</div>
 		</div>
 	</div>

@@ -13,6 +13,14 @@
 
 	.controller('distributionCtrl', function($rootScope, $filter, $interval, $scope, $http, $timeout, $location, vcRecaptchaService) {
 
+		$scope.howFaucet = function(bool) {
+			if(bool) {
+				$('#how-faucet').modal('show');
+			} else {
+				$('#how-faucet').modal('hide');
+			}
+		}
+
 		$scope.freeRaiVisible = true;
 
 		// clear any blocks upon page refresh
