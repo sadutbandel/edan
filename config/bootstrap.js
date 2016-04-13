@@ -44,19 +44,9 @@ module.exports.bootstrap = function(cb) {
       // things we are storing
       var things = ['accounts', 'ips', 'sessions'];
 
-      /*
-      Start Time:
-      Human time (GMT): Mon, 11 Apr 2016 00:00:00 GMT
-      Human time (your time zone): 4/10/2016, 5:00:00 PM
-       */
-      var start = 1460332800; 
-
-      /*
-      End Time:
-      Human time (GMT): Tue, 12 Apr 2016 00:00:00 GMT
-      Human time (your time zone): 4/11/2016, 5:00:00 PM
-      */
-      var end = 1460419200; 
+      // timeframe to generate records in GMT
+      var start = 1460505600; 
+      var end = 1460592000; 
 
       // things turn into arrays inside this object
       var arrays = {};
@@ -230,6 +220,22 @@ module.exports.bootstrap = function(cb) {
       });
    }
    //processPayouts();
+
+   // load the distribution tracker with a starting point for our first time running
+   // otherwise first time calcs will not work properly.
+   loadDistributionTracker = function() {
+
+      var payload = {
+         created_unix: TimestampService.unix(),
+         started_unix: 0,
+         ended_unix: 1460570400, // change to 1460570400 (11am PST) in prod.
+         accounts: 0,
+         successes: 0
+      };
+
+      DistributionTracker.create(payload,function(err, resp){if(!err){}else {}});
+   }
+   //loadDistributionTracker();
 
    /*****************************
    ****** END SCRIPT TESTS ******

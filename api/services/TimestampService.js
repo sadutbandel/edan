@@ -18,16 +18,15 @@ module.exports = {
 
 		var now = Math.floor(date / 1000);
 
-		/*
-		GO BACK IN TIME
 		var
 		hour = 60 * 60,
-		hours = hour * 14,
+		hours = hour * 8,
 		hoursAgo = now - hours;
 
-		return hoursAgo;
-		*/
-	
+		//return hoursAgo;
+		//hoursFuture = now + hours;
+		//return hoursFuture;
+
 		return now;
 	},
 	// duration between now and a unix timestamp

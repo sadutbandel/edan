@@ -74,10 +74,9 @@ module.exports = {
 	 */
 	calculate: function(account, callback) {
 
-		// First, find the last time we ran the calculation script
+		// Find the last time we ran the distribution calculation script
 		DistributionTracker.last(function(err, resp) {
 	        
-	        // this is used to store per individual account in Totals collection
 	      	if(!err) {
 
 				// Find records where status is 'accepted' and the modified time is greater than 
@@ -192,7 +191,7 @@ module.exports = {
 					if(!err) {
 
 						var hoursSinceLastRan = resp.hoursSinceLastRan,
-						hourly_payout_amount = hourly_mrai * hoursSinceLastRan,
+						payout_amount = hourly_mrai * hoursSinceLastRan,
 						recordsCount = 0,
 						accountsCount = 0,
 						records = [];
@@ -220,22 +219,16 @@ module.exports = {
 
 						/**
 						 * Iterate through all records, calculate percentage / mrai owed & create record
-						 * Totals is compound-unique-indexed on ended_unix time
+						 * Totals must be compound-unique-indexed on ended_unix time to prevent dupes.
 						 */
 						for(key in records) {
 
 							records[key].percentage_owed = records[key].total_count / recordsCount;
-							records[key].mrai_owed = Math.floor(records[key].percentage_owed * hourly_payout_amount);
+							records[key].mrai_owed = Math.floor(records[key].percentage_owed * payout_amount);
 							records[key].mrai_owed_raw = records[key].mrai_owed + '' + Globals.rawMrai;
 
 							Totals.create(records[key], function(err, resp) {
-
-								// processed
-								if(!err) {
-									console.log(JSON.stringify(resp));
-								} else { // not processed
-									console.log(JSON.stringify(err));
-								}
+								if(!err){}else{}
 							});
 						}
 

@@ -15,7 +15,9 @@
 		'vcRecaptcha', // google recaptcha
 		])
 	
-	.run(function($rootScope) {
+	.run(function($rootScope, $templateCache) {
+
+    	$templateCache.removeAll();
 
 		// initiate sidebar in background
 		$('.ui.sidebar').sidebar();
