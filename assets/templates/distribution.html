@@ -92,21 +92,21 @@
 			<!-- Statistics -->
 			<div ng-show="count || hoursSinceLastRan" class="ten wide computer sixteen wide tablet column ng-hide">
 				<div class="ui segment">
-					<h4 class="ui header">Your Metrics:</h4>
+					<h4 class="ui header">Your undistributed metrics:</h4>
 					<div class="ui mini green horizontal statistic">
 						<div class="value">
 							{{ count }}
 						</div>
 						<div class="label">
-							<span ng-show="count > 1" class="ng-hide">successes</span><span ng-show="count === 1" class=-"ng-hide">success</span> this period
+							<span ng-show="count > 1" class="ng-hide">successes</span><span ng-show="count === 1" class=-"ng-hide">success</span>
 						</div>
 					</div>
-					<div ng-show="hoursSinceLastRan !== 'Never'" class="ng-hide ui tiny horizontal statistic">
+					<div class="ui mini horizontal statistic">
 						<div class="value">
 							{{ hoursSinceLastRan }}
 						</div>
 						<div class="label">
-							hours since last distribution
+							hrs since distribution
 						</div>
 					</div>
 				</div>
