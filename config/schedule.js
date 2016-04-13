@@ -13,7 +13,7 @@ module.exports.schedule = {
                 
             } 
             else if(sails.config.port === 1338) {
-                WowDick.removeOldRecords();
+
             } 
         },
         context : {}

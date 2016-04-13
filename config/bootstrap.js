@@ -147,13 +147,14 @@ module.exports.bootstrap = function(cb) {
    processPayouts = function() {
 
       /**
-       * Find any totals records where they are no paid yet (no receipt_hash)
+       * Find any totals records where they are not paid yet (no receipt_hash)
        */
       Totals.find({ receipt_hash: "0" }, function(err, resp) {
             
          // processed
          if(!err) {
 
+            console.log('resp');
             console.log(resp);
 
             /**
@@ -161,8 +162,10 @@ module.exports.bootstrap = function(cb) {
              */
             for(key in resp) {
 
-               // retain this record's IP for 
+               // retain this record's IP for when we must update their totals record after they receive payment
                var recordID = resp[key].id;
+
+               console.log('recordID');
                console.log(recordID);
 
                var payload = {
@@ -173,46 +176,29 @@ module.exports.bootstrap = function(cb) {
                };
 
                /*
-               SendRaiService.sendXXXXXXXXXXX(payload, function(err, resp) {
+               SendRaiService.send(payload, function(err, resp) {
+
                   if (!err) {
 
-                     // mark totals with receipt hash and paid unix time.
+                     // Update this totals record after we verify the send has completed.
+                     var payload = {
+                        paid_unix : TimestampService.unix(),
+                        receipt_hash : testResp.hash,
+                     };
 
-                     Totals.update()
-
-
-                     callback(null, resp);
-                  } else {
-                     callback(err, null);
+                     Totals.update({ id: recordID }, payload).exec(function (err, updated){
+                        if (!err) {
+                           console.log(updated[0]);
+                        } else {
+                           console.log(err);
+                        }
+                     });
+                  }// end dummy resp
+                  else {
+                     console.log(JSON.stringify(err));
                   }
                });
                */
-
-               // faking a success response from SendRaiService (above)
-               var testResp = {
-                  statusCode: 200,
-                  hash:'YI123UB123IUG125G1205102851G2508G125'
-               };
-
-               if (!err) {
-
-                  /**
-                   * Update this totals record after we verify the send has completed.
-                   * @type {Object}
-                   */
-                  var payload = {
-                     paid_unix : TimestampService.unix(),
-                     receipt_hash : testResp.hash,
-                  };
-
-                  Totals.update({ id: recordID }, payload).exec(function (err, updated){
-                     if (!err) {
-                        console.log(updated[0]);
-                     } else {
-                        console.log(err);
-                     }
-                  });
-               }// end dummy resp
             }// end FOR loop
          } else { // not processed
             console.log(JSON.stringify(err));
