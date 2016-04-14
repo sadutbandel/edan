@@ -32,7 +32,7 @@ module.exports.bootstrap = function(cb) {
       }
    });
    */
-
+  
    // allows us to retrieve the remote-client IP and not localhost
    sails.hooks.http.app.set('trust proxy', true);
 
