@@ -40,22 +40,26 @@ module.exports = {
                     destination: resp[key].account
                 };
 
-                // remove the 1st element object from the array.
+                /*
+                Uncomment this when we are not wanting to actually send rai
                 resp.splice(0,1);
 
-                // 2 records, to start
-                if(resp.length === 160) {
+                if(resp.length === 155) {
                     resp.splice(0,resp.length);
                 }
 
-                /*
+                loop(resp);
+                */
+
                 SendRaiService.send(payload, function(err, res) {
 
                     if (!err) {
 
-                        // Update their totals row once we are done sending. 
-                        // We must REBUILD the record or else the other properties will be lost.
-                        Totals.update({ id: recordID }, {
+                        var where = { 
+                            id: recordID
+                        };
+
+                        var payload = {
                             paid_unix : TimestampService.unix(),
                             receipt_hash : res.response.block,
                             account: resp[key].account,
@@ -67,9 +71,25 @@ module.exports = {
                             mrai_owed_raw: resp[key].mrai_owed_raw,
                             createdAt: resp[key].createdAt,
                             updatedAt: resp[key].updatedAt
-                        }).exec(function (err, updated){
+                        };
+
+                        // Update their totals row once we are done sending. 
+                        // We must REBUILD the record or else the other properties will be lost.
+                        Totals.update(where, payload).exec(function (err, updated){
                             if (!err) {
+
+                                // remove the 1st element object from the array.
+                                resp.splice(0,1);
+
+                                // limit results if you need
+                                /*
+                                if(resp.length === 110) {
+                                    resp.splice(0,resp.length);
+                                }
+                                */
+                               
                                 loop(resp);
+
                             } else {
                                 console.log(JSON.stringify(err));
                             }
@@ -78,7 +98,6 @@ module.exports = {
                         console.log(JSON.stringify(err));
                     }
                 });
-                */
             }
         };
 
