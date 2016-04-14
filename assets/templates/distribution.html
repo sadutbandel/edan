@@ -42,8 +42,8 @@
 			</div>
 
 			<!-- FAUCET FORM -->
-			<div class="sixteen wide column">	
-				<div ng-show="!faucetOff && freeRaiVisible" class="ng-hide ui segment">
+			<div ng-show="!faucetOff && freeRaiVisible" class="ng-hide sixteen wide column">	
+				<div class="ui segment">
 					
 					<form>
 
@@ -88,23 +88,22 @@
 
 			<!-- INDIVIDUAL METRICS -->
 			<div ng-show="count || hoursSinceLastRan" class="ten wide computer sixteen wide tablet column ng-hide">
-				<div class="ui segment">
-					<h4 class="ui header">Your undistributed metrics:</h4>
-					<div class="ui mini green horizontal statistic">
-						<div class="value">
-							{{ count }}
-						</div>
-						<div class="label">
-							<span ng-show="count > 1" class="ng-hide">successes</span><span ng-show="count === 1" class=-"ng-hide">success</span>
-						</div>
+				<div class="ui mini green horizontal statistic">
+					<div class="value">
+						{{ count }}
 					</div>
-					<div class="ui mini horizontal statistic">
-						<div class="value">
-							{{ hoursSinceLastRan }}
-						</div>
-						<div class="label">
-							hrs since distribution
-						</div>
+					<div class="label">
+						<span ng-show="count > 1" class="ng-hide">My count</span>
+					</div>
+				</div>
+				<div class="ui mini horizontal statistic">
+					<div class="value">
+						{{ hoursSinceLastRan }}
+					</div>
+					<div class="label">
+						<span ng-show="hoursSinceLastRan > 1" class=-"ng-hide">hrs</span>
+						<span ng-show="hoursSinceLastRan === 1" class=-"ng-hide">hr</span>
+						&nbsp;since distribution
 					</div>
 				</div>
 			</div>
@@ -112,7 +111,7 @@
 			<!-- FAUCET STATISTICS -->
 			<div ng-show="percentage_distributed" class="sixteen wide column ng-hide">
 				<div class="ui raised segment">
-					<h4 class="ui header">Faucet Metrics:</h4>
+					<h4 class="ui header">Overall Distribution</h4>
 					<!-- Coin Availability -->
 					<div class="ui small statistics">
 						<div class="statistic">
