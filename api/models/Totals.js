@@ -196,6 +196,9 @@ module.exports = {
 						accountsCount = 0,
 						records = [];
 
+						console.log('payout_amount');
+						console.log(payout_amount);
+
 						/**
 						 * Iterate through each account and their success count
 						 * We want to store their payload into Totals collection
@@ -217,6 +220,9 @@ module.exports = {
 							recordsCount += payload.total_count;
 						}
 
+						console.log('recordsCount');
+						console.log(recordsCount);
+						
 						/**
 						 * Iterate through all records, calculate percentage / mrai owed & create record
 						 * Totals must be compound-unique-indexed on ended_unix time to prevent dupes.
