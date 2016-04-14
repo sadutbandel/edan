@@ -12,27 +12,27 @@
 module.exports.bootstrap = function(cb) {
 
    // PROCESS TOTALS
+
    /*
    AutomationService.processTotals(function(err, resp) {
       if(!err) {
+
          console.log(TimestampService.utc() + ' [ AutomationService.processTotals() ] (!err) ' + JSON.stringify(resp));
+            
+         // PROCESS PAYOUTS (only after process totals works)
+         AutomationService.processPayouts(function(err, resp) {
+            if(!err) {
+               console.log(TimestampService.utc() + ' [ AutomationService.processPayouts() ] (!err) ' + JSON.stringify(resp));
+            } else {
+               console.log(TimestampService.utc() + ' [ AutomationService.processPayouts() ] (err) ' + JSON.stringify(err));
+            }
+         });
       } else {
          console.log(TimestampService.utc() + ' [ AutomationService.processTotals() ] (err) ' + JSON.stringify(err));
       }
    });
    */
    
-   // PROCESS PAYOUTS
-   /*
-   AutomationService.processPayouts(function(err, resp) {
-      if(!err) {
-         console.log(TimestampService.utc() + ' [ AutomationService.processPayouts() ] (!err) ' + JSON.stringify(resp));
-      } else {
-         console.log(TimestampService.utc() + ' [ AutomationService.processPayouts() ] (err) ' + JSON.stringify(err));
-      }
-   });
-   */
-  
    // allows us to retrieve the remote-client IP and not localhost
    sails.hooks.http.app.set('trust proxy', true);
 
