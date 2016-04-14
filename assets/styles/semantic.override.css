@@ -11,9 +11,6 @@
 .borderless.main.menu .toc.item {
 	display: none !important;
 }
-.account_textarea {
-	width: 600px !important;
-}
 .hash_search {
 	width: 600px !important;
 }

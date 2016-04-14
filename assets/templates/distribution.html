@@ -10,10 +10,10 @@
 	<div class="ten wide computer sixteen wide tablet column">	
 		<div class="ui grid">
 
-			<!-- free rai form -->
+			<!-- MANUAL DISTRIBUTION MESSAGE -->
+			<!--
 			<div class="sixteen wide column">
-
-				<!--
+				
 				<div class="ui info message">
 					<div class="header">
 						Next Distribution will be Friday @ 14:30:00 GMT ( 7:30:00 AM PST )
@@ -23,16 +23,12 @@
 						<li>All of your successful solves will be counted until the next distribution listed above. Thanks.</li>
 					</ul>
 				</div>
-				-->
-				
-				<div ng-show="freeRaiVisible" class="ng-hide">
-					<button ng-click="howFaucet(true)" class="centered ui olive button">
-						How does this work?
-					</button>
-					<br style="clear:both;"/><br/>
-				</div>
+			</div>
+			-->
 
-				<div ng-show="!freeRaiVisible" class="ng-hide ui icon green message">
+			<!-- PLEASE WAIT DURATION MESSAGE -->
+			<div ng-show="!freeRaiVisible" class="ng-hide sixteen wide column">
+				<div class="ui icon green message">
 					<i class="thumbs up icon"></i>
 					<div class="content">
 						<div class="header">
@@ -43,19 +39,23 @@
 						</p>
 					</div>
 				</div>
+			</div>
 
-				<div ng-show="!faucetOff && freeRaiVisible" class="ng-hide">
-
-					<div class="ui blue pointing below label">
-						Please complete the form
-					</div>
+			<!-- FAUCET FORM -->
+			<div class="sixteen wide column">	
+				<div ng-show="!faucetOff && freeRaiVisible" class="ng-hide ui segment">
 					
 					<form>
-						<!-- account id -->
-						<div class="ui form field account_textarea">
-							<textarea ng-model="account" placeholder="Account #" rows="2" autocomplete="off"></textarea>
+
+						<!-- pointing label -->
+						<div class="ui blue pointing below label">
+							Complete the form
 						</div>
 
+						<!-- account id -->
+						<div class="ui form field account_textarea">
+							<textarea ng-model="account" placeholder="Enter your xrb account" rows="2" autocomplete="off"></textarea>
+						</div>
 						<br style="clear:both"/>
 
 						<!-- recaptcha -->
@@ -69,26 +69,24 @@
 						<br style="clear:both"/>
 
 						<!-- submission button -->
-						<button
-						ng-disabled="button.disabled == true"
-						ng-class="button.class"
-						ng-click="submit()"
-						class="ui button"
-						type="submit">
-							<i ng-class="button.icon" class="icon"></i>&nbsp;{{ button.title }}
-						</button>
-						<button 
-						class="ng-hide ui teal button"
-						ng-show="block"
-						ng-click="exploreBlock()">
-							Explore Last Block
-						</button>
+						<div class="ui buttons">
+							<button
+							ng-disabled="button.disabled == true"
+							ng-class="button.class"
+							ng-click="submit()"
+							class="ui button"
+							type="submit">
+								<i ng-class="button.icon" class="icon"></i>&nbsp;{{ button.title }}
+							</button>
+							<button ng-click="howFaucet(true)" class="ui olive button">
+								<i class="theme icon"></i>&nbsp;How does this work?
+							</button>
+						</div>
 					</form>
-					<br style="clear:both;"/>
 				</div>
 			</div>
 
-			<!-- Statistics -->
+			<!-- INDIVIDUAL METRICS -->
 			<div ng-show="count || hoursSinceLastRan" class="ten wide computer sixteen wide tablet column ng-hide">
 				<div class="ui segment">
 					<h4 class="ui header">Your undistributed metrics:</h4>
@@ -111,8 +109,8 @@
 				</div>
 			</div>
 
+			<!-- FAUCET STATISTICS -->
 			<div ng-show="percentage_distributed" class="sixteen wide column ng-hide">
-
 				<div class="ui raised segment">
 					<h4 class="ui header">Faucet Metrics:</h4>
 					<!-- Coin Availability -->
@@ -143,6 +141,7 @@
 					</div>
 				</div>
 			</div>
+
 		</div>
 	</div>
 </div>
@@ -154,26 +153,41 @@
 	</div>
 	<div class="image content">
 		<div class="image">
-			<i class="theme icon"></i>
+			<i class="theme blue icon"></i>
 		</div>
 		<div class="description">
 			<p>
-				We're currently distributing Mrai at a rate of <strong>21,000 Mrai per hour</strong>. Every successful faucet attempt will increase your overall count for the <strong>current undistributed period</strong>. When calculating distribution amounts, we consider your total count against the overall count of successful faucet attempts by everyone for that period.
+				The faucet distributes&nbsp;&nbsp;<a class="ui blue label">21,000 Mrai Per Hour</a>&nbsp;&nbsp;spread across all participating accounts. Each success increases your overall success count for the <strong>current undistributed period</strong>. When the algorithm calculates distribution percentages, it considers your total count against the overall success count of everyone for that period.
+			</p>
+			
+			<br style="clear:both;"/>
+			<a class="ui blue pointing below label">Distribution Algorithm</a>
+			<p>
+				<strong>Your Mrai Owed =</strong> ( My Count / Total Count ) * ( 21,000 * Hours Since Last Distributed )
+			</p>
+
+			<br style="clear:both;"/>
+
+			<a class="ui red pointing below label">Example Breakdown</a>
+			<p>
+				<strong>Your Mrai Owed =</strong> ( 420 / 4477 ) * ( 21,000 * 2 )
 			</p>
 			<p>
-				<strong>Mrai Owed =</strong> ( My Count / Total Count ) * ( 21,000 * Hours Since Last Distributed )
+				<strong>3940.1384855931 =</strong> 0.09381282108555 * 42,000
 			</p>
 			<p>
-				We are aiming to pay out every 2-6 hours. In the event that payouts take longer than normal, don't worry. All of your successful ReCaptcha solves are recorded and you will receive distribution for all of your work.
+				<strong>Example 3940 Mrai Owed</strong>
+			</p>
+			<p></p>
+			<p>
+				Our system calculates &amp; distributes Mrai <strong>every 2 hours</strong>. In the event that distribution takes longer than normal, <strong>please don't worry</strong>. All of your successful ReCaptcha solves are saved forever and you will receive complete distribution eventually.
 			</p>
 		</div>
 	</div>
 	<div class="actions">
-		<div class="one fluid ui inverted buttons">
-			<div ng-click="howFaucet(false)" class="ui green basic remove inverted button">
-				<i class="close icon"></i>
-				Close
-			</div>
+		<div ng-click="howFaucet(false)" class="ui olive big basic remove inverted button">
+			<i class="thumbs up icon"></i>
+			Got it
 		</div>
 	</div>
 </div>

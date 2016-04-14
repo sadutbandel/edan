@@ -23,9 +23,6 @@
 
 		$scope.freeRaiVisible = true;
 
-		// clear any blocks upon page refresh
-		delete $rootScope.block;
-
 		// fetch the available supply
 		io.socket.get('/api/available_supply', function (resData, jwres){
 
@@ -191,29 +188,23 @@
 				
 				$http.post('/distribution', this.payload).success(function(data) {
 
-					if(data.statusCode === 200) {
-						$rootScope.block = data.response.block;
-						$scope.button = button.processed;
+					// possible returnsponse: {"until":1460488859,"message":"wait","count":6,"lastRan":1460422800,"hoursSinceLastRan":18}
+					if(data.count) {
+						$scope.count = data.count;
+					}
+
+					$scope.hoursSinceLastRan = data.hoursSinceLastRan;
+
+					// if there is an 'until' time to wait for, run dynamic
+					if(data.until) {
+						$scope.wait(data.until); // a unique, dynamic function
 					} else {
-
-						// possible returnsponse: {"until":1460488859,"message":"wait","count":6,"lastRan":1460422800,"hoursSinceLastRan":18}
-						if(data.count) {
-							$scope.count = data.count;
-						}
-
-						$scope.hoursSinceLastRan = data.hoursSinceLastRan;
-
-						// if there is an 'until' time to wait for, run dynamic
-						if(data.until) {
-							$scope.wait(data.until); // a unique, dynamic function
-						} else {
-							$scope.button = button[data.message];
-							$timeout(function() {
-								vcRecaptchaService.reload($scope.widgetId);
-								$scope.init();
-								$scope.button = button.default;
-							}, 3000);
-						}
+						$scope.button = button[data.message];
+						$timeout(function() {
+							vcRecaptchaService.reload($scope.widgetId);
+							$scope.init();
+							$scope.button = button.default;
+						}, 3000);
 					}
 				})
 				.error(function(data, status) {
@@ -225,10 +216,6 @@
 					$scope.button = button.default;
 				}, 3000);
 			}
-		}
-
-		$scope.exploreBlock = function() {
-			$location.path('explorer');
 		}
 	});
 })();
