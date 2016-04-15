@@ -190,7 +190,6 @@
 
 					// if there is an 'until' time to wait for, run dynamic
 					if(data.until) {
-						console.log('Yes');
 						$scope.button = button.default;
 						$scope.init();
 						vcRecaptchaService.reload($scope.widgetId);
