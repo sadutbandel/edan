@@ -190,9 +190,9 @@
 
 					// if there is an 'until' time to wait for, run dynamic
 					if(data.until) {
-						$scope.button = button.default;
 						$scope.init();
 						vcRecaptchaService.reload($scope.widgetId);
+						$scope.button = button.default;
 						$scope.wait(data.until); // a unique, dynamic function
 					} else {
 						$scope.button = button[data.message];
