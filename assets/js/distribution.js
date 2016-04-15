@@ -21,7 +21,7 @@
 			}
 		}
 
-		$scope.freeRaiVisible = true;
+		$scope.requestSuccess = false;
 
 		// fetch the available supply
 		io.socket.get('/api/available_supply', function (resData, jwres){
@@ -110,26 +110,22 @@
 			// if a unix timestamp was passed...
 			if(until) {
 
-				// every second, re-calculate the time to wait
+				// every 1/10th second, re-calculate the seconds to wait
 				var waitUntilPromise = $interval(function() {
 
 					var untilThen = until - Math.floor(Date.now() / 1000);
 
-					// if the wait timer has expired, show the form again
+					// if the wait timer has expired, hide
 					if(untilThen <= 0) {
 						$interval.cancel(waitUntilPromise);
-						$scope.freeRaiVisible = true;
-						$scope.button = button.default;
-
+						$scope.requestSuccess = false;
 					} else {
 						$scope.wait_hdr = 'Request succeeded';
-						$scope.wait_msg = 'Please wait ' + untilThen + ' seconds';
-						$scope.freeRaiVisible = false;
-						vcRecaptchaService.reload($scope.widgetId);
-						$scope.init();
+						$scope.wait_msg = 'Wait ' + untilThen + ' seconds to request again';
+						$scope.requestSuccess = true;
   					}
-					},1000);
-				} 
+				},1000);
+			} 
   			// no unix timestamp passed...
   			else {
 	  			$scope.button = button.try_again;
@@ -143,7 +139,6 @@
 
   		$scope.button = button.default;
   		
-  		// account can't be null, nothing, or starting with anything but 'xrb_'
   		$scope.validateAccount = function() {
   			if($scope.account === undefined || $scope.account === null || $scope.account === '' || $scope.account.lastIndexOf('xrb_', 0) !== 0) {
   				$scope.button = button.account_error;
@@ -152,7 +147,6 @@
   				return true;
   			}
   		}
-
   		$scope.validateResponse = function() {
   			if($scope.response === undefined || $scope.response === null || $scope.response === '') {
   				$scope.button = button.recaptcha_error;
@@ -161,7 +155,6 @@
   				return true;
   			}
   		}
-
   		$scope.validateForm = function() {
   			if($scope.validateAccount()) {
   				if($scope.validateResponse()) {
@@ -197,6 +190,10 @@
 
 					// if there is an 'until' time to wait for, run dynamic
 					if(data.until) {
+						console.log('Yes');
+						$scope.button = button.default;
+						$scope.init();
+						vcRecaptchaService.reload($scope.widgetId);
 						$scope.wait(data.until); // a unique, dynamic function
 					} else {
 						$scope.button = button[data.message];

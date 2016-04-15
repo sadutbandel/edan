@@ -26,23 +26,8 @@
 			</div>
 			-->
 
-			<!-- PLEASE WAIT DURATION MESSAGE -->
-			<div ng-show="!freeRaiVisible" class="ng-hide sixteen wide column">
-				<div class="ui icon green message">
-					<i class="thumbs up icon"></i>
-					<div class="content">
-						<div class="header">
-							{{ wait_hdr }}
-						</div>
-						<p>
-							{{ wait_msg }}
-						</p>
-					</div>
-				</div>
-			</div>
-
 			<!-- FAUCET FORM -->
-			<div ng-show="!faucetOff && freeRaiVisible" class="ng-hide sixteen wide column">	
+			<div ng-show="!faucetOff" class="ng-hide sixteen wide column">	
 				<div class="ui segment">
 					
 					<form>
@@ -83,6 +68,21 @@
 							</button>
 						</div>
 					</form>
+				</div>
+			</div>
+
+			<!-- PLEASE WAIT DURATION MESSAGE -->
+			<div ng-show="requestSuccess" class="ng-hide sixteen wide column">
+				<div class="ui icon green message">
+					<i class="thumbs up icon"></i>
+					<div class="content">
+						<div class="header">
+							{{ wait_hdr }}
+						</div>
+						<p>
+							{{ wait_msg }}
+						</p>
+					</div>
 				</div>
 			</div>
 
