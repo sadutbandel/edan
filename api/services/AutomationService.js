@@ -19,7 +19,7 @@ module.exports = {
     },
 
     // process payouts
-    processPayouts: function() {
+    processPayouts: function(callback) {
 
         // iterate over our response of accounts needing payment
         loop = function(resp) {
@@ -39,17 +39,6 @@ module.exports = {
                     source: Globals.faucetAddress,
                     destination: resp[key].account
                 };
-
-                /*
-                Uncomment this when we are not wanting to actually send rai
-                resp.splice(0,1);
-
-                if(resp.length === 155) {
-                    resp.splice(0,resp.length);
-                }
-
-                loop(resp);
-                */
 
                 SendRaiService.send(payload, function(err, res) {
 
@@ -78,26 +67,26 @@ module.exports = {
                         Totals.update(where, payload).exec(function (err, updated){
                             if (!err) {
 
+                                console.log(JSON.stringify(updated[0]));
+
                                 // remove the 1st element object from the array.
                                 resp.splice(0,1);
 
-                                // limit results if you need
-                                /*
-                                if(resp.length === 110) {
-                                    resp.splice(0,resp.length);
-                                }
-                                */
-                               
+                                //tail-call recursion
                                 loop(resp);
 
                             } else {
                                 console.log(JSON.stringify(err));
+                                callback(err, null); // totals update failure
                             }
                         });
                     } else {
                         console.log(JSON.stringify(err));
+                        callback(err, null); // send rai failure
                     }
                 });
+            } else {
+                callback(null, true); // completed!
             }
         };
 
