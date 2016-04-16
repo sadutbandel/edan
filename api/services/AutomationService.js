@@ -39,7 +39,7 @@ module.exports = {
                 Distribution.update(where, payload).exec(function (err, updated){
                     if (!err) {
 
-                        //console.log(JSON.stringify(updated[0]));
+                        console.log(JSON.stringify(updated[0]));
 
                         // remove the 1st element object from the array.
                         resp.splice(0,1);
