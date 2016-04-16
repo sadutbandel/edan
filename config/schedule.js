@@ -6,56 +6,50 @@ module.exports.schedule = {
     sailsInContext: true,
     tasks: {
 
-        // Calculate distribution totals every 2 hours
+        // Calculate distribution totals every 2 hours (run payout / load available_supply twice to catch missed accounts)
         processTotals : {
 
-            cron : "0 */2 * * *",
+            cron : "0 * * * *",
             task : function (context, sails) {
 
                 // production-level CRON.
                 if(sails.config.port === 1338) {
 
-                    console.log('---------------- PROCESSING TOTALS -----------------');
+                    console.log('---------------- PROCESSING DISTRIBUTION -----------------');
 
                     // CALCULATE TOTALS
                     AutomationService.processTotals(function(err, resp) {
                         if(!err) {
                             console.log(TimestampService.utc() + ' [ AutomationService.processTotals() ] (!err) ' + JSON.stringify(resp));
+
+                            // PROCESS DISTRIBUTION
+                            AutomationService.processPayouts(function(err, resp) {
+                                if(!err) {
+                                    console.log(TimestampService.utc() + ' [ AutomationService.processPayouts() ] (!err) ' + JSON.stringify(resp));
+                                    
+                                    // PROCESS DISTRIBUTION (again)
+                                    AutomationService.processPayouts(function(err, resp) {
+                                        if(!err) {
+                                            console.log(TimestampService.utc() + ' [ AutomationService.processPayouts() ] (!err) ' + JSON.stringify(resp));
+                                        
+                                           // LOAD AVAILABLE SUPPLY
+                                           AutomationService.loadAvailableSupply(function(err, resp) {
+                                                if(!err) {
+                                                    console.log(TimestampService.utc() + ' [ AutomationService.loadAvailableSupply() ] (!err) ' + JSON.stringify(resp));
+                                                } else {
+                                                    console.log(TimestampService.utc() + ' [ AutomationService.loadAvailableSupply() ] (err) ' + JSON.stringify(err));
+                                                }
+                                           });                                    
+                                        } else {
+                                            console.log(TimestampService.utc() + ' [ AutomationService.processPayouts() ] (err) ' + JSON.stringify(err));
+                                        }
+                                    });                                 
+                                } else {
+                                    console.log(TimestampService.utc() + ' [ AutomationService.processPayouts() ] (err) ' + JSON.stringify(err));
+                                }
+                            });
                         } else {
                             console.log(TimestampService.utc() + ' [ AutomationService.processTotals() ] (err) ' + JSON.stringify(err));
-                        }
-                    });
-                } 
-            },
-            context : {}
-        },
-
-        // Process payouts every minute (if they exist) and load available supply (if it changes)
-        processPayouts : {
-
-            cron : "* * * * *",
-            task : function (context, sails) {
-
-                // production-level CRON.
-                if(sails.config.port === 1338) {
-
-                    console.log('---------------- PROCESSING PAYOUTS -----------------');
-
-                    // PROCESS DISTRIBUTION
-                    AutomationService.processPayouts(function(err, resp) {
-                        if(!err) {
-                            console.log(TimestampService.utc() + ' [ AutomationService.processPayouts() ] (!err) ' + JSON.stringify(resp));
-                        
-                           // LOAD AVAILABLE SUPPLY
-                           AutomationService.loadAvailableSupply(function(err, resp) {
-                                if(!err) {
-                                    console.log(TimestampService.utc() + ' [ AutomationService.loadAvailableSupply() ] (!err) ' + JSON.stringify(resp));
-                                } else {
-                                    console.log(TimestampService.utc() + ' [ AutomationService.loadAvailableSupply() ] (err) ' + JSON.stringify(err));
-                                }
-                           });                                    
-                        } else {
-                            console.log(TimestampService.utc() + ' [ AutomationService.processPayouts() ] (err) ' + JSON.stringify(err));
                         }
                     });
                 } 
