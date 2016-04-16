@@ -64,7 +64,7 @@
 								<i ng-class="button.icon" class="icon"></i>&nbsp;{{ button.title }}
 							</button>
 							<button ng-click="howFaucet(true)" class="ui olive button">
-								<i class="theme icon"></i>&nbsp;How does this work?
+								<i class="theme icon"></i>&nbsp;How it works
 							</button>
 						</div>
 					</form>
@@ -112,7 +112,7 @@
 			<!-- FAUCET STATISTICS -->
 			<div ng-show="percentage_distributed" class="sixteen wide column ng-hide">
 				<div class="ui raised segment">
-					<h4 class="ui header">Overall Faucet Distribution</h4>
+					<h3 class="ui header">Distribution Progress</h3>
 					<!-- Coin Availability -->
 					<div class="ui small statistics">
 						<div class="statistic">
@@ -142,6 +142,15 @@
 				</div>
 			</div>
 
+			<!-- PAST DISTRIBUTIONS
+			<div ng-show="percentage_distributed" class="sixteen wide column ng-hide">
+				<div class="ui stacked segment">
+					<h3 class="ui header">Past Distributions</h3>
+
+					
+				</div>
+			</div>
+			-->
 		</div>
 	</div>
 </div>
@@ -149,7 +158,7 @@
 <div id="how-faucet" class="ui basic modal">
 	<i class="close icon"></i>
 	<div class="header">
-		How does the distribution faucet work?
+		How the distribution faucet works
 	</div>
 	<div class="image content">
 		<div class="image">

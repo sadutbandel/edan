@@ -17,6 +17,7 @@
 # to fit your needs!
 ################################################
 
+dump/*
 assets/images/*
 api/models/Globals.js
 logs/access.log

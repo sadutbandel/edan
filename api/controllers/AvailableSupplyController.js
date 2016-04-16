@@ -1,7 +1,7 @@
 /**
  * AvailableSupplyController.js
  *
- * @description :: Fetch the available Raiblocks supply and conver the raw number to a human-readable one.
+ * @description :: Fetch the publicly available rai supply
  */
 
 module.exports = {
@@ -9,12 +9,18 @@ module.exports = {
 	// override the GET/fetch route/action
 	fetch: function (req, res) {
 
-		AvailableSupplyService.fetch(function(err, resp) {
+		AvailableSupply.native(function(err, collection) {
+			if (!err){
 
-			if(!err) {
-				res.send(resp);
+				collection.find().limit(1).sort({'$natural': -1}).toArray(function (err, results) {
+					if (!err) {
+						var amount = results[0].amount.toString();
+						res.send(amount);
+					} else {
+						res.send(err);
+					}
+				});
 			} else {
-				console.log(TimestampService.utc() + ' [AvailableSupplyController.js] (err) Total MRAI ' + JSON.stringify(err));
 				res.send(err);
 			}
 		});

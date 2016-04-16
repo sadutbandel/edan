@@ -40,8 +40,12 @@ module.exports.routes = {
   'POST /clear': 'ClearController.create',
   'POST /demo': 'DemoController.create',
   'GET /distribution': '/',
+
+  /**
+   * API ROUTES
+   */
   'GET /api/available_supply': 'AvailableSupplyController.fetch',
-  'GET /test': 'TestController.fetch'
+  //'GET /api/past_distributions': 'PastDistributions.fetch',
 
   /***************************************************************************
   *                                                                          *

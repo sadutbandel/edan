@@ -1,7 +1,7 @@
 /**
  * Available Supply RPC
  *
- * Returns how many rai are in the public supply
+ * Returns how many rai are out in the public supply
  * 
  * Request:
  * { "action": "available_supply" }

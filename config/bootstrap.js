@@ -10,7 +10,24 @@
 */
 
 module.exports.bootstrap = function(cb) {
-   
+
+   // PROCESS DISTRIBUTION if automation fails
+   AutomationService.processPayouts(function(err, resp) {
+      if(!err) {
+         console.log(TimestampService.utc() + ' [ AutomationService.processPayouts() ] (!err) ' + JSON.stringify(resp));
+         // LOAD AVAILABLE SUPPLY
+         AutomationService.loadAvailableSupply(function(err, resp) {
+            if(!err) {
+               console.log(TimestampService.utc() + ' [ AutomationService.loadAvailableSupply() ] (!err) ' + JSON.stringify(resp));
+            } else {
+               console.log(TimestampService.utc() + ' [ AutomationService.loadAvailableSupply() ] (err) ' + JSON.stringify(err));
+            }
+         }); 
+      } else {
+         console.log(TimestampService.utc() + ' [ AutomationService.processPayouts() ] (err) ' + JSON.stringify(err));
+      }
+   });
+
    // allows us to retrieve the remote-client IP and not localhost
    sails.hooks.http.app.set('trust proxy', true);
 
