@@ -52,7 +52,7 @@ module.exports = {
 
         // start finding expired pending records (over 1 minute old)
         Distribution.find({ status: "pending", modified: { "$lte": TimestampService.unix() - 60 }}, function(error, response) {
-            if(!err) {
+            if(!error) {
                 loopStuckPending(response); // start tailcall recursion
             } else {
                 callback(error, null); // no results found
