@@ -30,7 +30,7 @@ module.exports = {
                     createdAt: response[key].createdAt,
                     updatedAt: response[key].updatedAt
                 }).exec(function (er, upd){
-                    if (!err) {
+                    if (!er) {
 
                         console.log('Distribution.update()');
                         console.log(JSON.stringify(upd[0]));
