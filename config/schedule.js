@@ -9,7 +9,7 @@ module.exports.schedule = {
         // Calculate distribution totals every 2 hours (run payout / load available_supply twice to catch missed accounts)
         processTotals : {
 
-            cron : "0 * * * *",
+            cron : "0 */2 * * *",
             task : function (context, sails) {
 
                 // production-level CRON.

@@ -16,16 +16,12 @@ module.exports = {
             if(resp.length > 0) {
 
                 // always use 0 since we're going to remove it from the array when we're done.
-                var key = 0,
+                var key = 0;
 
-                // retain this record's ID for when we must update their record
-                recordID = resp[key].id,
-
-                where = { 
-                    id: recordID
-                },
-
-                payload = {
+                // Update their stuck 'pending' record as 'violation' so they can continue with requests
+                Distribution.update({ 
+                    id: resp[key].id
+                }, {
                     modified : TimestampService.unix(),
                     account: resp[key].account,
                     ip: resp[key].account,
@@ -33,12 +29,10 @@ module.exports = {
                     status: 'violation',
                     createdAt: resp[key].createdAt,
                     updatedAt: resp[key].updatedAt
-                };
-
-                // Update their stuck 'pending' record as 'violation' so they can continue with requests
-                Distribution.update(where, payload).exec(function (err, updated){
+                }).exec(function (err, updated){
                     if (!err) {
 
+                        console.log('Distribution.update()');
                         console.log(JSON.stringify(updated[0]));
 
                         // remove the 1st element object from the array.
@@ -115,25 +109,20 @@ module.exports = {
                 // always use 0 since we're going to remove it from the array when we're done.
                 var key = 0;
 
-                // retain this record's ID for when we must update their totals record after they receive payment
-                var recordID = resp[key].id;
-
-                var payload = {
+                SendRaiService.send({
                     amount: resp[key].mrai_owed_raw,
                     wallet: Globals.paymentWallets.production,
                     source: Globals.faucetAddress,
                     destination: resp[key].account
-                };
-
-                SendRaiService.send(payload, function(err, res) {
+                }, function(err, res) {
 
                     if (!err) {
 
-                        var where = { 
-                            id: recordID
-                        };
-
-                        var payload = {
+                        // Update their totals row once we are done sending. 
+                        // We must REBUILD the record or else the other properties will be lost.
+                        Totals.update({ 
+                            id: resp[key].id
+                        }, {
                             paid_unix : TimestampService.unix(),
                             receipt_hash : res.response.block,
                             account: resp[key].account,
@@ -145,13 +134,10 @@ module.exports = {
                             mrai_owed_raw: resp[key].mrai_owed_raw,
                             createdAt: resp[key].createdAt,
                             updatedAt: resp[key].updatedAt
-                        };
-
-                        // Update their totals row once we are done sending. 
-                        // We must REBUILD the record or else the other properties will be lost.
-                        Totals.update(where, payload).exec(function (err, updated){
+                        }).exec(function (err, updated){
                             if (!err) {
 
+                                console.log('Totals.update()');
                                 console.log(JSON.stringify(updated[0]));
 
                                 // remove the 1st element object from the array.
