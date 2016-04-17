@@ -52,10 +52,8 @@ module.exports = {
             }
         };
 
-        var minAgo = TimestampService.unix() - 60;
-
         // start finding expired pending records (over 1 minute old)
-        Distribution.find({ status: "pending", modified: { "$lte": minAgo }}, function(err, resp) {
+        Distribution.find({ status: "pending", modified: { "$lte": TimestampService.unix() - 60 }}, function(err, resp) {
             if(!err) {
                 self.loop(resp); // start tailcall recursion
             } else {
