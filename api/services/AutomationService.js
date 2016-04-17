@@ -9,42 +9,40 @@ module.exports = {
     // fix any stuck pending records causing perpetual 'Try Again' responses in faucet
     fixStuckPending: function(callback) {
 
-        var self = this;
-
         // iterate over our response of distribution records that may be stuck 'pending'
-        this.loop = function(resp) {
+        loopStuckPending = function(response) {
 
             // as long as there are still elements in the array....
-            if(resp.length > 0) {
+            if(response.length > 0) {
 
                 // always use 0 since we're going to remove it from the array when we're done.
                 var key = 0;
 
                 // Update their stuck 'pending' record as 'violation' so they can continue with requests
                 Distribution.update({ 
-                    id: resp[key].id
+                    id: response[key].id
                 }, {
                     modified : TimestampService.unix(),
-                    account: resp[key].account,
-                    ip: resp[key].account,
-                    sessionID: resp[key].account,
+                    account: response[key].account,
+                    ip: response[key].account,
+                    sessionID: response[key].account,
                     status: 'violation',
-                    createdAt: resp[key].createdAt,
-                    updatedAt: resp[key].updatedAt
-                }).exec(function (err, updated){
+                    createdAt: response[key].createdAt,
+                    updatedAt: response[key].updatedAt
+                }).exec(function (er, upd){
                     if (!err) {
 
                         console.log('Distribution.update()');
-                        console.log(JSON.stringify(updated[0]));
+                        console.log(JSON.stringify(upd[0]));
 
                         // remove the 1st element object from the array.
-                        resp.splice(0,1);
+                        response.splice(0,1);
 
                         //tail-call recursion
-                        self.loop(resp);
+                        loopStuckPending(response);
 
                     } else {
-                        callback(err, null); // distribution update failure
+                        callback(er, null); // distribution update failure
                     }
                 });
             } else {
@@ -53,11 +51,11 @@ module.exports = {
         };
 
         // start finding expired pending records (over 1 minute old)
-        Distribution.find({ status: "pending", modified: { "$lte": TimestampService.unix() - 60 }}, function(err, resp) {
+        Distribution.find({ status: "pending", modified: { "$lte": TimestampService.unix() - 60 }}, function(error, response) {
             if(!err) {
-                self.loop(resp); // start tailcall recursion
+                loopStuckPending(response); // start tailcall recursion
             } else {
-                callback(err, null); // no results found
+                callback(error, null); // no results found
             }
         });
     },
@@ -100,10 +98,8 @@ module.exports = {
     // process payouts
     processPayouts: function(callback) {
 
-        var self = this;
-
         // iterate over our response of accounts needing payment
-        this.loop = function(resp) {
+        loopPayouts = function(resp) {
 
             // as long as there are still elements in the array....
             if(resp.length > 0) {
@@ -146,7 +142,7 @@ module.exports = {
                                 resp.splice(0,1);
 
                                 //tail-call recursion
-                                self.loop(resp);
+                                loopPayouts(resp);
 
                             } else {
                                 console.log(JSON.stringify(err));
@@ -170,7 +166,7 @@ module.exports = {
             
             if(!err) {
                 // start the loop the first time.
-                self.loop(resp);
+                loopPayouts(resp);
             } else {
                 console.log(JSON.stringify(err));
             }
