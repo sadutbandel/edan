@@ -64,7 +64,7 @@ module.exports.schedule = {
             cron : "* * * * *",
             task : function (context, sails) {
 
-                // development-level CRON.
+                // production-level CRON.
                 if(sails.config.port === 1338) {
 
                     console.log('---------------- FIXING STUCK PENDING -----------------');

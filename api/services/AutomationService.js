@@ -9,8 +9,10 @@ module.exports = {
     // fix any stuck pending records causing perpetual 'Try Again' responses in faucet
     fixStuckPending: function(callback) {
 
+        var self = this;
+
         // iterate over our response of distribution records that may be stuck 'pending'
-        loop = function(resp) {
+        this.loop = function(resp) {
 
             // as long as there are still elements in the array....
             if(resp.length > 0) {
@@ -39,7 +41,7 @@ module.exports = {
                         resp.splice(0,1);
 
                         //tail-call recursion
-                        loop(resp);
+                        self.loop(resp);
 
                     } else {
                         callback(err, null); // distribution update failure
@@ -55,7 +57,7 @@ module.exports = {
         // start finding expired pending records (over 1 minute old)
         Distribution.find({ status: "pending", modified: { "$lte": minAgo }}, function(err, resp) {
             if(!err) {
-                loop(resp); // start tailcall recursion
+                self.loop(resp); // start tailcall recursion
             } else {
                 callback(err, null); // no results found
             }
@@ -100,8 +102,10 @@ module.exports = {
     // process payouts
     processPayouts: function(callback) {
 
+        var self = this;
+
         // iterate over our response of accounts needing payment
-        loop = function(resp) {
+        this.loop = function(resp) {
 
             // as long as there are still elements in the array....
             if(resp.length > 0) {
@@ -144,7 +148,7 @@ module.exports = {
                                 resp.splice(0,1);
 
                                 //tail-call recursion
-                                loop(resp);
+                                self.loop(resp);
 
                             } else {
                                 console.log(JSON.stringify(err));
@@ -168,7 +172,7 @@ module.exports = {
             
             if(!err) {
                 // start the loop the first time.
-                loop(resp);
+                self.loop(resp);
             } else {
                 console.log(JSON.stringify(err));
             }
