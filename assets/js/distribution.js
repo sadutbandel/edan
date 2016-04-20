@@ -2,7 +2,9 @@
 
 	angular
 
-	.module('Distribution', [])
+	.module('Distribution', [
+		'ngclipboard'
+		])
 
 	.config(function($routeProvider) {
 		$routeProvider.when('/distribution', {
@@ -137,8 +139,13 @@
 			}
 		}
 
-  		$scope.button = button.default;
-  		
+		// if greater than 7pm PDT, turn off faucet button (done on the backend too :)   >_<   )
+		if(Math.floor(Date.now() / 1000) >= 1461204000) {
+			$scope.button = button.faucetoff;
+		} else {
+  			$scope.button = button.default;
+  		}
+
   		$scope.validateAccount = function() {
   			if($scope.account === undefined || $scope.account === null || $scope.account === '' || $scope.account.lastIndexOf('xrb_', 0) !== 0) {
   				$scope.button = button.account_error;
@@ -186,7 +193,7 @@
 						$scope.count = data.count;
 					}
 
-					$scope.hoursSinceLastRan = data.hoursSinceLastRan;
+					$scope.past_distributions = data.past_distributions;
 
 					// if there is an 'until' time to wait for, run dynamic
 					if(data.until) {

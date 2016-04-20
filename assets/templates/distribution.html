@@ -11,20 +11,43 @@
 		<div class="ui grid">
 
 			<!-- MANUAL DISTRIBUTION MESSAGE -->
-			<!--
 			<div class="sixteen wide column">
 				
 				<div class="ui info message">
 					<div class="header">
-						Next Distribution will be Friday @ 14:30:00 GMT ( 7:30:00 AM PST )
+						Upcoming Maintenance
 					</div>
+					<p>Thanks for participating in the free distribution of RaiBlocks! Due to increasing popularity, we need to schedule a maintenance period to keep the website running smooth.
+					</p>
+
+					<strong>
+						How the maintenance period affects these popular timezones:
+					</strong>
 					<ul class="list">
-						<li>We are still working on automating the calculation &amp; payout processes, and it's going well!</li>
-						<li>All of your successful solves will be counted until the next distribution listed above. Thanks.</li>
+						<li>
+							(GMT/UTC) 2AM-4AM 04/21/2016
+						</li>
+						<li>
+							(PDT) 7PM-9PM 04/20/2016
+						</li>
+						<li>
+							(CTZ) 9PM-11PM 04/20/2016
+						</li>
 					</ul>
+
+					<br style="clear:both;"/>
+
+					<strong>
+						Q. What about the 2-hours missed? Where does that distribution go?
+					</strong>
+
+					<br style="clear:both;"/>
+
+					<em>
+						A. After the maintenance period, we will have an extra 2 hours of distribution saved up which will be distributed in the following distribution 2 hours after the end of this maintenance. This allows the users who were waiting for 2 hours to receive double distribution and not lose any time.
+					</em>
 				</div>
 			</div>
-			-->
 
 			<!-- FAUCET FORM -->
 			<div ng-show="!faucetOff" class="ng-hide sixteen wide column">	
@@ -95,19 +118,66 @@
 					<div class="label">
 						<span ng-show="count === 0 || count > 1" class=-"ng-hide">successes</span>
 						<span ng-show="count === 1" class=-"ng-hide">success</span>
-					</div>
-				</div>
-				<div class="ui mini horizontal statistic">
-					<div class="value">
-						{{ hoursSinceLastRan }}
-					</div>
-					<div class="label">
-						<span ng-show="hoursSinceLastRan === 0 || hoursSinceLastRan > 1" class=-"ng-hide">hrs</span>
-						<span ng-show="hoursSinceLastRan === 1" class=-"ng-hide">hr</span>
-						&nbsp;since distribution
+						this period
 					</div>
 				</div>
 			</div>
+
+			<!-- PAST DISTRIBUTIONS -->
+			<div ng-show="past_distributions" class="sixteen wide column ng-hide">
+				<div class="ui stacked segment">
+					<h3 class="ui header">My Past Distributions</h3>
+
+					<table class="ui celled table">
+						<thead>
+							<tr>
+								<th>Paid Time</th>
+								<th>Period End</th>
+								<th>Period Start</th>
+								<th>Count</th>
+								<th>Mrai Owed</th>
+								<th>Receipt</th>
+								
+							</tr>
+						</thead>
+						<tbody>
+							<tr ng-repeat="record in past_distributions">
+
+								<td>{{ record.paid_unix | date:'M/dd h:mma'}}</td>
+								<td>{{ record.ended_unix | date:'M/dd h:mma'}}</td>
+								<td>{{ record.started_unix | date:'M/dd h:mma'}}</td>
+								<td>{{ record.total_count }}</td>
+								<td>{{ record.mrai_owed }}</td>
+								<td>
+									<a
+									class="ui mini grey button" 
+									ngclipboard 
+									data-clipboard-text="{{ record.receipt_hash }}">
+										<i class="clipboard icon"></i> Hash
+									</a>
+								</td>
+							</tr>
+						</tbody>
+						<tfoot>
+							<tr><th colspan="3">
+								<div class="ui right floated pagination menu">
+									<a class="icon item">
+										<i class="left chevron icon"></i>
+									</a>
+									<a class="item">1</a>
+									<a class="item">2</a>
+									<a class="item">3</a>
+									<a class="item">4</a>
+									<a class="icon item">
+										<i class="right chevron icon"></i>
+									</a>
+								</div>
+							</th>
+						</tr></tfoot>
+					</table>
+				</div>
+			</div>
+			<!-- END PAST DISTRIBUTIONS -->
 
 			<!-- FAUCET STATISTICS -->
 			<div ng-show="percentage_distributed" class="sixteen wide column ng-hide">
@@ -141,16 +211,7 @@
 					</div>
 				</div>
 			</div>
-
-			<!-- PAST DISTRIBUTIONS
-			<div ng-show="percentage_distributed" class="sixteen wide column ng-hide">
-				<div class="ui stacked segment">
-					<h3 class="ui header">Past Distributions</h3>
-
-					
-				</div>
-			</div>
-			-->
+			<!-- END FAUCET STATISTICS -->
 		</div>
 	</div>
 </div>
