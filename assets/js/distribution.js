@@ -194,7 +194,7 @@
 					}
 
 					$scope.hoursSinceLastRan = data.hoursSinceLastRan;
-					$scope.past_distributions = data.past_distributions;
+					//$scope.past_distributions = data.past_distributions;
 
 					// if there is an 'until' time to wait for, run dynamic
 					if(data.until) {
