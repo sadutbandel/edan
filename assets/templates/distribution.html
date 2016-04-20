@@ -118,7 +118,16 @@
 					<div class="label">
 						<span ng-show="count === 0 || count > 1" class=-"ng-hide">successes</span>
 						<span ng-show="count === 1" class=-"ng-hide">success</span>
-						this period
+					</div>
+				</div>
+				<div class="ui mini horizontal statistic">
+					<div class="value">
+						{{ hoursSinceLastRan }}
+					</div>
+					<div class="label">
+						<span ng-show="hoursSinceLastRan === 0 || hoursSinceLastRan > 1" class=-"ng-hide">hrs</span>
+						<span ng-show="hoursSinceLastRan === 1" class=-"ng-hide">hr</span>
+						&nbsp;since distribution
 					</div>
 				</div>
 			</div>
