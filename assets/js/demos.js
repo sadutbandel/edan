@@ -15,7 +15,7 @@
 
 	.controller('demosCtrl', function($rootScope, $scope, $q, $http, $timeout) {
 
-		// assume the faucet is on by default
+		// assume the faucet is ON by default
 		$scope.faucetOff = false;
 
 		// clear any blocks upon page refresh

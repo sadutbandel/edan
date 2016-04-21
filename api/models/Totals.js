@@ -1,96 +1,90 @@
 /**
 * Totals.js
 *
+* @description :: Count the total distribution records per account
+* 
 * WARNING: This must contain a compound index to prevent duplicate records.
 * 		   Anytime the collection is destroyed, the index must be recreated
 * 		   using:
 * 		   
 * 		   db.totals.createIndex( { account: 1, ended_unix: 1 }, { unique: true } )
-* 		   
-* @description :: Count the total distribution records per account
-* 
 */
 
 module.exports = {
+
+	autoCreatedAt: false,
+	autoUpdatedAt: false,
 
 	attributes: {
 
 		// payee account
 		account: {
-			type:'string',
-			required:true,
+			type: 'string',
+			required: true,
 			unique: false
 		},
 		// start of time range of the Distribution records considered
 		started_unix: {
-			type:'integer',
-			required:true,
+			type: 'integer',
+			required: true,
 			unique: false
 		},
 		// end of time range of the Distribution records considered
 		ended_unix: {
-			type:'integer',
-			required:true,
+			type: 'integer',
+			required: true,
 			unique: false
 		},
 		// the total count of distribution records for this payee where status = 'accepted'
 		total_count: {
-			type:'integer',
-			required:true,
+			type: 'integer',
+			required: true,
 			unique: false
 		},
 		// based on total_count and PayoutSchedule
 		percentage_owed: {
-			type:'string',
-			required:true,
+			type: 'string',
+			required: true,
 			unique: false
 		},
-		mrai_owed: {
-			type:'string',
-			required:true,
+		krai_owed: {
+			type: 'string',
+			required: true,
 			unique: false
 		},
-		mrai_owed_raw: {
-			type:'string',
-			required:true,
+		raw_rai_owed: {
+			type: 'string',
+			required: true,
 			unique: false
 		},
 		// time when they were paid
 		paid_unix: {
-			type:'integer',
-			required:true,
+			type: 'integer',
+			required: true,
 			unique: false
 		},
 		// block hash receipt after they were paid
 		receipt_hash: {
-			type:'string',
-			required:true,
+			type: 'string',
+			required: true,
 			unique: false
 		}
 	},
 
 	/**
-	 * Count total success records per account
-	 */
-	calculate: function(account, callback) {
+	 * Calculate near-REALTIME metrics for current unpaid distribution for all acounts
+	 * Grabs all 'accepted' records greater than or equal to the last time Distribution was processed / finalized
+	 **/
+	calculate: function(callback) {
 
-		// Find the last time we ran the distribution calculation script
 		DistributionTracker.last(function(err, resp) {
 	        
 	      	if(!err) {
 
-				// Find records where status is 'accepted' and the modified time is greater than 
-				// or equal to the end time of when the last time totals were calculated but also
-				// less than the end of the most recent hour, which the function is using as the end.
-				// Also, group by 'account' with a total count.
+				// match only 'accepted' records that are in the current, unpaid distribution timeframe (realtime data)
 				var match = {
 
 					'$and': [
-						{
-							modified : { 
-			 					'$lt': resp.lastHour
-			 				}
-			 			},
 						{
 							modified : { 
 			 					'$gte': resp.lastRan
@@ -102,21 +96,7 @@ module.exports = {
 		 			]
 				};
 
-				// if account is -1, we are filtering for all accounts and not a single one.
-				// if it's NOT -1, then add more AND requirements for our mongo query. this let's us
-				// recycle the totals.calculate function being used for all users, for just 1 user.
-				if(account !== -1) {
-					/* 
-						Delete the 1st element in the array, so we can replace it LESS THAN OR EQUAL TO below.
-						This will remain LESS THAN for calculations for Totals though because obviously if the clock rolls over to the next 
-						hour, we shouldn't count any 0-second records as apart of the prior hour... This is only for including in the count 
-						we show users immediately after they submit the Distribution form and it is successful.
-					*/
-					delete match['$and'][0].modified['$lt']; // deletes the 'modified' property inside the first object / array element.
-					match['$and'].push({ account: account }); // add the single account to search for
-					match['$and'][0].modified['$lte'] = TimestampService.unix(); // overwrite less-than last hour with less than now for a realtime count	
-				}
-
+				// count 'success' records and group by account.
 				var group = {
 					_id: '$account',
 					count: { 
@@ -145,7 +125,6 @@ module.exports = {
 								 * If matches ARE found, then we should get a list of accounts with counts.
 								 */
 								else {
-									// add 'results' property to our return response object
 									resp.results = results;
 									callback(null, resp);
 								}
@@ -164,25 +143,34 @@ module.exports = {
 	},
 
 	/**
-	 * Calculate totals successes by account since the last time we ran this
+	 * Updates Totals model (used by cron every minute) to hold near-REALTIME data
 	 *
-	 * #1 - Find the total amount of Mrai currently being paid out
-	 * #2 - Calculate total success records by account & find percentages / mrai owed
-	 * #3 - Store record in DistributionTracker of the time range we ran this for future reference
+	 * First, find out the total Krai to pay out per hour.
+	 * Second, calculate totals for all accounts for unpaid period.
+	 * Third, count each account's 'accepted' records and build a payload to UPSERT that data (INSERT first time, UPDATE SUBSEQUENT).
+	 * Fourth, iterate through all records and calculate percentages owed along with krai_owed, and raw_rai_owed.
+	 * Fifth, begin tailcall recursion through all records to be able to utilize callback() properly
+	 *
+	 * IMPORTANT NOTES:
+	 *
+	 * Realtime records in the current 'unpaid distribution' are purposely marked with an string for the receipt_hash.
+	 * The empty string prevents payouts from happening because payouts only occur on records where receipt_hash === 0.
+	 * When the cron runs every 2 hours for payouts, it updates all of the past-period's records with receipt_hash = 0 from ""
+	 * This then allows those accounts to get paid out on after the cron runs but not before.
 	 */
 	processTotals: function(callback) {
 
-		Totals.totalMrai(function(err, resp) {
+		Totals.totalKrai(function(err, resp) {
 
 			/**
 			 * Results found! (GOOD) CONTINUE request
-			 * We have the total Mrai being paid out
+			 * We have the total Krai being paid out
 			 */
 			if(!err) {
 
-				var hourly_mrai = resp.hourly_mrai;
+				var hourly_rai = resp.hourly_rai;
 
-				Totals.calculate(-1, function(err, resp) {
+				Totals.calculate(function(err, resp) {
 
 					/**
 					 * Results found! (GOOD) CONTINUE request
@@ -191,28 +179,31 @@ module.exports = {
 					if(!err) {
 
 						var hoursSinceLastRan = resp.hoursSinceLastRan,
-						payout_amount = hourly_mrai * hoursSinceLastRan,
+						payout_amount,
 						recordsCount = 0,
 						accountsCount = 0,
 						records = [];
 
-						console.log('payout_amount');
-						console.log(payout_amount);
+						if(hoursSinceLastRan === 0) {
+							payout_amount = hourly_rai * 1; // if under 1 hour, then assume 1 hour for realtime projections accuracy.
+						} else {
+							payout_amount = hourly_rai * hoursSinceLastRan;
+						}
 
 						/**
 						 * Iterate through each account and their success count
-						 * We want to store their payload into Totals collection
-						 * example: { _id: 'xrb_3efamcqebsbtxxk6hz48buqjq9b1d9kpy6k8c5j5ibm9adxx9wyj4bphwn87', count: 6 }
+						 * We want to upsert a record into Totals collection
 						 */
+						
 						for(key in resp.results) {
 
 							var payload = {
-								paid_unix: 0, // filled upon payout
-								receipt_hash: 0, // filled upon payout
+								paid_unix: 0, // filled upon payout.
+								receipt_hash: "", // filled upon payout. explicitly set to an empty string to indicate it's a realtime row and that payouts aren't possible yet.
 								account: resp.results[key]._id,
 								total_count: resp.results[key].count,
 								started_unix: resp.lastRan,
-								ended_unix: resp.lastHour
+								ended_unix: 0 // this is 0 because there is no end time yet.
 							};
 
 							accountsCount++;
@@ -220,43 +211,83 @@ module.exports = {
 							recordsCount += payload.total_count;
 						}
 
-						console.log('recordsCount');
-						console.log(recordsCount);
-						
 						/**
-						 * Iterate through all records, calculate percentage / mrai owed & create record
+						 * Iterate through all records, calculate percentage / krai owed & create record
 						 * Totals must be compound-unique-indexed on ended_unix time to prevent dupes.
 						 */
 						for(key in records) {
 
 							records[key].percentage_owed = records[key].total_count / recordsCount;
-							records[key].mrai_owed = Math.floor(records[key].percentage_owed * payout_amount);
-							records[key].mrai_owed_raw = records[key].mrai_owed + '' + Globals.rawMrai;
-
-							Totals.create(records[key], function(err, resp) {
-								if(!err){}else{}
-							});
+							records[key].krai_owed = Math.floor(records[key].percentage_owed * payout_amount);
+							records[key].raw_rai_owed = records[key].krai_owed + '' + Globals.rawKrai;
 						}
 
 						/**
-						 * Create a new DistributionTracker record for the calculations in the given time-frame
+						 * Iterate through all records again to update the realtime records for the unpaid distribution
 						 */
-						var payload = {
-							created_unix: TimestampService.unix(),
-							started_unix: resp.lastRan,
-							ended_unix: resp.lastHour,
-							accounts: accountsCount,
-							successes: recordsCount
-						}
 						
-						DistributionTracker.create(payload, function(err, resp) {
-							// processed
-							if(!err) {
-								callback(null, resp);
+						// iterate over our response of accounts needing payment
+        				loopTotals = function(records) {
+
+        					if(records.length > 0) {
+
+        						var where = {
+									'$and': [
+										{
+											account: records[0].account
+										},
+										{
+											ended_unix: records[0].ended_unix
+										}
+									]
+								};
+
+								Totals.native(function(err, collection) {
+									if (!err) {
+
+										collection.update(where, records[0], { upsert: true }, function (err, updated) {
+											if (!err) {
+
+												// remove the first record
+												records.splice(0,1);
+
+												// loop through totals
+												loopTotals(records);
+
+											} else {
+												console.log(err);
+											}
+				                        });
+			                        } else {
+			                        	console.log('Realtime Totals Failed Mongo');
+				                        callback(err, null); // completed!
+			                        }
+		                        });
 							} else {
-								callback(err, null);
+
+								/**
+								 * Once looping completes, update DistributionTracker with the new numbers.
+								 */
+								var payload = {
+						            started_unix: resp.lastRan,
+						            ended_unix: 0,
+						            accounts: accountsCount,
+						            successes: recordsCount,
+						            complete: false
+						        };
+
+								DistributionTracker.update(payload, function(err, resp) {
+						            if(!err) {
+						                callback(null, resp); // looping complete and distribution tracker updated
+						            } else {
+						                callback(err, null);
+						            }
+						        });
 							}
-						});
+						};
+
+						// kick off looping through totals.
+						loopTotals(records);
 					} 
 
 					/**
@@ -280,9 +311,10 @@ module.exports = {
 	},
 
 	/**
-	 * Find the total amount of Mrai currently being paid out
+	 * Find the total amount of Krai currently being paid out hourly
+	 * Using KraiFromRawService, return the amount in Krai from raw.
 	 */
-	totalMrai: function(callback) {
+	totalKrai: function(callback) {
 
 		PayoutSchedule.native(function(err, collection) {
 			if (!err){
@@ -290,10 +322,10 @@ module.exports = {
 				collection.find().limit(1).sort({'$natural': -1}).toArray(function (err, results) {
 					if (!err) {
 
-						MraiFromRawService.convert(results[0].hourly_mrai, function(err, resp) {
+						KraiFromRawService.convert(results[0].hourly_rai, function(err, resp) {
 
 							if(!err) {
-								callback(null, { hourly_mrai: resp.response.amount });
+								callback(null, { hourly_rai: resp.response.amount });
 							} else {
 								callback(err, null);
 							}

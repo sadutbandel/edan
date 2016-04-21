@@ -1,8 +1,13 @@
 /**
  * Distribution.js
+ *
+ * Responsible for the start of a distribution request after it's initiated from DistributionController.js
  */
 
 module.exports = {
+
+	autoCreatedAt: false,
+	autoUpdatedAt: false,
 
 	attributes: {
 
@@ -11,6 +16,7 @@ module.exports = {
 			required:false,
 			unique: false
 		},
+		
 		// unix timestamp
 		modified: {
 			type:'integer',
@@ -39,7 +45,12 @@ module.exports = {
 
 	/**
 	 * Distribution Request
- 	 * @param  parameters  object
+ 	 * 
+ 	 * First, check to see if their initial timer is expired. If not, we know they waited and can continue.
+ 	 * Second, create a new Distribution record marked as 'pending'.
+ 	 * Third, send the Distribution record payload to DistributionService.process() for the bulk of the processing like validation and violation checks.
+ 	 * Fourth, after all V&V checks succeed, return the updated historical data for this user to the front-end of the app.
+ 	 * Alternate-Fourth, if the V&V checks fail, then mark their record as a 'violation'
 	 */
 	request: function(parameters, callback) {
 
@@ -48,11 +59,7 @@ module.exports = {
 
 			/**
 			 * Session timer expired. (good) CONTINUE request!
-			 * 
-			 * If the initial session timer is expired, we know the web-visitor 
-			 * has waited the required time & we can continue with the request.
 			 */
-			
 			if (!err) {
 
 				/**
@@ -85,36 +92,80 @@ module.exports = {
 		 					if(!error) {
 
 		 						/**
-		 						 * All checks passed and distribution records processed successfully!
-		 						 *
-		 						 * At this point resp = { until: <timestamp to wait until, 6 seconds in future?>, message: 'wait' }
-		 						 * 
+		 						 * Pull MY totals records (including realtime data for current unpaid period)
+		 						 * @type {Object}
 		 						 */
- 								Totals.calculate(parameters.account, function(err, results) {
+								var what = {
+									started_unix: 1,
+									ended_unix: 1,
+									total_count: 1,
+									percentage_owed: 1,
+									krai_owed: 1,
+									paid_unix: 1,
+									receipt_hash: 1,
+									_id: 0
+								};
 
-									/**
-									 * Results found! (GOOD) CONTINUE request
-									 * We have a list of accounts with counts for successfully solved captchas
-									 */
-									if(!err) {
+								var where = {
+									account: parameters.account
+								};
 
-										/* store total count for period, time since last period, time last ran */
-										resp.count = results.results[0].count;
-										resp.lastRan = results.lastRan;
-										resp.hoursSinceLastRan = results.hoursSinceLastRan;
-			 							callback(null, resp);
-			 						} 
-			 						else {
-			 							callback(err, null);
-			 						}
-			 					});
+								// my data
+								Totals.native(function(err, collection) {
+									if (!err){
+
+										collection.find(where,what).sort({ '$natural': -1 }).toArray(function (err, results) {
+											if (!err) {
+
+												// everyone's data
+												DistributionTracker.native(function(err, collection) {
+													if (!err){
+
+														collection.find({ complete: false }).toArray(function (err, res) {
+															if (!err) {
+
+																// convert unix timestamps to milliseconds fo angular
+																for(key in results) {
+																	results[key].paid_unix = results[key].paid_unix * 1000;
+																	results[key].started_unix = results[key].started_unix * 1000;
+																	results[key].ended_unix = results[key].ended_unix * 1000;
+																}
+
+																var resultsClone = JSON.parse(JSON.stringify(results));
+
+				 												// store our current distribution by grabbing the last item in the array
+				 												resp.current_distribution = resultsClone.slice(-1)[0];
+				 												resp.current_distribution.complete_count = res[0].successes;
+
+				                                				results.pop();
+
+				                                				// remove the 1st element object from the array, then store it.
+				                                				resp.past_distributions = results;
+
+					 											callback(null, resp);
+
+					 										} else {
+							 									callback(err, null);
+							 								}
+							 							});
+													} else {
+					 									callback(err, null);
+					 								}
+					 							});
+	 										} else {
+			 									callback(err, null);
+			 								}
+			 							});
+	 								} else {
+	 									callback(err, null);
+	 								}
+	 							});
 		 					} else {	
 		 						
 		 						/**
 				 				 * Validation fail OR Violation occurred...
 				 				 *
 				 				 * Update the 'pending' Distribution record as 'violation'
-				 				 * OR as 'parameters' or 'recaptcha' or 'account'
 				 				 * Returns true for success
 				 				 * Returns an object for failures with information as to why
 				 				 */
@@ -123,7 +174,7 @@ module.exports = {
 									account: parameters.account,
 									ip: parameters.ip,
 									sessionID: parameters.sessionID,
-									status: error.status
+									status: 'violation'
 								};
 
 								Distribution.update({ id:results.id }, payload).exec(function (err, updated){
@@ -145,7 +196,7 @@ module.exports = {
 			/**
 			 * Session timer NOT expired. (bad) HALT request!
 			 * 
-			 * If the initial 5-minute session timer is NOT expired, we know the web-visitor 
+			 * If the initial session timer has NOT expired, we know the web-visitor 
 			 * is brand new, opened a private-browsing (incognito) window, or cleared cache.
 			 */	
 			else {

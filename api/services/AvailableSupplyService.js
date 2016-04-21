@@ -19,7 +19,7 @@ module.exports = {
 		
 		RpcService.callRpc(this.payload, function(err, resp) {
 			if(!err) {
-				MraiFromRawService.convert(resp.response.available, function(err, resp) {
+				KraiFromRawService.convert(resp.response.available, function(err, resp) {
 					if(!err) {
 						callback(null, resp.response.amount);
 					} else {

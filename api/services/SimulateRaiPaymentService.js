@@ -3,7 +3,7 @@ module.exports = {
  	send: function(parameters, callback) {
 		
 		this.payload = {
-			amount: '1000000000000000000000000000000',
+			amount: '1000000000000000000000000000',
 			wallet: sails.config.wallet,
 			source: Globals.faucetAddress,
 			destination: parameters.account

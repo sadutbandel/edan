@@ -1,7 +1,11 @@
 /**
 * AutomationService.js
 *
-* @description :: Distribution / Payout Scripts
+* @description :: Handles various automated tasks such as:
+*                      Fixing stuck 'pending' distribution records.
+*                      Loading the available supply, used after distribution succeeds.
+*                      Processing distribution by looping through accounts requiring payouts.
+*                      Load a new payout schedule when directed by bootstrap.js.
 */
 
 module.exports = {
@@ -32,7 +36,7 @@ module.exports = {
                 }).exec(function (er, upd){
                     if (!er) {
 
-                        console.log('Distribution.update()');
+                        console.log('Fixing stuck record...');
                         console.log(JSON.stringify(upd[0]));
 
                         // remove the 1st element object from the array.
@@ -69,7 +73,7 @@ module.exports = {
                 // add a new entry for available supply
                 AvailableSupply.create({
                     modified: TimestampService.unix(),
-                    amount: resp
+                    raw_krai: resp
                 }, function(err, resp) {
                     if(!err) {
                         callback(null, resp);
@@ -83,20 +87,9 @@ module.exports = {
         });
     },
 
-    // calculate counts by account
-    processTotals: function(callback) {
-
-        Totals.processTotals(function(err, resp) {
-            if(!err) {
-                callback(null, resp);
-            } else {
-                callback(err, null);
-            }
-        });
-    },
-
-    // process payouts
-    processPayouts: function(callback) {
+    // finalize totals for the last period, then process payouts to all totals records with "0" block hashes.
+    // block hashes that are empty are for the CURRENT PERIOD, and can never get paid out on.
+    processDistribution: function(callback) {
 
         // iterate over our response of accounts needing payment
         loopPayouts = function(resp) {
@@ -107,8 +100,15 @@ module.exports = {
                 // always use 0 since we're going to remove it from the array when we're done.
                 var key = 0;
 
+                console.log({
+                    amount: resp[key].raw_rai_owed,
+                    wallet: Globals.paymentWallets.production,
+                    source: Globals.faucetAddress,
+                    destination: resp[key].account
+                });
+
                 SendRaiService.send({
-                    amount: resp[key].mrai_owed_raw,
+                    amount: '1000000000000000000000000000',
                     wallet: Globals.paymentWallets.production,
                     source: Globals.faucetAddress,
                     destination: resp[key].account
@@ -116,8 +116,8 @@ module.exports = {
 
                     if (!err) {
 
-                        // Update their totals row once we are done sending. 
-                        // We must REBUILD the record or else the other properties will be lost.
+                        // SAVE BLOCK HASH RECEIPT in totals row 
+                        // We must REBUILD the record properties or else the other properties will be lost.
                         Totals.update({ 
                             id: resp[key].id
                         }, {
@@ -128,21 +128,21 @@ module.exports = {
                             started_unix: resp[key].started_unix,
                             ended_unix: resp[key].ended_unix,
                             percentage_owed: resp[key].percentage_owed,
-                            mrai_owed: resp[key].mrai_owed,
-                            mrai_owed_raw: resp[key].mrai_owed_raw,
+                            krai_owed: resp[key].krai_owed,
+                            raw_rai_owed: resp[key].raw_rai_owed,
                             createdAt: resp[key].createdAt,
                             updatedAt: resp[key].updatedAt
                         }).exec(function (err, updated){
                             if (!err) {
 
-                                console.log('Totals.update()');
+                                console.log('Updating receipt hash...');
                                 console.log(JSON.stringify(updated[0]));
 
                                 // remove the 1st element object from the array.
                                 resp.splice(0,1);
 
                                 //tail-call recursion
-                                loopPayouts(resp);
+                                //loopPayouts(resp);
 
                             } else {
                                 console.log(JSON.stringify(err));
@@ -159,18 +159,126 @@ module.exports = {
             }
         };
 
-        /**
-         * Find any totals records where they are not paid yet (no receipt_hash)
-         */
-        Totals.find({ receipt_hash: "0" }, function(err, resp) {
+        console.log('FINALIZING CALCULATIONS');
+
+        DistributionTracker.last(function(err, resp) {
             
             if(!err) {
-                // start the loop the first time.
-                loopPayouts(resp);
+
+                // match only 'accepted' records that were in the last distribution timeframe (historical data)
+                var match = {
+
+                    '$and': [
+                        {
+                            modified : { 
+                                '$lt': resp.lastHour
+                            }
+                        },
+                        {
+                            modified : { 
+                                '$gte': resp.lastRan
+                            }
+                        },
+                        { 
+                            status: 'accepted'
+                        },
+                    ]
+                };
+
+                // count 'success' records and group by account.
+                var group = {
+                    _id: '$account',
+                    count: { 
+                        '$sum': 1
+                    }
+                };
+
+                Distribution.native(function(err, collection) {
+                    if (!err){
+
+                        collection.aggregate([{ '$match' : match }, { '$group' : group }]).toArray(function (err, results) {
+                            if (!err) {
+
+                                /**
+                                 * No matches found. (bad) HALT request!
+                                 * 
+                                 * If NO matches are found, then there are no Distribution records yet.
+                                 */
+                                
+                                if(Object.keys(results).length === 0) {
+                                    callback(true, null);
+                                }
+                                /**
+                                 * Matches found. (good) CONTINUE request!
+                                 * 
+                                 * If matches ARE found, then we should get a list of accounts with counts.
+                                 */
+                                else {
+
+                                    var accountsCount = 0,
+                                    recordsCount = 0,
+                                    records = [];
+
+                                    for(key in results) {
+
+                                        var payload = {
+                                            paid_unix: 0, // filled upon payout.
+                                            receipt_hash: 0, // filled upon payout. explicitly set to 0 now, indicating payout is possible.
+                                            account: results[key]._id,
+                                            total_count: results[key].count,
+                                            started_unix: resp.lastRan,
+                                            ended_unix: resp.lastHour // this is the last hour since we're doing historical (cron)
+                                        };
+
+                                        accountsCount++;
+                                        records.push(payload);
+                                        recordsCount += payload.total_count;
+                                    }
+
+                                    var payload = {
+                                        started_unix: resp.lastRan,
+                                        ended_unix: 0,
+                                        accounts: accountsCount,
+                                        successes: recordsCount,
+                                        complete: false
+                                    };
+
+                                    DistributionTracker.update(payload, function(err, resp) {
+                                        if(!err) {
+                                            callback(null, resp); // looping complete and distribution tracker updated
+                                        } else {
+                                            callback(err, null);
+                                        }
+                                    });
+                           
+                                    /**
+                                     * Find any totals records where they are not paid yet (no receipt_hash)
+                                     * This specifically excludes records where the receipt_hash === "" because
+                                     * this indicates a realtime record.
+                                     */
+                                    Totals.find({ receipt_hash: "" }, function(err, resp) {
+                                    //Totals.find({ receipt_hash: 0 }, function(err, resp) { 
+                                        
+                                        if(!err) {
+                                            // start the loop the first time.
+                                            loopPayouts(resp);
+                                        } else {
+                                            console.log(JSON.stringify(err));
+                                        }
+                                    });
+                                }
+                            } else {
+                                callback({ error: err }, null);
+                            }
+                        });
+                    } else {
+                        callback({ error: err }, null);
+                    }
+                });
             } else {
-                console.log(JSON.stringify(err));
+                callback({ error: err }, null);
             }
-        });
+        });   
     },
 
     // enter the desired payout amount per day here
@@ -178,10 +286,9 @@ module.exports = {
 
         var payload = {
             created_unix: TimestampService.unix(),
-            hourly_mrai: '21000000000000000000000000000000000' // 21,000/hr
+            hourly_rai: '21000000000000000000000000000000000' // 21,000,000/hr
         };
 
-        /*
         PayoutSchedule.create(payload, function(err, resp) {
             
             // processed
@@ -191,6 +298,5 @@ module.exports = {
                 console.log(JSON.stringify(err));
             }
         });
-        */
     }
 };

@@ -1,11 +1,14 @@
 /**
 * AvailableSupply.js
 *
-* @description :: The amount of rai in public supply
+* @description :: The amount of Krai in public supply
 */
 
 module.exports = {
 
+	autoCreatedAt: false,
+	autoUpdatedAt: false,
+	
 	attributes: {
 		// unix timestamp
 		modified: {
@@ -14,8 +17,8 @@ module.exports = {
 			unique: false
 		},
 		// amount available in public supply
-		amount: {
-			type:'integer',
+		raw_krai: {
+			type:'string',
 			required:true,
 			unique: false
 		}

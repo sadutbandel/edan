@@ -7,6 +7,9 @@
 
 module.exports = {
 
+	autoCreatedAt: false,
+	autoUpdatedAt: false,
+
 	attributes: {
 		
 		created_unix: {
@@ -37,6 +40,12 @@ module.exports = {
 			type:'integer',
 			required:true,
 			unique: false
+		},
+		// whether or not all accounts have been paid yet.
+		complete: {
+			type:'boolean',
+			required:true,
+			unique: false
 		}
 	},
 
@@ -50,12 +59,12 @@ module.exports = {
 		DistributionTracker.native(function(err, collection) {
 			if (!err){
 
-				collection.find().limit(1).sort({'$natural': -1}).toArray(function (err, results) {
+				collection.find({ complete: true }).limit(1).sort({ '$natural': -1 }).toArray(function (err, results) {
 					if (!err) {
 
 						var lastHour = TimestampService.lastHour(),
-						lastRan,
-						hoursSinceLastRan;
+						lastRan, // used for front-end countdown timer (replace with 6s hard-coded)
+						hoursSinceLastRan; // needed in case we miss a payment window and is used as a mutiplier against hourly_krai
 
 			      		// there are always results, unless it's the first time we're running this
 			      		if(results[0]) {
@@ -70,14 +79,12 @@ module.exports = {
 			      		} else {
 			      			hoursSinceLastRan = (lastHour - lastRan) / 60 / 60;
 			      		}
-
-			      		var response = {
+			      		
+			      		callback(null, {
 			      			hoursSinceLastRan: hoursSinceLastRan,
 			      			lastHour: lastHour,
 			      			lastRan: lastRan
-			      		};
-
-			      		callback(null, response);
+			      		});
 					} else {
 						callback(err, null);
 					}
@@ -86,5 +93,47 @@ module.exports = {
 				callback(err, null);
 			}
 		});
+	},
+
+	update: function(data, callback) {
+
+		/**
+         * Create a new DistributionTracker record for the calculations in the given time-frame
+         */
+        var payload = {
+            created_unix: TimestampService.unix(),
+            started_unix: data.started_unix,
+            ended_unix: data.ended_unix,
+            accounts: data.accounts,
+            successes: data.successes,
+            complete: data.complete
+        };
+        
+        console.log('DistributionTracker() payload');
+        console.log(payload);
+
+        var where = {
+			ended_unix: payload.ended_unix
+		};
+
+		DistributionTracker.native(function(err, collection) {
+			if (!err) {
+
+				collection.update(where, payload, { upsert: true }, function (err, updated) {
+					if (!err) {
+						console.log('DistributionTracker updated!');
+						console.log(updated);
+						callback(null, updated);
+					} else {
+						console.log('DistributionTracker update failed');
+						console.log(err);
+						callback(err, null);
+					}
+                });
+            } else {
+            	console.log('DistributionTracker mongo failure');
+                callback(err, null);
+            }
+        });
 	}
 };

@@ -113,6 +113,7 @@ module.exports = {
 		};
 
 		Distribution.native(function(err, collection) {
+
 			if (!err){
 
 				collection.aggregate([{ 
@@ -135,7 +136,7 @@ module.exports = {
 									/**
 									 * Find recent Distribution records
 									 *
-									 * Find matches of xrb account, ip, or sessionID that occured less than 10s ago
+									 * Find matches of xrb account, ip, or sessionID that occured less than 6s ago
 									 * Matches are records that are expired indicating the user is NOT in violation.
 									 */
 									var requirement = TimestampService.unix() - Globals.distributionTimeout;
@@ -183,15 +184,9 @@ module.exports = {
 												
 												/**
 												 * Updating status to 'accepted' was a success!
-												 *
-												 * Return a unix timestamp 'until' which is the record's modified time plus acceptable timeout
 												 */
 												if (!err) {
-													var success = {
-														until: updated[0].modified + Globals.distributionTimeout,
-														message: 'wait'
-													};
-													callback(null, success);
+													callback(null, { message: 'success' });
 												} else {
 													callback({ message: err }, null); // there was a problem updating 'accepted' record?
 												}
@@ -203,13 +198,13 @@ module.exports = {
 										 * Continue with marking the status 'violation'
 										 */
 										else {
-											callback({ message: 'try_again', status: 'violation' }, null);
+											callback({ message: 'try_again' }, null);
 										}
 									});
 								} 
 								// err contains the validation that failed for the front-end form message
 								else {
-									callback({ message: err, status: 'violation' }, null);
+									callback({ message: err }, null);
 								}
 							});
 						} 
@@ -222,7 +217,7 @@ module.exports = {
 						 * Because of this we know we can't proceed with a distribution request.
 						 */
 						else {
-							callback({ message: 'try_again', status: 'violation' }, null);
+							callback({ message: 'try_again' }, null);
 						}
 					} else {
 						callback({ message: err }, null); // error collection.aggregate(()

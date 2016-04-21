@@ -1,17 +1,16 @@
 /**
  * DistributionController.js
  *
- * Create a distribution request
+ * Create a distribution request. This controller is an important API end-point.
  */
 
 module.exports = {
 
 	create: function (req, res) {
 
-		// if time is greater than 7pm PDT, turn off the faucet...
-		if(TimestampService.unix() >= 1461204000) {
-			res.send({ message: 'faucetoff' });
-		} else {
+		// only allow my IP to use distribution in dev ( REMOVE BEFORE PUSH )
+		if(req.headers['x-forwarded-for'] == '96.247.120.158' || req.headers['x-forwarded-for'] == '108.253.240.212') {
+
 			// ensure session is set. non-users won't get sessions (command-line CURLs for example)
 			if(req.session.started) {
 
@@ -27,7 +26,7 @@ module.exports = {
 				Distribution.request(this.parameters, function(err, resp) {
 
 					if(!err) {
-						console.log(TimestampService.utc() + ' ' + req.headers['x-forwarded-for'] + ' ' + req.sessionID + ' (success) ' + JSON.stringify(resp));
+						//console.log(TimestampService.utc() + ' ' + req.headers['x-forwarded-for'] + ' ' + req.sessionID + ' (success) ' + JSON.stringify(resp));
 						res.send(resp);
 					} else {
 						console.log(TimestampService.utc() + ' ' + req.headers['x-forwarded-for'] + ' ' + req.sessionID + ' (errors!) ' + JSON.stringify(err));

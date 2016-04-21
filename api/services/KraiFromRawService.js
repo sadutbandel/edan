@@ -1,20 +1,20 @@
 /**
- * Mrai from raw RPC
+ * Krai from raw RPC
  *
- * Divide a raw amount down by the Mrai ratio.
+ * Divide a raw amount down by the Krai ratio.
  * Request:
- * { "action": "mrai_from_raw", "amount": "1000000000000000000000000000000" }
+ * { "action": "krai_from_raw", "amount": "1000000000000000000000000000000000" }
  * Response:
  * { "amount": "1" }
  */
 
 module.exports = {
 
-	convert: function(mrai, callback) {
+	convert: function(krai, callback) {
 
 		this.payload = {
-			action: 'mrai_from_raw',
-			amount: mrai
+			action: 'krai_from_raw',
+			amount: krai
 		};
 		
 		RpcService.callRpc(this.payload, function(err, resp) {

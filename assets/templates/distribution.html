@@ -10,7 +10,7 @@
 	<div class="ten wide computer sixteen wide tablet column">	
 		<div class="ui grid">
 
-			<!-- MANUAL DISTRIBUTION MESSAGE -->
+			<!-- MAINTENANCE MESSAGE 
 			<div class="sixteen wide column">
 				
 				<div class="ui info message">
@@ -48,6 +48,7 @@
 					</em>
 				</div>
 			</div>
+			-->
 
 			<!-- FAUCET FORM -->
 			<div ng-show="!faucetOff" class="ng-hide sixteen wide column">	
@@ -86,7 +87,7 @@
 							type="submit">
 								<i ng-class="button.icon" class="icon"></i>&nbsp;{{ button.title }}
 							</button>
-							<button ng-click="howFaucet(true)" class="ui olive button">
+							<button ng-click="howFaucet(true)" class="ui grey button">
 								<i class="theme icon"></i>&nbsp;How it works
 							</button>
 						</div>
@@ -94,99 +95,28 @@
 				</div>
 			</div>
 
-			<!-- PLEASE WAIT DURATION MESSAGE -->
-			<div ng-show="requestSuccess" class="ng-hide sixteen wide column">
-				<div class="ui icon green message">
-					<i class="thumbs up icon"></i>
-					<div class="content">
-						<div class="header">
-							{{ wait_hdr }}
-						</div>
-						<p>
-							{{ wait_msg }}
-						</p>
-					</div>
-				</div>
-			</div>
-
-			<!-- INDIVIDUAL METRICS -->
-			<div ng-show="count || hoursSinceLastRan" class="ten wide computer sixteen wide tablet column ng-hide">
-				<div class="ui mini green horizontal statistic">
-					<div class="value">
-						{{ count }}
-					</div>
-					<div class="label">
-						<span ng-show="count === 0 || count > 1" class=-"ng-hide">successes</span>
-						<span ng-show="count === 1" class=-"ng-hide">success</span>
-					</div>
-				</div>
-				<div class="ui mini horizontal statistic">
-					<div class="value">
-						{{ hoursSinceLastRan }}
-					</div>
-					<div class="label">
-						<span ng-show="hoursSinceLastRan === 0 || hoursSinceLastRan > 1" class=-"ng-hide">hrs</span>
-						<span ng-show="hoursSinceLastRan === 1" class=-"ng-hide">hr</span>
-						&nbsp;since distribution
-					</div>
-				</div>
-			</div>
-
-			<!-- PAST DISTRIBUTIONS
+			<!-- IN PROGRESS DISTRIBUTION -->
 			<div ng-show="past_distributions" class="sixteen wide column ng-hide">
-				<div class="ui stacked segment">
-					<h3 class="ui header">My Past Distributions</h3>
-
-					<table class="ui celled table">
-						<thead>
-							<tr>
-								<th>Paid Time</th>
-								<th>Period End</th>
-								<th>Period Start</th>
-								<th>Count</th>
-								<th>Mrai Owed</th>
-								<th>Receipt</th>
-								
-							</tr>
-						</thead>
-						<tbody>
-							<tr ng-repeat="record in past_distributions">
-
-								<td>{{ record.paid_unix | date:'M/dd h:mma'}}</td>
-								<td>{{ record.ended_unix | date:'M/dd h:mma'}}</td>
-								<td>{{ record.started_unix | date:'M/dd h:mma'}}</td>
-								<td>{{ record.total_count }}</td>
-								<td>{{ record.mrai_owed }}</td>
-								<td>
-									<a
-									class="ui mini grey button" 
-									ngclipboard 
-									data-clipboard-text="{{ record.receipt_hash }}">
-										<i class="clipboard icon"></i> Hash
-									</a>
-								</td>
-							</tr>
-						</tbody>
-						<tfoot>
-							<tr><th colspan="3">
-								<div class="ui right floated pagination menu">
-									<a class="icon item">
-										<i class="left chevron icon"></i>
-									</a>
-									<a class="item">1</a>
-									<a class="item">2</a>
-									<a class="item">3</a>
-									<a class="item">4</a>
-									<a class="icon item">
-										<i class="right chevron icon"></i>
-									</a>
-								</div>
-							</th>
-						</tr></tfoot>
-					</table>
+				<div class="ui statistics">
+					<div class="green statistic">
+						<div class="value">
+							{{ current_distribution.total_count }}
+						</div>
+						<div class="label">
+							My Count
+						</div>
+					</div>
+					<div class="grey statistic">
+						<div class="value">
+							{{ current_distribution.complete_count }}
+						</div>
+						<div class="label">
+							Total Count
+						</div>
+					</div>
 				</div>
 			</div>
-			END PAST DISTRIBUTIONS -->
+			<!-- END IN PROGRESS DISTRIBUTION -->
 
 			<!-- FAUCET STATISTICS -->
 			<div ng-show="percentage_distributed" class="sixteen wide column ng-hide">
@@ -199,7 +129,7 @@
 								{{ available_supply_absolute | number }}
 							</div>
 							<div class="label">
-								Mrai
+								Krai
 							</div>
 						</div>
 						<div class="statistic">
@@ -221,6 +151,75 @@
 				</div>
 			</div>
 			<!-- END FAUCET STATISTICS -->
+
+			<!-- DISTRIBUTIONS -->
+			<div ng-show="past_distributions" class="sixteen wide column ng-hide">
+				<div class="ui stacked segment">
+					<h3 class="ui header">My Distributions</h3>
+
+					<table class="ui celled compact table">
+						<thead>
+							<tr>
+								<th>Paid Time</th>
+								<th>Period End</th>
+								<th>Period Start</th>
+								<th>Count</th>
+								<th>Krai Owed</th>
+								<th>Receipt</th>
+								
+							</tr>
+						</thead>
+						<tbody>
+
+							<tr class="positive">
+								<td></td>
+								<td></td>
+								<td>{{ current_distribution.started_unix | date:'M/dd h:mma'}}</td>
+								<td>{{ current_distribution.total_count }}</td>
+								<td>{{ current_distribution.krai_owed }}</td>
+								<td></td>
+							</tr>
+
+							</tr>
+							<tr ng-repeat="record in past_distributions">
+
+								<td>{{ record.paid_unix | date:'M/dd h:mma'}}</td>
+								<td>{{ record.ended_unix | date:'M/dd h:mma'}}</td>
+								<td>{{ record.started_unix | date:'M/dd h:mma'}}</td>
+								<td>{{ record.total_count }}</td>
+								<td>{{ record.krai_owed }}</td>
+								<td>
+									<a
+									class="ui mini grey button copy_hash" 
+									data-content="Copied {{ record.receipt_hash }}"
+									ngclipboard 
+									data-clipboard-text="{{ record.receipt_hash }}">
+										<i class="clipboard icon"></i> Hash
+									</a>
+								</td>
+							</tr>
+						</tbody>
+						<!--
+						<tfoot>
+							<tr><th colspan="3">
+								<div class="ui right floated pagination menu">
+									<a class="icon item">
+										<i class="left chevron icon"></i>
+									</a>
+									<a class="item">1</a>
+									<a class="item">2</a>
+									<a class="item">3</a>
+									<a class="item">4</a>
+									<a class="icon item">
+										<i class="right chevron icon"></i>
+									</a>
+								</div>
+							</th>
+						</tr></tfoot>-->
+					</table>
+				</div>
+			</div>
+			<!-- END PAST DISTRIBUTIONS -->
 		</div>
 	</div>
 </div>
@@ -228,7 +227,7 @@
 <div id="how-faucet" class="ui basic modal">
 	<i class="close icon"></i>
 	<div class="header">
-		How the distribution faucet works
+		How distribution works
 	</div>
 	<div class="image content">
 		<div class="image">
@@ -236,37 +235,54 @@
 		</div>
 		<div class="description">
 			<p>
-				The faucet distributes&nbsp;&nbsp;<a class="ui blue label">21,000 Mrai Per Hour</a>&nbsp;&nbsp;spread across all participating accounts. Each success increases your overall success count for the <strong>current undistributed period</strong>. When the algorithm calculates distribution percentages, it considers your total count against the overall success count of everyone for that period.
+				The faucet drips&nbsp;&nbsp;<a class="ui blue label">21,000,000 Krai Per Hour</a>&nbsp;&nbsp;spread across any participating accounts for the prior 2-hour period. Each one of your successes increases your overall success count for the <strong>current undistributed period</strong>. When our algorithm calculates distribution percentages by account, it considers the total success count for that account against the overall success count of everyone for that period.
 			</p>
 			
 			<br style="clear:both;"/>
 			<a class="ui blue pointing below label">Distribution Algorithm</a>
 			<p>
-				<strong>Your Mrai Owed =</strong> ( My Count / Total Count ) * ( 21,000 * Hours Since Last Distributed )
+				<strong>Krai =</strong> ( My Count / Total Count ) * ( 21,000,000 * Hours Since Last Distributed )
 			</p>
 
 			<br style="clear:both;"/>
 
 			<a class="ui red pointing below label">Example Breakdown</a>
 			<p>
-				<strong>Your Mrai Owed =</strong> ( 420 / 4477 ) * ( 21,000 * 2 )
+				<strong>Your Krai Owed =</strong> ( 420 / 22,345 ) * ( 21,000,000 * 2 )
 			</p>
 			<p>
-				<strong>3940.1384855931 =</strong> 0.09381282108555 * 42,000
+				<strong>789438.35309892 =</strong> 0.01879615126426 * 42,000,000
 			</p>
 			<p>
-				<strong>Example 3940 Mrai Owed</strong>
+				<strong>789,438 Krai Owed</strong> (About 789 Mrai)
 			</p>
-			<p></p>
+
+			<br style="clear:both;"/>
+
+			<a class="ui green pointing below label">Distribution Method</a>
 			<p>
-				Our system calculates &amp; distributes Mrai <strong>every 2 hours</strong>. In the event that distribution takes longer than normal, <strong>please don't worry</strong>. All of your successful ReCaptcha solves are saved forever and you will receive complete distribution eventually.
+				Our system finalizes total calculations for the last 2-hour period prior to actually distributing Krai. This process occurs <strong>every 2 hours</strong>. In the event that distribution takes longer than normal, <strong>please don't worry</strong>! All of your successful ReCaptcha solves are saved forever in our system and it's very clear which accounts have not beed paid making it easy for us to retroactively pay. We are working towards preventing all hiccups in our automated distribution process though and it won't be an issue soon.
+			</p>
+			<p>
+				The realtime data shown in the top row of 'My Past Distributions' shows your current progress in the unpaid distribution period. It shows you a <strong>projection that's likely to change</strong> after finalization calculations occur. It should be a fairly accurate representation of what you will get receive in distribution, especially if you are highly-active near the 2-hour mark.
+			</p>
+
+			<br style="clear:both;"/>
+
+			<a class="ui grey pointing below label">Some advice</a>
+			<p>
+				Keep in mind that <strong>any requests faster than 6 seconds</strong> from your last successful request <a class="ui red label">will fail</a>. It's difficult to be this fast, but it's possible in certain cases. In that case, you would receive a <a class="ui yellow label">Try Again</a> message, so be careful not to be too quick!
+			</p>
+
+			<p>
+				There are also currently rare cases where your distribution request will get stuck and you will keep getting a <a class="ui yellow label">Try Again</a> warning. This should resolve itself within 1 minute though, so please be patient if that does happen.
 			</p>
 		</div>
 	</div>
 	<div class="actions">
 		<div ng-click="howFaucet(false)" class="ui olive big basic remove inverted button">
 			<i class="thumbs up icon"></i>
-			Got it
+			Got it!
 		</div>
 	</div>
 </div>

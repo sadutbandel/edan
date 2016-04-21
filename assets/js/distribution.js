@@ -71,10 +71,10 @@
   				class: 'grey'
   			},
 
-  			processed: {
-  				displaybled: true,
+  			success: {
+  				disabled: true,
   				icon: 'thumbs up',
-  				title: 'Processed',
+  				title: 'Success',
   				class: 'green'
   			},
 
@@ -107,44 +107,7 @@
   			}
   		};
 
-  		$scope.wait = function(until) {
-
-			// if a unix timestamp was passed...
-			if(until) {
-
-				// every 1/10th second, re-calculate the seconds to wait
-				var waitUntilPromise = $interval(function() {
-
-					var untilThen = until - Math.floor(Date.now() / 1000);
-
-					// if the wait timer has expired, hide
-					if(untilThen <= 0) {
-						$interval.cancel(waitUntilPromise);
-						$scope.requestSuccess = false;
-					} else {
-						$scope.wait_hdr = 'Request succeeded';
-						$scope.wait_msg = 'Wait ' + untilThen + ' seconds to request again';
-						$scope.requestSuccess = true;
-  					}
-				},1000);
-			} 
-  			// no unix timestamp passed...
-  			else {
-	  			$scope.button = button.try_again;
-	  			$timeout(function() {
-	  				vcRecaptchaService.reload($scope.widgetId);
-	  				$scope.init();
-					$scope.button = button.default;
-				}, 3000);
-			}
-		}
-
-		// if greater than 7pm PDT, turn off faucet button (done on the backend too :)   >_<   )
-		if(Math.floor(Date.now() / 1000) >= 1461204000) {
-			$scope.button = button.faucetoff;
-		} else {
-  			$scope.button = button.default;
-  		}
+		$scope.button = button.default;
 
   		$scope.validateAccount = function() {
   			if($scope.account === undefined || $scope.account === null || $scope.account === '' || $scope.account.lastIndexOf('xrb_', 0) !== 0) {
@@ -188,27 +151,49 @@
 				
 				$http.post('/distribution', this.payload).success(function(data) {
 
-					// possible returnsponse: {"until":1460488859,"message":"wait","count":6,"lastRan":1460422800,"hoursSinceLastRan":18}
-					if(data.count) {
-						$scope.count = data.count;
-					}
-
-					$scope.hoursSinceLastRan = data.hoursSinceLastRan;
-					//$scope.past_distributions = data.past_distributions;
-
-					// if there is an 'until' time to wait for, run dynamic
-					if(data.until) {
+					// possible return response: {"message":"success", lastRan":1460422800,"hoursSinceLastRan":18, past_distributions: [ objs ] }
+					if(data.past_distributions) {
+						
+						// clear recaptcha for re-use right-away so front-end exploiters have no advantage.
+						vcRecaptchaService.reload($scope.widgetId);						
 						$scope.init();
-						vcRecaptchaService.reload($scope.widgetId);
-						$scope.button = button.default;
-						$scope.wait(data.until); // a unique, dynamic function
-					} else {
+
+						// display success button very briefly so front-end exploiters have no incentive to disable this. (purely for UX)
+						$scope.button = button.success;
+						$timeout(function() {
+							$scope.button = button.default;
+						}, 1000);
+
+						// prepare to preserve our UI-total count to check if it's more updated than the server one or not.
+						var total_count;
+
+						// if we have a count for current distribution already, add on to it until data-source is bigger. (every minute)
+						if($scope.current_distribution){
+
+							ui_total_count = $scope.current_distribution.total_count;
+							ui_total_count++;
+
+							if(ui_total_count >= data.current_distribution.total_count) {
+								data.current_distribution.total_count = ui_total_count;
+							}
+						} else {
+							data.current_distribution.total_count++;
+						}
+
+						// store some relevant data in the front-end for the account submitted
+						$scope.current_distribution = data.current_distribution;
+						$scope.hoursSinceLastRan = data.hoursSinceLastRan;
+						$scope.past_distributions = data.past_distributions;
+						
+						//$('.copy_hash').popup({ popup:true }); // activate popups
+						
+					} else { // non-success messages
 						$scope.button = button[data.message];
 						$timeout(function() {
 							vcRecaptchaService.reload($scope.widgetId);
 							$scope.init();
 							$scope.button = button.default;
-						}, 3000);
+						}, 1000);
 					}
 				})
 				.error(function(data, status) {
@@ -217,6 +202,8 @@
 
 			} else {
 				$timeout(function() {
+					vcRecaptchaService.reload($scope.widgetId);
+					$scope.init();
 					$scope.button = button.default;
 				}, 3000);
 			}

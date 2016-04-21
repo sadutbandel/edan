@@ -29,7 +29,7 @@
 		$rootScope.recaptchaKey = '6LcPNAsTAAAAANCpxZY3SMikIjg5a0T9XTnjM-v4';
 		$rootScope.faucetNumber = 'xrb_35jjmmmh81kydepzeuf9oec8hzkay7msr6yxagzxpcht7thwa5bus5tomgz9';
 		$rootScope.rb_version = '7.4.4';
-		$rootScope.total_faucet = 340282366; // used for visual display of distribution # on get started
+		$rootScope.total_faucet = 340282366000; // used for visual display of distribution # on get started
 	})
 
 	.config(function($routeProvider) {
