@@ -6,10 +6,11 @@ module.exports.schedule = {
     sailsInContext: true,
     tasks: {
 
-        // Calculate distribution totals every 2 hours (run payout / load available_supply twice to catch missed accounts)
-        processTotals : {
+        // this finalizes calculations for the last period, then pays out participating accounts (every 2 hours)
+        /*
+        processDistribution : {
 
-            cron : "0 */2 * * *",
+            cron : "0 !/2 ! ! !",
             task : function (context, sails) {
 
                 // production-level CRON.
@@ -17,46 +18,28 @@ module.exports.schedule = {
 
                     console.log('---------------- PROCESSING DISTRIBUTION -----------------');
 
-                    // CALCULATE TOTALS
-                    AutomationService.processTotals(function(err, resp) {
+                    AutomationService.processDistribution(function(err, resp) {
                         if(!err) {
-                            console.log(TimestampService.utc() + ' [ AutomationService.processTotals() ] (!err) ' + JSON.stringify(resp));
 
-                            // PROCESS DISTRIBUTION
-                            AutomationService.processPayouts(function(err, resp) {
+                            console.log(TimestampService.utc() + ' [ AutomationService.processDistribution() ] (!err) ' + JSON.stringify(resp));
+                           
+                           // LOAD AVAILABLE SUPPLY
+                           AutomationService.loadAvailableSupply(function(err, resp) {
                                 if(!err) {
-                                    console.log(TimestampService.utc() + ' [ AutomationService.processPayouts() ] (!err) ' + JSON.stringify(resp));
-                                    
-                                    // PROCESS DISTRIBUTION (again)
-                                    AutomationService.processPayouts(function(err, resp) {
-                                        if(!err) {
-                                            console.log(TimestampService.utc() + ' [ AutomationService.processPayouts() ] (!err) ' + JSON.stringify(resp));
-                                        
-                                           // LOAD AVAILABLE SUPPLY
-                                           AutomationService.loadAvailableSupply(function(err, resp) {
-                                                if(!err) {
-                                                    console.log(TimestampService.utc() + ' [ AutomationService.loadAvailableSupply() ] (!err) ' + JSON.stringify(resp));
-                                                } else {
-                                                    console.log(TimestampService.utc() + ' [ AutomationService.loadAvailableSupply() ] (err) ' + JSON.stringify(err));
-                                                }
-                                           });                                    
-                                        } else {
-                                            console.log(TimestampService.utc() + ' [ AutomationService.processPayouts() ] (err) ' + JSON.stringify(err));
-                                        }
-                                    });                                 
+                                    console.log(TimestampService.utc() + ' [ AutomationService.loadAvailableSupply() ] (!err) ' + JSON.stringify(resp));
                                 } else {
-                                    console.log(TimestampService.utc() + ' [ AutomationService.processPayouts() ] (err) ' + JSON.stringify(err));
+                                    console.log(TimestampService.utc() + ' [ AutomationService.loadAvailableSupply() ] (err) ' + JSON.stringify(err));
                                 }
-                            });
+                           });                                    
                         } else {
-                            console.log(TimestampService.utc() + ' [ AutomationService.processTotals() ] (err) ' + JSON.stringify(err));
+                            console.log(TimestampService.utc() + ' [ AutomationService.processDistribution() ] (err) ' + JSON.stringify(err));
                         }
                     });
                 } 
             },
             context : {}
         },
-
+        */
         // Fix any stuck 'pending' distribution records to be 'violations' (anything older than 1 minute is obviously stuck)
         stuckPending : {
 

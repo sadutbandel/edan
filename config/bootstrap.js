@@ -15,7 +15,9 @@ module.exports.bootstrap = function(cb) {
    /*
    AutomationService.processDistribution(function(err, resp) {
       if(!err) {
-         console.log(TimestampService.utc() + ' [ AutomationService.processPayouts() ] (!err) ' + JSON.stringify(resp));
+
+         console.log(TimestampService.utc() + ' [ AutomationService.processDistribution() ] (!err) ' + JSON.stringify(resp));
+         
          // LOAD AVAILABLE SUPPLY
          AutomationService.loadAvailableSupply(function(err, resp) {
             if(!err) {
@@ -25,7 +27,7 @@ module.exports.bootstrap = function(cb) {
             }
          }); 
       } else {
-         console.log(TimestampService.utc() + ' [ AutomationService.processPayouts() ] (err) ' + JSON.stringify(err));
+         console.log(TimestampService.utc() + ' [ AutomationService.processDistribution() ] (err) ' + JSON.stringify(err));
       }
    });
    */
