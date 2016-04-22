@@ -174,7 +174,12 @@
 							ui_total_count++;
 
 							if(ui_total_count >= data.current_distribution.total_count) {
-								data.current_distribution.total_count = ui_total_count;
+								var diff = ui_total_count - data.current_distribution.total_count;
+								if(diff >= 10) {
+									ui_total_count = data.current_distribution.total_count;
+								} else {
+									data.current_distribution.total_count = ui_total_count;
+								}
 							}
 						} else {
 							data.current_distribution.total_count++;

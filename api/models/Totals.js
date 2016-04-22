@@ -73,7 +73,13 @@ module.exports = {
 
 	/**
 	 * Calculate near-REALTIME metrics for current unpaid distribution for all acounts
-	 * Grabs all 'accepted' records greater than or equal to the last time Distribution was processed / finalized
+	 * Grabs all 'accepted' records greater than or equal to the last time Distribution calculations were last finalized
+	 *
+	 * returns: 
+	 * { hoursSinceLastRan: 0,
+     * lastHour: 1461294000,
+  	 * lastRan: 1461294000 }
+	 *
 	 **/
 	calculate: function(callback) {
 
@@ -117,7 +123,7 @@ module.exports = {
 								 */
 								
 								if(Object.keys(results).length === 0) {
-									callback(true, null);
+									callback('no matches 1', null);
 								}
 								/**
 								 * Matches found. (good) CONTINUE request!
@@ -266,19 +272,21 @@ module.exports = {
 							} else {
 
 								/**
-								 * Once looping completes, update DistributionTracker with the new numbers.
+								 * Once looping over totals calculations is finalized, 
+								 * create/update DistributionTracker with the new numbers.
 								 */
 								var payload = {
 						            started_unix: resp.lastRan,
 						            ended_unix: 0,
 						            accounts: accountsCount,
 						            successes: recordsCount,
-						            complete: false
+						            finalized: false,
+						            paid: false
 						        };
 
 								DistributionTracker.update(payload, function(err, resp) {
 						            if(!err) {
-						                callback(null, resp); // looping complete and distribution tracker updated
+						                callback(null, true); // looping finalized and distribution tracker updated
 						            } else {
 						                callback(err, null);
 						            }

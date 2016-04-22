@@ -87,8 +87,7 @@ module.exports = {
         });
     },
 
-    // finalize totals for the last period, then process payouts to all totals records with "0" block hashes.
-    // block hashes that are empty are for the CURRENT PERIOD, and can never get paid out on.
+    // finalize totals for the last period, then process payouts to all totals records with "" block hashes.
     processDistribution: function(callback) {
 
         // iterate over our response of accounts needing payment
@@ -99,20 +98,16 @@ module.exports = {
 
                 // always use 0 since we're going to remove it from the array when we're done.
                 var key = 0;
-
-                console.log({
-                    amount: resp[key].raw_rai_owed,
-                    wallet: Globals.paymentWallets.production,
-                    source: Globals.faucetAddress,
-                    destination: resp[key].account
-                });
-
-                SendRaiService.send({
+                
+                var sendRaiPayload = {
                     amount: '1000000000000000000000000000',
+                    //amount: resp[key].raw_rai_owed,
                     wallet: Globals.paymentWallets.production,
                     source: Globals.faucetAddress,
                     destination: resp[key].account
-                }, function(err, res) {
+                };
+
+                SendRaiService.send(sendRaiPayload, function(err, res) {
 
                     if (!err) {
 
@@ -129,9 +124,7 @@ module.exports = {
                             ended_unix: resp[key].ended_unix,
                             percentage_owed: resp[key].percentage_owed,
                             krai_owed: resp[key].krai_owed,
-                            raw_rai_owed: resp[key].raw_rai_owed,
-                            createdAt: resp[key].createdAt,
-                            updatedAt: resp[key].updatedAt
+                            raw_rai_owed: resp[key].raw_rai_owed
                         }).exec(function (err, updated){
                             if (!err) {
 
@@ -142,15 +135,13 @@ module.exports = {
                                 resp.splice(0,1);
 
                                 //tail-call recursion
-                                //loopPayouts(resp);
+                                loopPayouts(resp);
 
                             } else {
-                                console.log(JSON.stringify(err));
                                 callback(err, null); // totals update failure
                             }
                         });
                     } else {
-                        console.log(JSON.stringify(err));
                         callback(err, null); // send rai failure
                     }
                 });
@@ -159,7 +150,7 @@ module.exports = {
             }
         };
 
-        console.log('FINALIZING CALCULATIONS');
+        console.log('---------------- FINALIZING CALCULATIONS ----------------');
 
         DistributionTracker.last(function(err, resp) {
             
@@ -204,67 +195,49 @@ module.exports = {
                                  * 
                                  * If NO matches are found, then there are no Distribution records yet.
                                  */
-                                
                                 if(Object.keys(results).length === 0) {
-                                    callback(true, null);
+                                    callback('no matches', null);
                                 }
+
                                 /**
                                  * Matches found. (good) CONTINUE request!
                                  * 
                                  * If matches ARE found, then we should get a list of accounts with counts.
+                                 * Count total accounts and records for storage in in DistributionTracker
                                  */
                                 else {
 
                                     var accountsCount = 0,
-                                    recordsCount = 0,
-                                    records = [];
+                                    recordsCount = 0;
 
                                     for(key in results) {
-
-                                        var payload = {
-                                            paid_unix: 0, // filled upon payout.
-                                            receipt_hash: 0, // filled upon payout. explicitly set to 0 now, indicating payout is possible.
-                                            account: results[key]._id,
-                                            total_count: results[key].count,
-                                            started_unix: resp.lastRan,
-                                            ended_unix: resp.lastHour // this is the last hour since we're doing historical (cron)
-                                        };
-
                                         accountsCount++;
-                                        records.push(payload);
-                                        recordsCount += payload.total_count;
+                                        recordsCount += results[key].count;
                                     }
 
+                                    // mark this distribution as finalized with accounts and successes
                                     var payload = {
                                         started_unix: resp.lastRan,
-                                        ended_unix: 0,
+                                        ended_unix: resp.lastHour,
                                         accounts: accountsCount,
                                         successes: recordsCount,
-                                        complete: false
+                                        finalized: true
                                     };
 
+                                    // attempt to update DistributionTracker for any unpaid timeframe
                                     DistributionTracker.update(payload, function(err, resp) {
-                                        if(!err) {
-                                            callback(null, resp); // looping complete and distribution tracker updated
-                                        } else {
-                                            callback(err, null);
-                                        }
-                                    });
-                           
-                                    /**
-                                     * Find any totals records where they are not paid yet (no receipt_hash)
-                                     * This specifically excludes records where the receipt_hash === "" because
-                                     * this indicates a realtime record.
-                                     */
-                                    Totals.find({ receipt_hash: "" }, function(err, resp) {
-                                    //Totals.find({ receipt_hash: 0 }, function(err, resp) { 
-                                        
-                                        if(!err) {
-                                            // start the loop the first time.
-                                            loopPayouts(resp);
-                                        } else {
-                                            console.log(JSON.stringify(err));
-                                        }
+
+                                        var where = { receipt_hash: "" };
+
+                                        Totals.find(where, function(err, resp) { 
+                                            
+                                            if(!err) {
+                                                // start the loop the first time.
+                                                loopPayouts(resp);
+                                            } else {
+                                                callback({ error: err }, null);
+                                            }
+                                        });
                                     });
                                 }
                             } else {

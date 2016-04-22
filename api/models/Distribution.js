@@ -114,16 +114,22 @@ module.exports = {
 								Totals.native(function(err, collection) {
 									if (!err){
 
-										collection.find(where,what).sort({ '$natural': -1 }).toArray(function (err, results) {
+										collection.find(where,what).sort({ 'ended_unix': -1 }).toArray(function (err, results) {
 											if (!err) {
 
 												// everyone's data
 												DistributionTracker.native(function(err, collection) {
 													if (!err){
 
-														collection.find({ complete: false }).toArray(function (err, res) {
+														collection.find({ finalized: false }).toArray(function (err, res) {
 															if (!err) {
 
+																// if there are no results, we dont have DistributionTracker row yet.
+																// 
+																// 
+																// 
+																// 
+																
 																// convert unix timestamps to milliseconds fo angular
 																for(key in results) {
 																	results[key].paid_unix = results[key].paid_unix * 1000;

@@ -41,16 +41,22 @@ module.exports = {
 			required:true,
 			unique: false
 		},
-		// whether or not all accounts have been paid yet.
-		complete: {
+		// whether or not final calculations have been done yet
+		finalized: {
 			type:'boolean',
 			required:true,
 			unique: false
-		}
+		},
+		// whether or not all accounts have been paid yet.
+		paid: {
+			type:'boolean',
+			required:true,
+			unique: false
+		},
 	},
 
 	/**
-	 * Grab the most recent tracked distribution
+	 * Grab the most recent tracked distribution that's been finalized
 	 *
 	 * Returns lastHour, lastRan, & hoursSinceLastRan
 	 */
@@ -59,7 +65,7 @@ module.exports = {
 		DistributionTracker.native(function(err, collection) {
 			if (!err){
 
-				collection.find({ complete: true }).limit(1).sort({ '$natural': -1 }).toArray(function (err, results) {
+				collection.find({ finalized: true }).limit(1).sort({ '$natural': -1 }).toArray(function (err, results) {
 					if (!err) {
 
 						var lastHour = TimestampService.lastHour(),
@@ -95,25 +101,23 @@ module.exports = {
 		});
 	},
 
+	/**
+	 * Upsert a realtime DistributionTracker record where ended_unix === 0
+	 */
 	update: function(data, callback) {
 
-		/**
-         * Create a new DistributionTracker record for the calculations in the given time-frame
-         */
         var payload = {
             created_unix: TimestampService.unix(),
             started_unix: data.started_unix,
             ended_unix: data.ended_unix,
             accounts: data.accounts,
             successes: data.successes,
-            complete: data.complete
+            finalized: data.finalized,
+            paid: data.paid
         };
-        
-        console.log('DistributionTracker() payload');
-        console.log(payload);
 
         var where = {
-			ended_unix: payload.ended_unix
+			ended_unix: 0
 		};
 
 		DistributionTracker.native(function(err, collection) {
@@ -121,17 +125,12 @@ module.exports = {
 
 				collection.update(where, payload, { upsert: true }, function (err, updated) {
 					if (!err) {
-						console.log('DistributionTracker updated!');
-						console.log(updated);
-						callback(null, updated);
+						callback(null, true);
 					} else {
-						console.log('DistributionTracker update failed');
-						console.log(err);
 						callback(err, null);
 					}
                 });
             } else {
-            	console.log('DistributionTracker mongo failure');
                 callback(err, null);
             }
         });

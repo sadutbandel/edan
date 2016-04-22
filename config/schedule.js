@@ -10,7 +10,7 @@ module.exports.schedule = {
 
         processDistribution : {
 
-            cron : "0 */2 * * *",
+            cron : "10 * * * *",
             task : function (context, sails) {
 
                 // production-level CRON.
@@ -77,7 +77,7 @@ module.exports.schedule = {
                 // production-level CRON.
                 if(sails.config.port === 1337) {
 
-                    console.log('---------------- RE-CALCULATING TOTALS -----------------');
+                    console.log('---------------- RE-CALCULATING TOTALS ----------------');
 
                     Totals.processTotals(function(err, resp) {
 
@@ -86,7 +86,7 @@ module.exports.schedule = {
                          * We have the total Krai being paid out
                          */
                         if(!err) {
-                            console.log('---------------- TOTALS RECALCULATED -----------------');
+                            console.log('---------------- TOTALS RECALCULATED ----------------');
                         } else {
                             console.log(TimestampService.utc() + ' [ Totals.processTotals() ] (err) ' + JSON.stringify(err));
                         }
