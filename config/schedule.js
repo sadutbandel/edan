@@ -10,30 +10,19 @@ module.exports.schedule = {
 
         processDistribution : {
 
-            cron : "5 * * * *",
+            cron : "49 * * * *",
             task : function (context, sails) {
 
                 // production-level CRON.
                 if(sails.config.port === 1337) {
 
-                    console.log('---------------- PROCESSING DISTRIBUTION -----------------');
+                    console.log(TimestampService.utc() + ' ---------------- PROCESSING DISTRIBUTION ----------------- ');
 
-                    AutomationService.processDistribution(function(err, resp) {
+                    AutomationService.distributionThenUpdateSupply(function(err, resp) {
                         if(!err) {
-
-                            //console.log(TimestampService.utc() + ' [ AutomationService.processDistribution() ] (!err) ' + JSON.stringify(resp));
-                           
-                           // LOAD AVAILABLE SUPPLY
-                           AutomationService.loadAvailableSupply(function(err, resp) {
-                                if(!err) {
-                                    console.log('---------------- DISTRIBUTION PROCESSED -----------------');
-                                    //console.log(TimestampService.utc() + ' [ AutomationService.loadAvailableSupply() ] (!err) ' + JSON.stringify(resp));
-                                } else {
-                                    console.log(TimestampService.utc() + ' [ AutomationService.loadAvailableSupply() ] (err) ' + JSON.stringify(err));
-                                }
-                           });                            
+                            console.log(TimestampService.utc() + ' ---------------- DISTRIBUTION PROCESSED! ----------------- ' + JSON.stringify(resp));                       
                         } else {
-                            console.log(TimestampService.utc() + ' [ AutomationService.processDistribution() ] (err) ' + JSON.stringify(err));
+                            console.log(TimestampService.utc() + ' ---------------- DISTRIBUTION FAILED... ----------------- ' + JSON.stringify(err));                       
                         }
                     });
                 } 
@@ -51,13 +40,12 @@ module.exports.schedule = {
                 // production-level CRON.
                 if(sails.config.port === 1338) {
 
-                    console.log('---------------- FIXING STUCK PENDING -----------------');
+                    console.log(TimestampService.utc() + ' ---------------- FIXING STUCK PENDING ----------------- ');
 
                     // FIND RECORDS OLDER THAN 1 MINUTE
                     AutomationService.fixStuckPending(function(err, resp) {
                         if(!err) {
-                            console.log('---------------- STUCK PENDING FIXED -----------------');
-                            //console.log(TimestampService.utc() + ' [ AutomationService.fixStuckPending() ] (!err) ' + JSON.stringify(resp));
+                            console.log(TimestampService.utc() + ' ---------------- STUCK PENDING FIXED ----------------- ');
                         } else {
                             console.log(TimestampService.utc() + ' [ AutomationService.fixStuckPending() ] (err) ' + JSON.stringify(err));
                         }
@@ -77,7 +65,7 @@ module.exports.schedule = {
                 // production-level CRON.
                 if(sails.config.port === 1337) {
 
-                    console.log('---------------- RE-CALCULATING TOTALS ----------------');
+                    console.log(TimestampService.utc() + ' ---------------- RE-CALCULATING TOTALS ----------------');
 
                     Totals.processTotals(function(err, resp) {
 
@@ -86,7 +74,7 @@ module.exports.schedule = {
                          * We have the total Krai being paid out
                          */
                         if(!err) {
-                            console.log('---------------- TOTALS RECALCULATED ----------------');
+                            console.log(TimestampService.utc() + ' ---------------- TOTALS RECALCULATED ----------------');
                         } else {
                             console.log(TimestampService.utc() + ' [ Totals.processTotals() ] (err) ' + JSON.stringify(err));
                         }

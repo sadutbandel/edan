@@ -66,7 +66,7 @@ module.exports = {
 		// block hash receipt after they were paid
 		receipt_hash: {
 			type: 'string',
-			required: true,
+			required: false, // although we always set it, even to "" to indicate a realtime row record.
 			unique: false
 		}
 	},
@@ -83,7 +83,7 @@ module.exports = {
 	 **/
 	calculate: function(callback) {
 
-		DistributionTracker.last({ finalized: true, paid: true }, function(err, resp) {
+		DistributionTracker.last({ finalized: true }, function(err, resp) {
 	        
 	      	if(!err) {
 
@@ -269,27 +269,43 @@ module.exports = {
 				                        callback(err, null); // completed!
 			                        }
 		                        });
-							} else {
+							}
 
-								/**
-								 * Once looping over totals calculations is finalized, 
-								 * create/update DistributionTracker with the new numbers.
-								 */
-								var payload = {
-						            started_unix: resp.lastRan,
-						            ended_unix: 0,
-						            accounts: accountsCount,
-						            successes: recordsCount,
-						            finalized: false,
-						            paid: false
-						        };
+							// resp length is 0 now... looping is complete.
+							// now we need to update DT with the new record.
 
-								DistributionTracker.update(payload, function(err, resp) {
+							else {
+
+						        // find the row we are about to update to get it's created_unix time
+						        DistributionTracker.find({ ended_unix: 0 }, function(err, res) {
+
 						            if(!err) {
-						                callback(null, true); // looping finalized and distribution tracker updated
-						            } else {
-						                callback(err, null);
-						            }
+
+						            	var payload = {
+								            started_unix: resp.lastRan,
+								            ended_unix: 0,
+								            accounts: accountsCount,
+								            successes: recordsCount,
+								            finalized: false,
+								            paid: false
+								        };
+
+								        // if there is a results, retain the created_unix time 
+						            	if(res.length > 0) {
+						            		payload.created_unix = res[0].created_unix;
+									    }
+
+									    // update distribution tracker
+									    DistributionTracker.update(payload, function(err, resp) {
+								            if(!err) {
+								                callback(null, true); // looping finalized and distribution tracker updated
+								            } else {
+								                callback(err, null);
+								            }
+								        });
+						        	} else {
+						        		callback(err, null);
+						        	}
 						        });
 							}
 						};

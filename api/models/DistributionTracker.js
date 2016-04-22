@@ -70,18 +70,39 @@ module.exports = {
 		DistributionTracker.native(function(err, collection) {
 			if (!err){
 
-				collection.find({ finalized: params.finalized, paid: params.paid }).limit(1).sort({ '$natural': -1 }).toArray(function (err, results) {
+				var minuteAgo = TimestampService.unix() - 60;
+
+				var find = {
+					finalized: params.finalized,
+					created_unix: {
+						'$lt': minuteAgo
+					}
+				};
+
+				if(params.paid) {
+					find.paid = params.paid;
+				}
+
+				// ensure we don't accidentally grab a record that minutely realtime cron just created.
+				collection.find(find).limit(1).sort({ '$natural': -1 }).toArray(function (err, results) {
 					if (!err) {
 
-						var lastHour = TimestampService.lastHour(), // the last hour that ended (if 7:15pm, then 7pm)
-						lastRan = results[0].ended_unix, // used to determine how many hours ago we last ran this
-						hoursSinceLastRan = (lastHour - lastRan) / 60 / 60; // needed for calculating total krai to payout depending on hours
-			      		
-			      		callback(null, {
-			      			hoursSinceLastRan: hoursSinceLastRan,
-			      			lastHour: lastHour,
-			      			lastRan: lastRan
-			      		});
+						if(results.length > 0) {
+
+							var lastHour = TimestampService.lastHour(), // the last hour that ended (if 7:15pm, then 7pm)
+							lastRan = results[0].ended_unix, // used to determine how many hours ago we last ran this
+							hoursSinceLastRan = (lastHour - lastRan) / 60 / 60; // needed for calculating total krai to payout depending on hours
+				      		
+				      		callback(null, {
+				      			created_unix: results[0].created_unix,
+				      			started_unix: results[0].started_unix,
+				      			hoursSinceLastRan: hoursSinceLastRan,
+				      			lastHour: lastHour,
+				      			lastRan: lastRan,
+				      		});
+				      	} else {
+				      		callback('no results dt', null);
+				      	}
 					} else {
 						callback(err, null);
 					}
@@ -97,8 +118,17 @@ module.exports = {
 	 */
 	update: function(data, callback) {
 
+		var created_unix;
+
+		// we don't want to overwrite created if we are updating.
+		if(data.created_unix) {
+			created_unix = data.created_unix;
+		} else {
+			created_unix = TimestampService.unix();
+		}
+
         var payload = {
-            created_unix: TimestampService.unix(),
+            created_unix: created_unix,
             started_unix: data.started_unix,
             ended_unix: data.ended_unix,
             accounts: data.accounts,

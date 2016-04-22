@@ -110,7 +110,7 @@ module.exports = {
 									account: parameters.account
 								};
 
-								// my data
+								// my records
 								Totals.native(function(err, collection) {
 									if (!err){
 
@@ -124,13 +124,9 @@ module.exports = {
 														collection.find({ finalized: false }).toArray(function (err, res) {
 															if (!err) {
 
+																// generally we'll always have results in DistributionTracker for current unpair period
 																if(res.length > 0) {
-																	// if there are no results, we dont have DistributionTracker row yet.
-																	// 
-																	// 
-																	// 
-																	// 
-																	
+
 																	// convert unix timestamps to milliseconds fo angular
 																	for(key in results) {
 																		results[key].paid_unix = results[key].paid_unix * 1000;
@@ -144,13 +140,16 @@ module.exports = {
 					 												resp.current_distribution = resultsClone.slice(-1)[0];
 					 												resp.current_distribution.complete_count = res[0].successes;
 
+					                                				// remove the last object element (realtime unpaid distribution) from 
+					                                				// the array, then store past distributions.
 					                                				results.pop();
-
-					                                				// remove the 1st element object from the array, then store it.
 					                                				resp.past_distributions = results;
 
 						 											callback(null, resp);
-						 										} else {
+						 										} 
+
+						 										// we just lifted server and crons have not yet created totals / DT records.
+						 										else {
 						 											callback({ message: 'try_again'}, null);
 						 										}
 					 										} else {
