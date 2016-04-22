@@ -7,22 +7,19 @@ module.exports.schedule = {
     tasks: {
 
         // this finalizes calculations for the last period, then pays out participating accounts (every 2 hours)
-
         processDistribution : {
 
-            cron : "49 * * * *",
+            cron : "36 * * * *",
             task : function (context, sails) {
 
                 // production-level CRON.
                 if(sails.config.port === 1337) {
 
-                    console.log(TimestampService.utc() + ' ---------------- PROCESSING DISTRIBUTION ----------------- ');
-
                     AutomationService.distributionThenUpdateSupply(function(err, resp) {
                         if(!err) {
-                            console.log(TimestampService.utc() + ' ---------------- DISTRIBUTION PROCESSED! ----------------- ' + JSON.stringify(resp));                       
+                            console.log(TimestampService.utc() + ' ---------------- DISTRIBUTION PROCESSING SUCCESS ----------------- ' + JSON.stringify(resp));                       
                         } else {
-                            console.log(TimestampService.utc() + ' ---------------- DISTRIBUTION FAILED... ----------------- ' + JSON.stringify(err));                       
+                            console.log(TimestampService.utc() + ' ---------------- DISTRIBUTION PROCESSING FAILURE! ----------------- ' + JSON.stringify(err));                       
                         }
                     });
                 } 
@@ -38,16 +35,14 @@ module.exports.schedule = {
             task : function (context, sails) {
 
                 // production-level CRON.
-                if(sails.config.port === 1338) {
-
-                    console.log(TimestampService.utc() + ' ---------------- FIXING STUCK PENDING ----------------- ');
+                if(sails.config.port === 1337) {
 
                     // FIND RECORDS OLDER THAN 1 MINUTE
                     AutomationService.fixStuckPending(function(err, resp) {
                         if(!err) {
-                            console.log(TimestampService.utc() + ' ---------------- STUCK PENDING FIXED ----------------- ');
+                            console.log(TimestampService.utc() + ' ---------------- STUCK PENDING SUCCESS ----------------- ');
                         } else {
-                            console.log(TimestampService.utc() + ' [ AutomationService.fixStuckPending() ] (err) ' + JSON.stringify(err));
+                            console.log(TimestampService.utc() + ' ---------------- STUCK PENDING FAILED! ----------------- ' + JSON.stringify(err));
                         }
                     });
                 } 
@@ -65,8 +60,6 @@ module.exports.schedule = {
                 // production-level CRON.
                 if(sails.config.port === 1337) {
 
-                    console.log(TimestampService.utc() + ' ---------------- RE-CALCULATING TOTALS ----------------');
-
                     Totals.processTotals(function(err, resp) {
 
                         /**
@@ -74,9 +67,9 @@ module.exports.schedule = {
                          * We have the total Krai being paid out
                          */
                         if(!err) {
-                            console.log(TimestampService.utc() + ' ---------------- TOTALS RECALCULATED ----------------');
+                            console.log(TimestampService.utc() + ' ---------------- TOTALS RECALCULATION SUCCESS ---------------- ');
                         } else {
-                            console.log(TimestampService.utc() + ' [ Totals.processTotals() ] (err) ' + JSON.stringify(err));
+                            console.log(TimestampService.utc() + ' ---------------- TOTALS RECALCULATION FAILED! ---------------- ' + JSON.stringify(err));
                         }
                     });
                 }

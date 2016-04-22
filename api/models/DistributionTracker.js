@@ -59,13 +59,14 @@ module.exports = {
 	 * Fetch the most recent DistributionTracker record that matches params.
 	 *
 	 * params = {
+	 * 	limit: <positive integer>,
 	 * 	finalized: true/false,
 	 * 	paid: true/false
 	 * }
 	 *
 	 * Returns { lastHour, lastRan, hoursSinceLastRan }
 	 */
-	last: function(params, callback) {
+	fetch: function(params, callback) {
 
 		DistributionTracker.native(function(err, collection) {
 			if (!err){
@@ -84,7 +85,7 @@ module.exports = {
 				}
 
 				// ensure we don't accidentally grab a record that minutely realtime cron just created.
-				collection.find(find).limit(1).sort({ '$natural': -1 }).toArray(function (err, results) {
+				collection.find(find).limit(params.limit).sort({ '$natural': -1 }).toArray(function (err, results) {
 					if (!err) {
 
 						if(results.length > 0) {

@@ -83,7 +83,7 @@ module.exports = {
 	 **/
 	calculate: function(callback) {
 
-		DistributionTracker.last({ finalized: true }, function(err, resp) {
+		DistributionTracker.fetch({ limit: 1, finalized: true }, function(err, resp) {
 	        
 	      	if(!err) {
 
@@ -261,12 +261,11 @@ module.exports = {
 												loopTotals(records);
 
 											} else {
-												console.log(err);
+												callback(err, null);
 											}
 				                        });
 			                        } else {
-			                        	console.log('Realtime Totals Failed Mongo');
-				                        callback(err, null); // completed!
+				                        callback(err, null);
 			                        }
 		                        });
 							}

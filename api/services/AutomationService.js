@@ -88,6 +88,9 @@ module.exports = {
     },
 
     // 'run' determines if we are finalizing & distributing, or just one or the other.
+    // 'run' can equal 'last' or 'historical'.
+    //          'last' indicates automation is running
+    //          'historical' indicates manually running
     // 
     // First, run finalizeCalculations() to finalize totals for the last unpaid period.
     // Second, run processPayouts() to find all records with "" block hashes.
@@ -105,9 +108,7 @@ module.exports = {
          */
         finalizeCalculations = function() {
 
-            console.log('---------------- FINALIZING CALCULATIONS ----------------');
-
-            DistributionTracker.last({ finalized: false, paid: false }, function(err, resp) {
+            DistributionTracker.fetch({ limit: 1, finalized: false, paid: false }, function(err, resp) {
                 
                 if(!err) {
 
@@ -188,13 +189,13 @@ module.exports = {
                                         };
 
                                         DistributionTracker.update(payload, function(err, resp) {
-                                            console.log('---------------- CALCULATIONS FINALIZED ----------------');
+                                            console.log(TimestampService.utc() + ' ---------------- CALCULATIONS FINALIZED ----------------');
 
                                             // once calculations are finalized, they won't ever be finalized again,
                                             // nor should they need to be. payouts process can fail now like if RPC
                                             // gets overloaded, and we can simply re-run it without worrying about
                                             // any calculations needing to be finalized.
-                                            processPayouts();
+                                            processPayouts('last');
                                         });
                                     }
                                 } else {
@@ -211,12 +212,14 @@ module.exports = {
             });
         };
 
-        if(run === 'everything' || run === 'numbers') {
+        // historical doesn't need to re-finalize (unless something freaky happens with Distribution records collection count?)
+        // this is only triggered by the cron
+        if(run === 'last') {
             finalizeCalculations();
         }
 
         // iterate over accounts needing payment
-        loopPayouts = function(resp) {
+        loopPayouts = function(resp, objParams) {
 
             // as long as there are still elements in the array....
             if(resp.length > 0) {
@@ -242,7 +245,7 @@ module.exports = {
 
                         var what = {
                             paid_unix : TimestampService.unix(),
-                            receipt_hash : res.response.block,
+                            receipt_hash : res.response.block, // element we are updating
                             account: resp[key].account,
                             total_count: resp[key].total_count,
                             started_unix: resp[key].started_unix,
@@ -251,12 +254,6 @@ module.exports = {
                             krai_owed: resp[key].krai_owed,
                             raw_rai_owed: resp[key].raw_rai_owed
                         };
-
-                        console.log('where');
-                        console.log(where);
-
-                        console.log('what');
-                        console.log(what);
 
                         // SAVE BLOCK HASH RECEIPT in totals row 
                         // We must REBUILD the record properties or else the other properties will be lost.
@@ -270,7 +267,7 @@ module.exports = {
                                 resp.splice(0,1);
 
                                 //tail-call recursion
-                                loopPayouts(resp);
+                                loopPayouts(resp, objParams);
 
                             } else {
                                 callback(err, null); // totals update failure
@@ -282,7 +279,7 @@ module.exports = {
                 });
             } else {
 
-                console.log('WE SHOULD MARK DT FOR THIS PERIOD AS PAID ');
+                console.log('PAYMENTS COMPLETE FOR PERIOD!');
                 // mark DT as paid...
                 // 
                 // 
@@ -293,7 +290,7 @@ module.exports = {
                 // 
                 // 
                 // 
-                callback(null, true); // completed!
+                callback(null, objParams); // completed!
             }
         };
 
@@ -320,16 +317,13 @@ module.exports = {
                     raw_rai_owed: resp[key].raw_rai_owed
                 };
 
-                console.log('loopEnded what');
-                console.log(what);
-
                 // SAVE ENDED_UNIX TIMESTAMP 
                 // We must REBUILD the record properties or else the other properties will be lost.
-                Totals.update(where, what).exec(function (err, updated){
+                Totals.update(where, what, { upsert: false }).exec(function (err, updated){
                     if (!err) {
 
                         console.log('Updating totals ended_unix...');
-                        console.log(JSON.stringify(updated[0]));
+                        console.log(JSON.stringify(updated));
 
                         // remove the 1st element object from the array.
                         resp.splice(0,1);
@@ -345,66 +339,96 @@ module.exports = {
 
             // no more records left
             else {
-
-                console.log('TIME TO LOOP PAYOUTS');
-
+                console.log('Starting looping payouts');
                 // start the payout loop the first time.
-                //loopPayouts(resp);
+                loopPayouts(resp, objParams);
             }
-        }
+        };
+
+        // loop over DT result(s) and either loopPayouts() or loopEnded()
+        loopDt = function(resp) {
+
+            if(resp.length > 0) {
+
+                var lastHour = resp.lastHour,
+                lastRan = resp.lastRan;
+
+                var where = { receipt_hash: "", started_unix: lastRan };
+
+                Totals.find(where, function(err, response) { 
+                    
+                    if(!err) {
+
+                        // historical? go straight to payouts and skip marking totals ended_unix timestamps again
+                        if(when === 'historical') {
+                            loopPayouts(response, { lastHour: lastHour, lastRan: lastRan });
+                        }
+
+                        // our most recent distribution needs to have it's totals records ended_unix times marked ( they are 0 now )
+                        // after this, loopEnded() will lead to loopPayouts()
+                        else if(when === 'last') {
+                            loopEnded(response, { lastHour: lastHour, lastRan: lastRan });
+                        }
+
+                        // remove the first element from the original array before re-passing into loopDt()
+                        resp.splice(0,1);
+
+                        // loop over any remaining results
+                        loopDt(resp);
+
+                    } else {
+                        callback({ error: err }, null);
+                    }
+                });
+            } else {
+                console.log('loopDt() complete!');
+                callback(null, true); // success
+            }
+        };
 
         /**
-         * This function needs to work retroactively in case 1 or more distributions are missed.
-         * We will simply grab all empty receipt hashes and then using the started_unix time of
-         * each record, we will know which distribution period the record falls within.
+         *
+         * 'when' is either 'historical' or 'last'.
+         *     'last' indicates the most recently finished distribution.
+         *     'historical' indicates we're running this manually from bootstrap and need to do this for history.
+         * First, find the last finalized, unpaid period.
+         * Second, using the unix times of that last period, 
+         *         find records in Totals that need payment in the last finalized-unpaid period.
+         * Third,
          * 
-         * First, find the last finalized period that's not paid
-         * Second, use that period time to search for all totals records were the receipt hash is empty and 
-         * @return {[type]} [description]
          */
-        processPayouts = function() {
+        processPayouts = function(when) {
 
-            DistributionTracker.last({ finalized: true, paid: false }, function(err, resp) {
+            var limitedTo;
+
+            if(when === 'last') {
+                limitedTo = 1;
+            }
+            else if(when === 'historical') {
+                limitedTo = 5;
+            }
+
+            DistributionTracker.fetch({ limit: limitedTo, finalized: true, paid: false }, function(err, resp) {
                 
                 if(!err) {
-
-                    var lastHour = resp.lastHour,
-                    lastRan = resp.lastRan;
-
-                    var where = { receipt_hash: "", started_unix: lastRan };
-
-                    console.log('where');
-                    console.log(where);
-
-                    Totals.find(where, function(err, resp) { 
-                        
-                        if(!err) {
-
-                            console.log('resp');
-                            console.log(resp);
-
-                            // updated totals ended_unix timestamps
-                            loopEnded(resp, { lastHour: lastHour, lastRan: lastRan });
-                        } else {
-                            callback({ error: err }, null);
-                        }
-                    });
+                    // loop over dt records
+                    loopDt(resp);
                 } else {
                     callback({ error: err }, null);
                 }
             });
         };
 
-        if(run === 'everything' || run === 'payouts') {
-            processPayouts();
+        if(run === 'last') {
+            processPayouts('last');
         }
     },
 
     // run processDistribution() & loadAvailableSupply()
     distributionThenUpdateSupply: function(callback) {
 
-        // make sure this finalizes calculations and processes payouts.
-        AutomationService.processDistribution('everything', function(err, resp) {
+        // make sure this finalizes calculations and processes payouts for the past distribution only
+        AutomationService.processDistribution('last', function(err, resp) {
             if(!err) {
                
                // update available suppoly
