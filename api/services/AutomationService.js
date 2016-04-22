@@ -87,10 +87,120 @@ module.exports = {
         });
     },
 
-    // finalize totals for the last period, then process payouts to all totals records with "" block hashes.
+    // First, run finalizeCalculations() to finalize totals for the last non-finalized, unpaid period.
+    // Second, run processPayouts() to find all records with "" block hashes.
+    // Third, run loopPayouts using those accounts to distribute to each Totals record needing it.
     processDistribution: function(callback) {
 
-        // iterate over our response of accounts needing payment
+        /**
+         * First, Find the last distribution period that has not be finalized yet (or obviously paid yet)
+         * Second, calculate total accounts, successes for all accounts for the period
+         * Third, save those totals for the period and mark the distribution period as 'finalized' but not 'paid'
+         * Fourth, move to processPayouts().
+         */
+        finalizeCalculations = function() {
+
+            console.log('---------------- FINALIZING CALCULATIONS ----------------');
+
+            DistributionTracker.last({ finalized: false, paid: false }, function(err, resp) {
+                
+                if(!err) {
+
+                    var match = {
+
+                        '$and': [
+                            {
+                                modified : { 
+                                    '$lt': resp.lastHour
+                                }
+                            },
+                            {
+                                modified : { 
+                                    '$gte': resp.lastRan
+                                }
+                            },
+                            { 
+                                status: 'accepted'
+                            },
+                        ]
+                    };
+
+                    var group = {
+                        _id: '$account',
+                        count: { 
+                            '$sum': 1
+                        }
+                    };
+
+                    Distribution.native(function(err, collection) {
+                        if (!err){
+
+                            collection.aggregate([{ '$match' : match }, { '$group' : group }]).toArray(function (err, results) {
+                                if (!err) {
+
+                                    /**
+                                     * No matches found. (bad) HALT request!
+                                     * 
+                                     * If NO matches are found, then there are no Distribution records yet.
+                                     */
+                                    if(Object.keys(results).length === 0) {
+                                        callback('no matches', null);
+                                    }
+
+                                    /**
+                                     * Matches found. (good) CONTINUE request!
+                                     * 
+                                     * If matches ARE found, then we should get a list of accounts with counts.
+                                     * Count total accounts and records for storage in in DistributionTracker
+                                     */
+                                    else {
+
+                                        var accountsCount = 0,
+                                        recordsCount = 0;
+
+                                        for(key in results) {
+                                            accountsCount++;
+                                            recordsCount += results[key].count;
+                                        }
+
+                                        // create a DistributionTracker payload
+                                        // mark this period as Finalized!
+                                        // mark this period as NOT paid yet...
+                                        var payload = {
+                                            started_unix: resp.lastRan,
+                                            ended_unix: resp.lastHour,
+                                            accounts: accountsCount,
+                                            successes: recordsCount,
+                                            finalized: true,
+                                            paid: false
+                                        };
+
+                                        DistributionTracker.update(payload, function(err, resp) {
+                                            console.log('---------------- CALCULATIONS FINALIZED ----------------');
+                                            // once calculations are finalized, they won't ever be finalized again,
+                                            // nor should they need to be. payouts process can fail now like if RPC
+                                            // gets overloaded, and we can simply re-run it without worrying about
+                                            // any calculations needing to be finalized.
+                                            processPayouts();
+                                        });
+                                    }
+                                } else {
+                                    callback({ error: err }, null);
+                                }
+                            });
+                        } else {
+                            callback({ error: err }, null);
+                        }
+                    });
+                } else {
+                    callback({ error: err }, null);
+                }
+            });
+        };
+
+        finalizeCalculations();
+
+        // iterate over accounts needing payment
         loopPayouts = function(resp) {
 
             // as long as there are still elements in the array....
@@ -146,112 +256,34 @@ module.exports = {
                     }
                 });
             } else {
+
+                // mark DT as paid
                 callback(null, true); // completed!
             }
         };
 
-        console.log('---------------- FINALIZING CALCULATIONS ----------------');
+        /**
+         * This function needs to work retroactively in case 1 or more distributions are missed.
+         * We will simply grab all empty receipt hashes and then using the started_unix time of
+         * each record, we will know which distribution period the record falls within.
+         * 
+         * First, search for all totals records were the receipt hash is empty and 
+         * @return {[type]} [description]
+         */
+        processPayouts = function(started_unix) {
 
-        DistributionTracker.last(function(err, resp) {
-            
-            if(!err) {
+            var where = { receipt_hash: "" };
 
-                // match only 'accepted' records that were in the last distribution timeframe (historical data)
-                var match = {
-
-                    '$and': [
-                        {
-                            modified : { 
-                                '$lt': resp.lastHour
-                            }
-                        },
-                        {
-                            modified : { 
-                                '$gte': resp.lastRan
-                            }
-                        },
-                        { 
-                            status: 'accepted'
-                        },
-                    ]
-                };
-
-                // count 'success' records and group by account.
-                var group = {
-                    _id: '$account',
-                    count: { 
-                        '$sum': 1
-                    }
-                };
-
-                Distribution.native(function(err, collection) {
-                    if (!err){
-
-                        collection.aggregate([{ '$match' : match }, { '$group' : group }]).toArray(function (err, results) {
-                            if (!err) {
-
-                                /**
-                                 * No matches found. (bad) HALT request!
-                                 * 
-                                 * If NO matches are found, then there are no Distribution records yet.
-                                 */
-                                if(Object.keys(results).length === 0) {
-                                    callback('no matches', null);
-                                }
-
-                                /**
-                                 * Matches found. (good) CONTINUE request!
-                                 * 
-                                 * If matches ARE found, then we should get a list of accounts with counts.
-                                 * Count total accounts and records for storage in in DistributionTracker
-                                 */
-                                else {
-
-                                    var accountsCount = 0,
-                                    recordsCount = 0;
-
-                                    for(key in results) {
-                                        accountsCount++;
-                                        recordsCount += results[key].count;
-                                    }
-
-                                    // mark this distribution as finalized with accounts and successes
-                                    var payload = {
-                                        started_unix: resp.lastRan,
-                                        ended_unix: resp.lastHour,
-                                        accounts: accountsCount,
-                                        successes: recordsCount,
-                                        finalized: true
-                                    };
-
-                                    // attempt to update DistributionTracker for any unpaid timeframe
-                                    DistributionTracker.update(payload, function(err, resp) {
-
-                                        var where = { receipt_hash: "" };
-
-                                        Totals.find(where, function(err, resp) { 
-                                            
-                                            if(!err) {
-                                                // start the loop the first time.
-                                                loopPayouts(resp);
-                                            } else {
-                                                callback({ error: err }, null);
-                                            }
-                                        });
-                                    });
-                                }
-                            } else {
-                                callback({ error: err }, null);
-                            }
-                        });
-                    } else {
-                        callback({ error: err }, null);
-                    }
-                });
-            } else {
-                callback({ error: err }, null);
-            }
-        });   
+            Totals.find(where, function(err, resp) { 
+                
+                if(!err) {
+                    // start the loop the first time.
+                    loopPayouts(resp);
+                } else {
+                    callback({ error: err }, null);
+                }
+            });
+        };
     },
 
     // enter the desired payout amount per day here

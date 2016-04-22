@@ -72,7 +72,7 @@ module.exports = {
 	},
 
 	/**
-	 * Calculate near-REALTIME metrics for current unpaid distribution for all acounts
+	 * Calculate metrics by account for current unpaid distribution period
 	 * Grabs all 'accepted' records greater than or equal to the last time Distribution calculations were last finalized
 	 *
 	 * returns: 
@@ -83,7 +83,7 @@ module.exports = {
 	 **/
 	calculate: function(callback) {
 
-		DistributionTracker.last(function(err, resp) {
+		DistributionTracker.last({ finalized: true, paid: true }, function(err, resp) {
 	        
 	      	if(!err) {
 

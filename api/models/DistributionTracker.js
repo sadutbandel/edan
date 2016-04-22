@@ -56,35 +56,26 @@ module.exports = {
 	},
 
 	/**
-	 * Grab the most recent tracked distribution that's been finalized
+	 * Fetch the most recent DistributionTracker record that matches params.
 	 *
-	 * Returns lastHour, lastRan, & hoursSinceLastRan
+	 * params = {
+	 * 	finalized: true/false,
+	 * 	paid: true/false
+	 * }
+	 *
+	 * Returns { lastHour, lastRan, hoursSinceLastRan }
 	 */
-	last: function(callback) {
+	last: function(params, callback) {
 
 		DistributionTracker.native(function(err, collection) {
 			if (!err){
 
-				collection.find({ finalized: true }).limit(1).sort({ '$natural': -1 }).toArray(function (err, results) {
+				collection.find({ finalized: params.finalized, paid: params.paid }).limit(1).sort({ '$natural': -1 }).toArray(function (err, results) {
 					if (!err) {
 
-						var lastHour = TimestampService.lastHour(),
-						lastRan, // used for front-end countdown timer (replace with 6s hard-coded)
-						hoursSinceLastRan; // needed in case we miss a payment window and is used as a mutiplier against hourly_krai
-
-			      		// there are always results, unless it's the first time we're running this
-			      		if(results[0]) {
-			      			lastRan = results[0].ended_unix; // the last time the calculation script ended
-			      		} else { // 1st-time running script, assume all records to start up until last hour.
-			      			lastRan = 0; // 0 is the beginning of unix time.
-			      		}
-
-			      		// never ran before
-			      		if(lastRan === 0) {
-			      			hoursSinceLastRan = 'Never';
-			      		} else {
-			      			hoursSinceLastRan = (lastHour - lastRan) / 60 / 60;
-			      		}
+						var lastHour = TimestampService.lastHour(), // the last hour that ended (if 7:15pm, then 7pm)
+						lastRan = results[0].ended_unix, // used to determine how many hours ago we last ran this
+						hoursSinceLastRan = (lastHour - lastRan) / 60 / 60; // needed for calculating total krai to payout depending on hours
 			      		
 			      		callback(null, {
 			      			hoursSinceLastRan: hoursSinceLastRan,

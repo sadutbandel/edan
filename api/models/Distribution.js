@@ -124,32 +124,35 @@ module.exports = {
 														collection.find({ finalized: false }).toArray(function (err, res) {
 															if (!err) {
 
-																// if there are no results, we dont have DistributionTracker row yet.
-																// 
-																// 
-																// 
-																// 
-																
-																// convert unix timestamps to milliseconds fo angular
-																for(key in results) {
-																	results[key].paid_unix = results[key].paid_unix * 1000;
-																	results[key].started_unix = results[key].started_unix * 1000;
-																	results[key].ended_unix = results[key].ended_unix * 1000;
-																}
+																if(res.length > 0) {
+																	// if there are no results, we dont have DistributionTracker row yet.
+																	// 
+																	// 
+																	// 
+																	// 
+																	
+																	// convert unix timestamps to milliseconds fo angular
+																	for(key in results) {
+																		results[key].paid_unix = results[key].paid_unix * 1000;
+																		results[key].started_unix = results[key].started_unix * 1000;
+																		results[key].ended_unix = results[key].ended_unix * 1000;
+																	}
 
-																var resultsClone = JSON.parse(JSON.stringify(results));
+																	var resultsClone = JSON.parse(JSON.stringify(results));
 
-				 												// store our current distribution by grabbing the last item in the array
-				 												resp.current_distribution = resultsClone.slice(-1)[0];
-				 												resp.current_distribution.complete_count = res[0].successes;
+					 												// store our current distribution by grabbing the last item in the array
+					 												resp.current_distribution = resultsClone.slice(-1)[0];
+					 												resp.current_distribution.complete_count = res[0].successes;
 
-				                                				results.pop();
+					                                				results.pop();
 
-				                                				// remove the 1st element object from the array, then store it.
-				                                				resp.past_distributions = results;
+					                                				// remove the 1st element object from the array, then store it.
+					                                				resp.past_distributions = results;
 
-					 											callback(null, resp);
-
+						 											callback(null, resp);
+						 										} else {
+						 											callback({ message: 'try_again'}, null);
+						 										}
 					 										} else {
 							 									callback(err, null);
 							 								}

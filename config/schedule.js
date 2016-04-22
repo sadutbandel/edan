@@ -10,7 +10,7 @@ module.exports.schedule = {
 
         processDistribution : {
 
-            cron : "10 * * * *",
+            cron : "5 * * * *",
             task : function (context, sails) {
 
                 // production-level CRON.
