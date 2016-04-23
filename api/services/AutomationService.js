@@ -305,23 +305,37 @@ module.exports = {
                 });
             } else {
 
+                var payloadLP = {
+                    ended_unix: objParamsLP.lastHour,
+                    finalized: true,
+                    paid: false
+                };
+
+                //console.log('payloadLP');
+                //console.log(payloadLP);
+
                 // grab the entire record and update paid = true for this completely paid distribution
-                DistributionTracker.find({ started_unix: objParamsLE.lastHour, finalized: true, paid: false }, function(errLP, respLP) {
+                DistributionTracker.find(payloadLP, function(errLP, respLP) {
                     
                     if(!errLP) {
 
+                        // mark this distribution as PAID since we only got to this point since all accounts were paid.
                         respLP[0].paid = true;
+                        //console.log(respLP[0]);
 
-                        console.log(respLP[0]);
+                        DistributionTracker.native(function(errLP, collectionLP) {
+                            if (!errLP) {
 
-                        // update the same record but marking paid as true.
-                        DistributionTracker.update({ started_unix: objParamsLE.lastHour, finalized: true, paid: false }, respLP[0], function(errLP, respLP) {
-                    
-                            if(!errLP) {
-                                console.log(respLP[0]);
-                                callbackPD(null, true); // completed!
+                                collectionLP.update(payloadLP, respLP[0], function (errLP, updatedLP) {
+                                    if (!errLP) {
+                                        //console.log(updatedLP);
+                                        callbackPD(null, true);
+                                    } else {
+                                        callbackPD(errLP, null);
+                                    }
+                                });
                             } else {
-                                callbackPD(errLP, null); // completed!
+                                callbackPD(errLP, null);
                             }
                         });
                     } else {
