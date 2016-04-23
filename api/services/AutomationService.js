@@ -194,8 +194,8 @@ module.exports = {
                                         // mark this period as NOT paid yet...
                                         
                                         var whatFC = {
-                                            created_unix: respFC.created_unix,
-                                            started_unix: respFC.started_unix,
+                                            created_unix: respFC[0].created_unix,
+                                            started_unix: respFC[0].started_unix,
                                             ended_unix: lastHourFC,
                                             accounts: accountsCount,
                                             successes: recordsCount,
@@ -203,15 +203,12 @@ module.exports = {
                                             paid: false
                                         };
 
-                                        console.log('Update DT final numbers');
-                                        console.log(JSON.stringify(whatFC));
-                                        
                                         DistributionTracker.update(whatFC, function(errFC, respFC) {
                                             console.log(TimestampService.utc() + ' ---------------- CALCULATIONS FINALIZED ----------------');
 
                                             // once calculations are finalized, they won't ever be finalized again,
-                                            // nor should they need to be. payouts process can fail now like if RPC
-                                            // gets overloaded, and we can simply re-run it without worrying about
+                                            // nor should they need to be. payouts process can fail NP now like if RPC
+                                            // gets overloaded. we can simply re-run it without worrying about
                                             // any calculations needing to be finalized.
                                             processPayouts('last');
                                         });
@@ -289,8 +286,8 @@ module.exports = {
                         Totals.update(whereLP, whatLP).exec(function (errLP, updatedLP){
                             if (!errLP) {
 
-                                console.log(TimestampService.utc() + ' Updating receipt hash...');
-                                console.log(JSON.stringify(updatedLP[0]));
+                                //console.log(TimestampService.utc() + ' Updating receipt hash...');
+                                //console.log(JSON.stringify(updatedLP[0]));
 
                                 // remove the 1st element object from the array.
                                 respLP.splice(0,1);
@@ -308,18 +305,29 @@ module.exports = {
                 });
             } else {
 
-                console.log(TimestampService.utc() + ' MARK DT AS PAID!!');
-                // mark DT as paid...
-                // 
-                // 
-                // 
-                // 
-                // 
-                // 
-                // 
-                // 
-                // 
-                callbackPD(null, objParamsLP); // completed!
+                // grab the entire record and update paid = true for this completely paid distribution
+                DistributionTracker.find({ started_unix: objParamsLE.lastHour, finalized: true, paid: false }, function(errLP, respLP) {
+                    
+                    if(!errLP) {
+
+                        respLP[0].paid = true;
+
+                        console.log(respLP[0]);
+
+                        // update the same record but marking paid as true.
+                        DistributionTracker.update({ started_unix: objParamsLE.lastHour, finalized: true, paid: false }, respLP[0], function(errLP, respLP) {
+                    
+                            if(!errLP) {
+                                console.log(respLP[0]);
+                                callbackPD(null, true); // completed!
+                            } else {
+                                callbackPD(errLP, null); // completed!
+                            }
+                        });
+                    } else {
+                        callbackPD(errLP, null); // completed!
+                    }
+                });
             }
         };
 
@@ -327,6 +335,9 @@ module.exports = {
         // reserved:
         //      respLE, objParamsLE, keyLE, errLE, updatedLE
         loopEnded = function(respLE, objParamsLE) {
+
+            //console.log('Loop Ended params');
+            //console.log(JSON.stringify(objParamsLE));
 
             if(respLE.length > 0) {
 
@@ -380,13 +391,14 @@ module.exports = {
             else {
 
                 // grab the records needing payouts now that they have their end-times stored.
+                // 
                 //console.log('LoopEnded() Complete... Finding those needing payment')
-                DistributionTracker.fetch({ limit: 1, finalized: true, paid: false }, function(errLE, respLE) {
+                DistributionTracker.fetch({ limit: 2, finalized: true, paid: false }, function(errLE, respLE) {
                     
                     if(!errLE) {
 
-                        lastHourLE = respLE[0].lastHour;
-                        lastRanLE = respLE[0].lastRan;
+                        lastHourLE = respLE[1].lastHour;
+                        lastRanLE = respLE[1].lastRan;
 
                         var whereLE = { receipt_hash: "", started_unix: lastRanLE };
 
@@ -396,6 +408,10 @@ module.exports = {
                         Totals.find(whereLE, function(errLE, respLE) { 
                             
                             if(!errLE) {
+
+                                //console.log('Accounts needing payment');
+                                //console.log(respLE);
+
                                 // start the payout loop the first time.
                                 loopPayouts(respLE, objParamsLE);
                             } else {
@@ -409,7 +425,7 @@ module.exports = {
             }
         };
 
-        // loop over DT result(s) and either loopPayouts() or loopEnded()
+        // loop over distributionTracker result(s) and either run loopPayouts() or loopEnded()
         // reserved:
         //      respDT, responseDT, errDT
         loopDt = function(respDT) {
@@ -476,7 +492,7 @@ module.exports = {
             var limitedPP;
 
             if(whenPP === 'last') {
-                limitedPP = 1;
+                limitedPP = 2; // we need the last 2 so we can grab the start_unix of the most recently-finalized record.
             }
             else if(whenPP === 'historical') {
                 limitedPP = 5;
@@ -488,16 +504,21 @@ module.exports = {
                 paid: false
             };
 
-            //console.log(TimestampService.utc() + ' Process Payouts DT.Fetch Payload');
-            //console.log(TimestampService.utc() + ' ' + JSON.stringify(payloadPP));
-
             DistributionTracker.fetch(payloadPP, function(errPP, respPP) {
                 
                 if(!errPP) {
-                    //console.log(TimestampService.utc() + ' DT.fetch Response');
-                    //console.log(TimestampService.utc() + ' ' + JSON.stringify(respPP));
-                    // loop over dt record(s)
-                    loopDt(respPP);
+
+                    //console.log('DT PP respPP');
+                    //console.log(JSON.stringify(respPP));
+
+                    if(whenPP === 'last') {
+                        respPP.splice(0,1); // just use the prior record
+                        loopDt(respPP);
+                    }
+                    else if(whenPP === 'historical') {
+                        loopDt(respPP);
+                    }
+                   
                 } else {
                     callbackPD({ error: errPP }, null);
                 }
@@ -511,10 +532,10 @@ module.exports = {
     },
 
     // run processDistribution() & loadAvailableSupply()
-    distributionThenUpdateSupply: function(callbackDU) {
+    distributionThenUpdateSupply: function(run, callbackDU) {
 
         // make sure this finalizes calculations and processes payouts for the past distribution only
-        AutomationService.processDistribution('last', function(errDU, respDU) {
+        AutomationService.processDistribution(run, function(errDU, respDU) {
             if(!errDU) {
                
                // update available suppoly

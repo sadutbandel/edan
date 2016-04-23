@@ -9,13 +9,13 @@ module.exports.schedule = {
         // this finalizes calculations for the last period, then pays out participating accounts (every 2 hours)
         processDistribution : {
 
-            cron : "12 * * * *",
+            cron : "21 * * * *",
             task : function (context, sails) {
 
                 // production-level CRON.
                 if(sails.config.port === 1337) {
 
-                    AutomationService.distributionThenUpdateSupply(function(errPD, respPD) {
+                    AutomationService.distributionThenUpdateSupply('last', function(errPD, respPD) {
                         if(!errPD) {
                             console.log(TimestampService.utc() + ' ---------------- DISTRIBUTION PROCESSING SUCCESS ----------------- ');                       
                         } else {

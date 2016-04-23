@@ -89,8 +89,6 @@ module.exports = {
 	      		resultsF.splice(0,1);
 	      		loopDtResults(resultsF);
 	      	} else {
-	      		console.log('recordsF');
-	      		console.log(recordsF);
 	      		callbackF(null, recordsF);
 	      	}
 		};
@@ -115,8 +113,6 @@ module.exports = {
 				// ensure we don't accidentally grab a record that minutely realtime cron just created.
 				collectionF.find(findF).limit(paramsF.limit).sort({ '$natural': -1 }).toArray(function (errF, resultsF) {
 					if (!errF) {
-						console.log('resultsF');
-						console.log(resultsF);
 						loopDtResults(resultsF);
 					} else {
 						callbackF(errF, null);
