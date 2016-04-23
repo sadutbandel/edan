@@ -66,50 +66,48 @@ module.exports = {
 	 *
 	 * Returns { lastHour, lastRan, hoursSinceLastRan }
 	 */
-	fetch: function(params, callback) {
+	fetch: function(paramsF, callbackF) {
 
-		DistributionTracker.native(function(err, collection) {
-			if (!err){
+		DistributionTracker.native(function(errF, collectionF) {
+			if (!errF) {
 
-				var minuteAgo = TimestampService.unix() - 60;
-
-				var find = {
-					finalized: params.finalized,
+				var findF = {
+					finalized: paramsF.finalized,
 					created_unix: {
-						'$lt': minuteAgo
+						'$lt': TimestampService.unix() - 60
 					}
 				};
 
-				if(params.paid) {
-					find.paid = params.paid;
+				if(paramsF.paid) {
+					findF.paid = paramsF.paid;
 				}
 
 				// ensure we don't accidentally grab a record that minutely realtime cron just created.
-				collection.find(find).limit(params.limit).sort({ '$natural': -1 }).toArray(function (err, results) {
-					if (!err) {
+				collectionF.find(findF).limit(paramsF.limit).sort({ '$natural': -1 }).toArray(function (errF, resultsF) {
+					if (!errF) {
 
-						if(results.length > 0) {
+						if(resultsF.length > 0) {
 
-							var lastHour = TimestampService.lastHour(), // the last hour that ended (if 7:15pm, then 7pm)
-							lastRan = results[0].ended_unix, // used to determine how many hours ago we last ran this
-							hoursSinceLastRan = (lastHour - lastRan) / 60 / 60; // needed for calculating total krai to payout depending on hours
+							var lastHourF = TimestampService.lastHour(), // the last hour that ended (if 7:15pm, then 7pm)
+							lastRanF = resultsF[0].ended_unix, // used to determine how many hours ago we last ran this
+							hoursSinceLastRanF = (lastHourF - lastRanF) / 60 / 60; // needed for calculating total krai to payout depending on hours
 				      		
-				      		callback(null, {
-				      			created_unix: results[0].created_unix,
-				      			started_unix: results[0].started_unix,
-				      			hoursSinceLastRan: hoursSinceLastRan,
-				      			lastHour: lastHour,
-				      			lastRan: lastRan,
+				      		callbackF(null, {
+				      			created_unix: resultsF[0].created_unix,
+				      			started_unix: resultsF[0].started_unix,
+				      			hoursSinceLastRan: hoursSinceLastRanF,
+				      			lastHour: lastHourF,
+				      			lastRan: lastRanF,
 				      		});
 				      	} else {
-				      		callback('no results dt', null);
+				      		callbackF('no results dt', null);
 				      	}
 					} else {
-						callback(err, null);
+						callbackF(errF, null);
 					}
 				});
 			} else {
-				callback(err, null);
+				callbackF(errF, null);
 			}
 		});
 	},
@@ -117,43 +115,43 @@ module.exports = {
 	/**
 	 * Upsert a realtime DistributionTracker record where ended_unix === 0
 	 */
-	update: function(data, callback) {
+	update: function(dataU, callbackU) {
 
 		var created_unix;
 
 		// we don't want to overwrite created if we are updating.
-		if(data.created_unix) {
-			created_unix = data.created_unix;
+		if(dataU.created_unix) {
+			created_unix = dataU.created_unix;
 		} else {
 			created_unix = TimestampService.unix();
 		}
 
-        var payload = {
+        var payloadU = {
             created_unix: created_unix,
-            started_unix: data.started_unix,
-            ended_unix: data.ended_unix,
-            accounts: data.accounts,
-            successes: data.successes,
-            finalized: data.finalized,
-            paid: data.paid
+            started_unix: dataU.started_unix,
+            ended_unix: dataU.ended_unix,
+            accounts: dataU.accounts,
+            successes: dataU.successes,
+            finalized: dataU.finalized,
+            paid: dataU.paid
         };
 
-        var where = {
+        var whereU = {
 			ended_unix: 0
 		};
 
-		DistributionTracker.native(function(err, collection) {
-			if (!err) {
+		DistributionTracker.native(function(errU, collectionU) {
+			if (!errU) {
 
-				collection.update(where, payload, { upsert: true }, function (err, updated) {
-					if (!err) {
-						callback(null, true);
+				collectionU.update(whereU, payloadU, { upsert: true }, function (errU, updatedU) {
+					if (!errU) {
+						callbackU(null, true);
 					} else {
-						callback(err, null);
+						callbackU(errU, null);
 					}
                 });
             } else {
-                callback(err, null);
+                callbackU(errU, null);
             }
         });
 	}

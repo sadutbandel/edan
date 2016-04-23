@@ -9,17 +9,17 @@ module.exports.schedule = {
         // this finalizes calculations for the last period, then pays out participating accounts (every 2 hours)
         processDistribution : {
 
-            cron : "36 * * * *",
+            cron : "44 * * * *",
             task : function (context, sails) {
 
                 // production-level CRON.
                 if(sails.config.port === 1337) {
 
-                    AutomationService.distributionThenUpdateSupply(function(err, resp) {
-                        if(!err) {
-                            console.log(TimestampService.utc() + ' ---------------- DISTRIBUTION PROCESSING SUCCESS ----------------- ' + JSON.stringify(resp));                       
+                    AutomationService.distributionThenUpdateSupply(function(errPD, respPD) {
+                        if(!errPD) {
+                            console.log(TimestampService.utc() + ' ---------------- DISTRIBUTION PROCESSING SUCCESS ----------------- ');                       
                         } else {
-                            console.log(TimestampService.utc() + ' ---------------- DISTRIBUTION PROCESSING FAILURE! ----------------- ' + JSON.stringify(err));                       
+                            console.log(TimestampService.utc() + ' ---------------- DISTRIBUTION PROCESSING FAILURE! ----------------- ' + JSON.stringify(errPD));                       
                         }
                     });
                 } 
@@ -38,11 +38,11 @@ module.exports.schedule = {
                 if(sails.config.port === 1337) {
 
                     // FIND RECORDS OLDER THAN 1 MINUTE
-                    AutomationService.fixStuckPending(function(err, resp) {
-                        if(!err) {
+                    AutomationService.fixStuckPending(function(errSP, respSP) {
+                        if(!errSP) {
                             console.log(TimestampService.utc() + ' ---------------- STUCK PENDING SUCCESS ----------------- ');
                         } else {
-                            console.log(TimestampService.utc() + ' ---------------- STUCK PENDING FAILED! ----------------- ' + JSON.stringify(err));
+                            console.log(TimestampService.utc() + ' ---------------- STUCK PENDING FAILED! ----------------- ' + JSON.stringify(errSP));
                         }
                     });
                 } 
@@ -60,18 +60,22 @@ module.exports.schedule = {
                 // production-level CRON.
                 if(sails.config.port === 1337) {
 
-                    Totals.processTotals(function(err, resp) {
+                    //setTimeout(function () {
 
-                        /**
-                         * Results found! (GOOD) CONTINUE request
-                         * We have the total Krai being paid out
-                         */
-                        if(!err) {
-                            console.log(TimestampService.utc() + ' ---------------- TOTALS RECALCULATION SUCCESS ---------------- ');
-                        } else {
-                            console.log(TimestampService.utc() + ' ---------------- TOTALS RECALCULATION FAILED! ---------------- ' + JSON.stringify(err));
-                        }
-                    });
+                        Totals.processTotals(function(errUT, respUT) {
+
+                            /**
+                             * Results found! (GOOD) CONTINUE request
+                             * We have the total Krai being paid out
+                             */
+                            if(!errUT) {
+                                console.log(TimestampService.utc() + ' ---------------- TOTALS RECALCULATION SUCCESS ---------------- ');
+                            } else {
+                                console.log(TimestampService.utc() + ' ---------------- TOTALS RECALCULATION FAILED! ---------------- ' + JSON.stringify(errUT));
+                            }
+                        });
+
+                    //}, 5000);
                 }
             },
             context : {}

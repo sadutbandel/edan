@@ -81,19 +81,19 @@ module.exports = {
   	 * lastRan: 1461294000 }
 	 *
 	 **/
-	calculate: function(callback) {
+	calculate: function(callbackC) {
 
-		DistributionTracker.fetch({ limit: 1, finalized: true }, function(err, resp) {
+		DistributionTracker.fetch({ limit: 1, finalized: true }, function(errC, respC) {
 	        
-	      	if(!err) {
+	      	if(!errC) {
 
 				// match only 'accepted' records that are in the current, unpaid distribution timeframe (realtime data)
-				var match = {
+				var matchC = {
 
 					'$and': [
 						{
 							modified : { 
-			 					'$gte': resp.lastRan
+			 					'$gte': respC.lastRan
 			 				}
 			 			},
 			 			{ 
@@ -103,18 +103,18 @@ module.exports = {
 				};
 
 				// count 'success' records and group by account.
-				var group = {
+				var groupC = {
 					_id: '$account',
 					count: { 
 						'$sum': 1
 					}
 				};
 
-				Distribution.native(function(err, collection) {
-					if (!err){
+				Distribution.native(function(errC, collectionC) {
+					if (!errC) {
 
-						collection.aggregate([{ '$match' : match }, { '$group' : group }]).toArray(function (err, results) {
-							if (!err) {
+						collectionC.aggregate([{ '$match' : matchC }, { '$group' : groupC }]).toArray(function (errC, resultsC) {
+							if (!errC) {
 
 								/**
 								 * No matches found. (bad) HALT request!
@@ -122,8 +122,8 @@ module.exports = {
 								 * If NO matches are found, then there are no Distribution records yet.
 								 */
 								
-								if(Object.keys(results).length === 0) {
-									callback('no matches 1', null);
+								if(Object.keys(resultsC).length === 0) {
+									callbackC('no matches 1', null);
 								}
 								/**
 								 * Matches found. (good) CONTINUE request!
@@ -131,19 +131,19 @@ module.exports = {
 								 * If matches ARE found, then we should get a list of accounts with counts.
 								 */
 								else {
-									resp.results = results;
-									callback(null, resp);
+									respC.results = resultsC;
+									callbackC(null, respC);
 								}
 							} else {
-								callback({ error: err }, null);
+								callbackC({ error: errC }, null);
 							}
 						});
 					} else {
-						callback({ error: err }, null);
+						callbackC({ error: errC }, null);
 					}
 				});
 			} else {
-	         	callback({ error: err }, null);
+	         	callbackC({ error: errC }, null);
 	      	}
 	   	});
 	},
@@ -155,7 +155,7 @@ module.exports = {
 	 * Second, calculate totals for all accounts for unpaid period.
 	 * Third, count each account's 'accepted' records and build a payload to UPSERT that data (INSERT first time, UPDATE SUBSEQUENT).
 	 * Fourth, iterate through all records and calculate percentages owed along with krai_owed, and raw_rai_owed.
-	 * Fifth, begin tailcall recursion through all records to be able to utilize callback() properly
+	 * Fifth, begin tailcall recursion through all records to be able to utilize callbackC() properly
 	 *
 	 * IMPORTANT NOTES:
 	 *
@@ -164,31 +164,31 @@ module.exports = {
 	 * When the cron runs every 2 hours for payouts, it updates all of the past-period's records with receipt_hash = 0 from ""
 	 * This then allows those accounts to get paid out on after the cron runs but not before.
 	 */
-	processTotals: function(callback) {
+	processTotals: function(callbackPT) {
 
-		Totals.totalKrai(function(err, resp) {
+		Totals.totalKrai(function(errPT, respPT) {
 
 			/**
 			 * Results found! (GOOD) CONTINUE request
 			 * We have the total Krai being paid out
 			 */
-			if(!err) {
+			if(!errPT) {
 
-				var hourly_rai = resp.hourly_rai;
+				var hourly_rai = respPT.hourly_rai;
 
-				Totals.calculate(function(err, resp) {
+				Totals.calculate(function(errPT, respPT) {
 
 					/**
 					 * Results found! (GOOD) CONTINUE request
 					 * We have a list of accounts with counts for successfully solved captchas
 					 */
-					if(!err) {
+					if(!errPT) {
 
-						var hoursSinceLastRan = resp.hoursSinceLastRan,
+						var hoursSinceLastRan = respPT.hoursSinceLastRan,
 						payout_amount,
 						recordsCount = 0,
 						accountsCount = 0,
-						records = [];
+						recordsPT = [];
 
 						if(hoursSinceLastRan === 0) {
 							payout_amount = hourly_rai * 1; // if under 1 hour, then assume 1 hour for realtime projections accuracy.
@@ -201,31 +201,31 @@ module.exports = {
 						 * We want to upsert a record into Totals collection
 						 */
 						
-						for(key in resp.results) {
+						for(key in respPT.results) {
 
-							var payload = {
+							var payloadPT = {
 								paid_unix: 0, // filled upon payout.
 								receipt_hash: "", // filled upon payout. explicitly set to an empty string to indicate it's a realtime row and that payouts aren't possible yet.
-								account: resp.results[key]._id,
-								total_count: resp.results[key].count,
-								started_unix: resp.lastRan,
+								account: respPT.results[key]._id,
+								total_count: respPT.results[key].count,
+								started_unix: respPT.lastRan,
 								ended_unix: 0 // this is 0 because there is no end time yet.
 							};
 
 							accountsCount++;
-							records.push(payload);
-							recordsCount += payload.total_count;
+							recordsPT.push(payloadPT);
+							recordsCount += payloadPT.total_count;
 						}
 
 						/**
 						 * Iterate through all records, calculate percentage / krai owed & create record
 						 * Totals must be compound-unique-indexed on ended_unix time to prevent dupes.
 						 */
-						for(key in records) {
+						for(keyPT in recordsPT) {
 
-							records[key].percentage_owed = records[key].total_count / recordsCount;
-							records[key].krai_owed = Math.floor(records[key].percentage_owed * payout_amount);
-							records[key].raw_rai_owed = records[key].krai_owed + '' + Globals.rawKrai;
+							recordsPT[keyPT].percentage_owed = recordsPT[keyPT].total_count / recordsCount;
+							recordsPT[keyPT].krai_owed = Math.floor(recordsPT[keyPT].percentage_owed * payout_amount);
+							recordsPT[keyPT].raw_rai_owed = recordsPT[keyPT].krai_owed + '' + Globals.rawKrai;
 						}
 
 						/**
@@ -233,39 +233,39 @@ module.exports = {
 						 */
 						
 						// iterate over our response of accounts needing payment
-        				loopTotals = function(records) {
+        				loopTotals = function(recordsPT) {
 
-        					if(records.length > 0) {
+        					if(recordsPT.length > 0) {
 
-        						var where = {
+        						var wherePT = {
 									'$and': [
 										{
-											account: records[0].account
+											account: recordsPT[0].account
 										},
 										{
-											ended_unix: records[0].ended_unix
+											ended_unix: recordsPT[0].ended_unix
 										}
 									]
 								};
 
-								Totals.native(function(err, collection) {
-									if (!err) {
+								Totals.native(function(errPT, collectionPT) {
+									if (!errPT) {
 
-										collection.update(where, records[0], { upsert: true }, function (err, updated) {
-											if (!err) {
+										collectionPT.update(wherePT, recordsPT[0], { upsert: true }, function (errPT, updatedPT) {
+											if (!errPT) {
 
 												// remove the first record
-												records.splice(0,1);
+												recordsPT.splice(0,1);
 
 												// loop through totals
-												loopTotals(records);
+												loopTotals(recordsPT);
 
 											} else {
-												callback(err, null);
+												callbackPT(errPT, null);
 											}
 				                        });
 			                        } else {
-				                        callback(err, null);
+				                        callbackPT(errPT, null);
 			                        }
 		                        });
 							}
@@ -276,12 +276,12 @@ module.exports = {
 							else {
 
 						        // find the row we are about to update to get it's created_unix time
-						        DistributionTracker.find({ ended_unix: 0 }, function(err, res) {
+						        DistributionTracker.find({ ended_unix: 0 }, function(errPT, resPT) {
 
-						            if(!err) {
+						            if(!errPT) {
 
-						            	var payload = {
-								            started_unix: resp.lastRan,
+						            	var payloadPT = {
+								            started_unix: respPT.lastRan,
 								            ended_unix: 0,
 								            accounts: accountsCount,
 								            successes: recordsCount,
@@ -290,27 +290,27 @@ module.exports = {
 								        };
 
 								        // if there is a results, retain the created_unix time 
-						            	if(res.length > 0) {
-						            		payload.created_unix = res[0].created_unix;
+						            	if(resPT.length > 0) {
+						            		payloadPT.created_unix = resPT[0].created_unix;
 									    }
 
 									    // update distribution tracker
-									    DistributionTracker.update(payload, function(err, resp) {
-								            if(!err) {
-								                callback(null, true); // looping finalized and distribution tracker updated
+									    DistributionTracker.update(payloadPT, function(errPT, respPT) {
+								            if(!errPT) {
+								                callbackPT(null, true); // looping finalized and distribution tracker updated
 								            } else {
-								                callback(err, null);
+								                callbackPT(errPT, null);
 								            }
 								        });
 						        	} else {
-						        		callback(err, null);
+						        		callbackPT(errPT, null);
 						        	}
 						        });
 							}
 						};
 
 						// kick off looping through totals.
-						loopTotals(records);
+						loopTotals(recordsPT);
 					} 
 
 					/**
@@ -318,7 +318,7 @@ module.exports = {
 					 * For some reason, calculations failed. Don't process saving records.
 					 */		
 					else {
-						callback(err, null);
+						callbackPT(errPT, null);
 					}
 				});
 			}
@@ -328,7 +328,7 @@ module.exports = {
 			 * For some reason, we could not receive an amount. An RPC could have failed or mongoDB.
 			 */
 			else {
-				callback(err, null);
+				callbackPT(errPT, null);
 			}
 		});
 	},
@@ -337,28 +337,28 @@ module.exports = {
 	 * Find the total amount of Krai currently being paid out hourly
 	 * Using KraiFromRawService, return the amount in Krai from raw.
 	 */
-	totalKrai: function(callback) {
+	totalKrai: function(callbackTK) {
 
-		PayoutSchedule.native(function(err, collection) {
-			if (!err){
+		PayoutSchedule.native(function(errTK, collectionTK) {
+			if (!errTK){
 
-				collection.find().limit(1).sort({'$natural': -1}).toArray(function (err, results) {
-					if (!err) {
+				collectionTK.find().limit(1).sort({'$natural': -1}).toArray(function (errTK, resultsTK) {
+					if (!errTK) {
 
-						KraiFromRawService.convert(results[0].hourly_rai, function(err, resp) {
+						KraiFromRawService.convert(resultsTK[0].hourly_rai, function(errTK, respTK) {
 
-							if(!err) {
-								callback(null, { hourly_rai: resp.response.amount });
+							if(!errTK) {
+								callbackTK(null, { hourly_rai: respTK.response.amount });
 							} else {
-								callback(err, null);
+								callbackTK(errTK, null);
 							}
 						});
 					} else {
-						callback(err, null);
+						callbackTK(errTK, null);
 					}
 				});
 			} else {
-				callback(err, null);
+				callbackTK(errTK, null);
 			}
    		});
 	}
