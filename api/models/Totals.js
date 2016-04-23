@@ -74,6 +74,7 @@ module.exports = {
 	/**
 	 * Calculate metrics by account for current unpaid distribution period
 	 * Grabs all 'accepted' records greater than or equal to the last time Distribution calculations were last finalized
+	 * 	if that time
 	 *
 	 * returns: 
 	 * { hoursSinceLastRan: 0,
@@ -83,6 +84,7 @@ module.exports = {
 	 **/
 	calculate: function(callbackC) {
 
+		//console.log('Calculate DT.fetch()');
 		DistributionTracker.fetch({ limit: 1, finalized: true }, function(errC, respC) {
 	        
 	      	if(!errC) {
@@ -93,7 +95,7 @@ module.exports = {
 					'$and': [
 						{
 							modified : { 
-			 					'$gte': respC.lastRan
+			 					'$gte': respC[0].lastRan
 			 				}
 			 			},
 			 			{ 
@@ -131,8 +133,8 @@ module.exports = {
 								 * If matches ARE found, then we should get a list of accounts with counts.
 								 */
 								else {
-									respC.results = resultsC;
-									callbackC(null, respC);
+									respC[0].results = resultsC;
+									callbackC(null, respC[0]);
 								}
 							} else {
 								callbackC({ error: errC }, null);
@@ -243,10 +245,16 @@ module.exports = {
 											account: recordsPT[0].account
 										},
 										{
-											ended_unix: recordsPT[0].ended_unix
+											started_unix: recordsPT[0].started_unix
 										}
 									]
 								};
+
+								//console.log(TimestampService.utc() + ' Update Where PT');
+								//console.log(TimestampService.utc() + ' ' + JSON.stringify(wherePT));
+
+								//console.log(TimestampService.utc() + ' Update What PT');
+								//console.log(TimestampService.utc() + ' ' + JSON.stringify(recordsPT[0]));
 
 								Totals.native(function(errPT, collectionPT) {
 									if (!errPT) {
@@ -293,6 +301,9 @@ module.exports = {
 						            	if(resPT.length > 0) {
 						            		payloadPT.created_unix = resPT[0].created_unix;
 									    }
+
+									    //console.log(TimestampService.utc() + ' Pre-DT Update Payload');
+								        //console.log(TimestampService.utc() + ' ' + JSON.stringify(payloadPT));
 
 									    // update distribution tracker
 									    DistributionTracker.update(payloadPT, function(errPT, respPT) {

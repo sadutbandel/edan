@@ -9,7 +9,7 @@ module.exports.schedule = {
         // this finalizes calculations for the last period, then pays out participating accounts (every 2 hours)
         processDistribution : {
 
-            cron : "44 * * * *",
+            cron : "12 * * * *",
             task : function (context, sails) {
 
                 // production-level CRON.
@@ -40,7 +40,7 @@ module.exports.schedule = {
                     // FIND RECORDS OLDER THAN 1 MINUTE
                     AutomationService.fixStuckPending(function(errSP, respSP) {
                         if(!errSP) {
-                            console.log(TimestampService.utc() + ' ---------------- STUCK PENDING SUCCESS ----------------- ');
+                            //console.log(TimestampService.utc() + ' ---------------- STUCK PENDING SUCCESS ----------------- ');
                         } else {
                             console.log(TimestampService.utc() + ' ---------------- STUCK PENDING FAILED! ----------------- ' + JSON.stringify(errSP));
                         }

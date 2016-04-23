@@ -68,6 +68,33 @@ module.exports = {
 	 */
 	fetch: function(paramsF, callbackF) {
 
+		var recordsF = [];
+
+		loopDtResults = function(resultsF) {
+
+			if(resultsF.length > 0) {
+				var keyF = 0,
+				lastHourF = TimestampService.lastHour(), // the last hour that ended (if 7:15pm, then 7pm)
+				lastRanF = resultsF[keyF].ended_unix, // used to determine how many hours ago we last ran this
+				hoursSinceLastRanF = (lastHourF - lastRanF) / 60 / 60; // needed for calculating total krai to payout depending on hours
+	  			
+	  			recordsF.push({
+	      			created_unix: resultsF[keyF].created_unix,
+	      			started_unix: resultsF[keyF].started_unix,
+	      			hoursSinceLastRan: hoursSinceLastRanF,
+	      			lastHour: lastHourF,
+	      			lastRan: lastRanF,
+	      		});
+
+	      		resultsF.splice(0,1);
+	      		loopDtResults(resultsF);
+	      	} else {
+	      		console.log('recordsF');
+	      		console.log(recordsF);
+	      		callbackF(null, recordsF);
+	      	}
+		};
+
 		DistributionTracker.native(function(errF, collectionF) {
 			if (!errF) {
 
@@ -82,26 +109,15 @@ module.exports = {
 					findF.paid = paramsF.paid;
 				}
 
+				//console.log(TimestampService.utc() + ' DistributionTracker.fetch()');
+				//console.log(TimestampService.utc() + ' ' + JSON.stringify(findF));
+
 				// ensure we don't accidentally grab a record that minutely realtime cron just created.
 				collectionF.find(findF).limit(paramsF.limit).sort({ '$natural': -1 }).toArray(function (errF, resultsF) {
 					if (!errF) {
-
-						if(resultsF.length > 0) {
-
-							var lastHourF = TimestampService.lastHour(), // the last hour that ended (if 7:15pm, then 7pm)
-							lastRanF = resultsF[0].ended_unix, // used to determine how many hours ago we last ran this
-							hoursSinceLastRanF = (lastHourF - lastRanF) / 60 / 60; // needed for calculating total krai to payout depending on hours
-				      		
-				      		callbackF(null, {
-				      			created_unix: resultsF[0].created_unix,
-				      			started_unix: resultsF[0].started_unix,
-				      			hoursSinceLastRan: hoursSinceLastRanF,
-				      			lastHour: lastHourF,
-				      			lastRan: lastRanF,
-				      		});
-				      	} else {
-				      		callbackF('no results dt', null);
-				      	}
+						console.log('resultsF');
+						console.log(resultsF);
+						loopDtResults(resultsF);
 					} else {
 						callbackF(errF, null);
 					}
@@ -113,7 +129,7 @@ module.exports = {
 	},
 
 	/**
-	 * Upsert a realtime DistributionTracker record where ended_unix === 0
+	 * Upsert a realtime DistributionTracker record
 	 */
 	update: function(dataU, callbackU) {
 
@@ -137,8 +153,14 @@ module.exports = {
         };
 
         var whereU = {
-			ended_unix: 0
+			started_unix: payloadU.started_unix
 		};
+
+		//console.log(TimestampService.utc() + ' Update Where');
+		//console.log(TimestampService.utc() + ' ' + JSON.stringify(whereU));
+
+		//console.log(TimestampService.utc() + ' Update Data');
+		//console.log(TimestampService.utc() + ' ' + JSON.stringify(payloadU));
 
 		DistributionTracker.native(function(errU, collectionU) {
 			if (!errU) {

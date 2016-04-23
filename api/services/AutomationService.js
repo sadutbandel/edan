@@ -42,8 +42,8 @@ module.exports = {
                 Distribution.update(where, what).exec(function (errFSP, updatedFSP){
                     if (!errFSP) {
 
-                        console.log('Fixing stuck record...');
-                        console.log(JSON.stringify(updatedFSP[0]));
+                        //console.log('Fixing stuck record...');
+                        //console.log(JSON.stringify(updatedFSP[0]));
 
                         // remove the 1st element object from the array.
                         respFSP.splice(0,1);
@@ -122,8 +122,8 @@ module.exports = {
                 
                 if(!errFC) {
 
-                    lastHourFC = respFC.lastHour;
-                    lastRanFC = respFC.lastRan;
+                    lastHourFC = respFC[0].lastHour;
+                    lastRanFC = respFC[0].lastRan;
 
                     var matchFC = {
 
@@ -144,6 +144,9 @@ module.exports = {
                         ]
                     };
 
+                    //console.log('matchFC');
+                    //console.log(JSON.stringify(matchFC));
+
                     var groupFC = {
                         _id: '$account',
                         count: { 
@@ -156,6 +159,7 @@ module.exports = {
 
                             collectionFC.aggregate([{ '$match' : matchFC }, { '$group' : groupFC }]).toArray(function (errFC, resultsFC) {
                                 if (!errFC) {
+
 
                                     /**
                                      * No matches found. (bad) HALT request!
@@ -199,6 +203,9 @@ module.exports = {
                                             paid: false
                                         };
 
+                                        console.log('Update DT final numbers');
+                                        console.log(JSON.stringify(whatFC));
+                                        
                                         DistributionTracker.update(whatFC, function(errFC, respFC) {
                                             console.log(TimestampService.utc() + ' ---------------- CALCULATIONS FINALIZED ----------------');
 
@@ -248,32 +255,41 @@ module.exports = {
                     destination: respLP[keyLP].account
                 };
 
+                //console.log(TimestampService.utc() + ' Sending Payload');
+                //console.log(TimestampService.utc() + ' ' + JSON.stringify(payloadLP));
+
                 SendRaiService.send(payloadLP, function(errLP, resLP) {
 
                     if (!errLP) {
 
                         var whereLP = { 
-                            id: respLP[key].id
+                            id: respLP[keyLP].id
                         };
 
                         var whatLP = {
                             paid_unix : TimestampService.unix(),
                             receipt_hash : resLP.response.block, // element we are updating (notice resLP not respLP)
-                            account: respLP[key].account,
-                            total_count: respLP[key].total_count,
-                            started_unix: respLP[key].started_unix,
-                            ended_unix: respLP[key].ended_unix,
-                            percentage_owed: respLP[key].percentage_owed,
-                            krai_owed: respLP[key].krai_owed,
-                            raw_rai_owed: respLP[key].raw_rai_owed
+                            account: respLP[keyLP].account,
+                            total_count: respLP[keyLP].total_count,
+                            started_unix: respLP[keyLP].started_unix,
+                            ended_unix: respLP[keyLP].ended_unix,
+                            percentage_owed: respLP[keyLP].percentage_owed,
+                            krai_owed: respLP[keyLP].krai_owed,
+                            raw_rai_owed: respLP[keyLP].raw_rai_owed
                         };
+
+                        //console.log(TimestampService.utc() + ' Update Where LP');
+                        //console.log(TimestampService.utc() + ' ' + JSON.stringify(whereLP));
+
+                        //console.log(TimestampService.utc() + ' Update What LP');
+                        //console.log(TimestampService.utc() + ' ' + JSON.stringify(whatLP));
 
                         // SAVE BLOCK HASH RECEIPT in totals row 
                         // We must REBUILD the record properties or else the other properties will be lost.
                         Totals.update(whereLP, whatLP).exec(function (errLP, updatedLP){
                             if (!errLP) {
 
-                                console.log('Updating receipt hash...');
+                                console.log(TimestampService.utc() + ' Updating receipt hash...');
                                 console.log(JSON.stringify(updatedLP[0]));
 
                                 // remove the 1st element object from the array.
@@ -292,7 +308,7 @@ module.exports = {
                 });
             } else {
 
-                console.log('PAYMENTS COMPLETE FOR PERIOD!');
+                console.log(TimestampService.utc() + ' MARK DT AS PAID!!');
                 // mark DT as paid...
                 // 
                 // 
@@ -312,15 +328,13 @@ module.exports = {
         //      respLE, objParamsLE, keyLE, errLE, updatedLE
         loopEnded = function(respLE, objParamsLE) {
 
-            // keep the original object for when we want to payout
-            var cloneRespLE = JSON.parse(JSON.stringify(respLE));
-
             if(respLE.length > 0) {
 
                 var keyLE = 0;
 
                 var whereLE = { 
-                    id: respLE[keyLE].id
+                    account: respLE[keyLE].account,
+                    started_unix: respLE[keyLE].started_unix
                 };
 
                 var whatLE = {
@@ -334,14 +348,21 @@ module.exports = {
                     krai_owed: respLE[keyLE].krai_owed,
                     raw_rai_owed: respLE[keyLE].raw_rai_owed
                 };
+                
+                //console.log(TimestampService.utc() + ' Update Where LE');
+                //console.log(TimestampService.utc() + ' ' + JSON.stringify(whereLE));
+
+                //console.log(TimestampService.utc() + ' Update What LE');
+                //console.log(TimestampService.utc() + ' ' + JSON.stringify(whatLE));
+
 
                 // SAVE ENDED_UNIX TIMESTAMP 
                 // We must REBUILD the record properties or else the other properties will be lost.
-                Totals.update(whereLE, what).exec(function (errLE, updatedLE){
+                Totals.update(whereLE, whatLE).exec(function (errLE, updatedLE){
                     if (!errLE) {
 
-                        console.log('Updating totals ended_unix...');
-                        console.log(JSON.stringify(updatedLE[0]));
+                        //console.log(TimestampService.utc() + ' Updating totals ended_unix...');
+                        //console.log(TimestampService.utc() + ' ' + JSON.stringify(updatedLE[0]));
 
                         // remove the 1st element object from the array.
                         respLE.splice(0,1);
@@ -357,9 +378,34 @@ module.exports = {
 
             // no more records left
             else {
-                console.log('Starting looping payouts');
-                // start the payout loop the first time.
-                loopPayouts(cloneRespLE, objParamsLE);
+
+                // grab the records needing payouts now that they have their end-times stored.
+                //console.log('LoopEnded() Complete... Finding those needing payment')
+                DistributionTracker.fetch({ limit: 1, finalized: true, paid: false }, function(errLE, respLE) {
+                    
+                    if(!errLE) {
+
+                        lastHourLE = respLE[0].lastHour;
+                        lastRanLE = respLE[0].lastRan;
+
+                        var whereLE = { receipt_hash: "", started_unix: lastRanLE };
+
+                        //console.log('Where Totals...');
+                        //console.log(JSON.stringify(whereLE));
+
+                        Totals.find(whereLE, function(errLE, respLE) { 
+                            
+                            if(!errLE) {
+                                // start the payout loop the first time.
+                                loopPayouts(respLE, objParamsLE);
+                            } else {
+                                callbackPD(errLE, null); // totals update failure
+                            }
+                        });
+                    } else {
+                        callbackPD(errLE, null); // totals update failure
+                    }
+                });
             }
         };
 
@@ -368,25 +414,34 @@ module.exports = {
         //      respDT, responseDT, errDT
         loopDt = function(respDT) {
 
+            //console.log(TimestampService.utc() + ' loopDt() respDT.length');
+            //console.log(TimestampService.utc() + ' ' + JSON.stringify(respDT));
+            //console.log(TimestampService.utc() + ' ' + respDT.length);
+
+            var keyDT = 0;
+
             if(respDT.length > 0) {
 
-                var lastHourDT = respDT.lastHour,
-                lastRanDT = respDT.lastRan;
+                var lastHourDT = respDT[keyDT].lastHour,
+                lastRanDT = respDT[keyDT].lastRan;
 
-                var where = { receipt_hash: "", started_unix: lastRanDT };
+                var whereDT = { receipt_hash: "", started_unix: lastRanDT };
 
-                Totals.find(where, function(errDT, responseDT) { 
+                //console.log('Where Totals...');
+                //console.log(JSON.stringify(whereDT));
+
+                Totals.find(whereDT, function(errDT, responseDT) { 
                     
                     if(!errDT) {
 
-                        // historical? go straight to payouts and skip marking totals ended_unix timestamps again
-                        if(when === 'historical') {
+                        // historical? go storageight to payouts and skip marking totals ended_unix timestamps again
+                        if(run === 'historical') {
                             loopPayouts(responseDT, { lastHour: lastHourDT, lastRan: lastRanDT });
                         }
 
                         // our most recent distribution needs to have it's totals records ended_unix times marked ( they are 0 now )
                         // after this, loopEnded() will lead to loopPayouts()
-                        else if(when === 'last') {
+                        else if(run === 'last') {
                             loopEnded(responseDT, { lastHour: lastHourDT, lastRan: lastRanDT });
                         }
 
@@ -427,10 +482,21 @@ module.exports = {
                 limitedPP = 5;
             }
 
-            DistributionTracker.fetch({ limit: limitedPP, finalized: true, paid: false }, function(errPP, respPP) {
+            var payloadPP = { 
+                limit: limitedPP,
+                finalized: true,
+                paid: false
+            };
+
+            //console.log(TimestampService.utc() + ' Process Payouts DT.Fetch Payload');
+            //console.log(TimestampService.utc() + ' ' + JSON.stringify(payloadPP));
+
+            DistributionTracker.fetch(payloadPP, function(errPP, respPP) {
                 
                 if(!errPP) {
-                    // loop over dt records
+                    //console.log(TimestampService.utc() + ' DT.fetch Response');
+                    //console.log(TimestampService.utc() + ' ' + JSON.stringify(respPP));
+                    // loop over dt record(s)
                     loopDt(respPP);
                 } else {
                     callbackPD({ error: errPP }, null);
@@ -477,9 +543,9 @@ module.exports = {
             
             // processed
             if(!errLP) {
-                console.log(JSON.stringify(respLP));
+                console.log(TimestampService.utc() + ' ' + JSON.stringify(respLP));
             } else { // not processed
-                console.log(JSON.stringify(errLP));
+                console.log(TimestampService.utc() + ' ' + JSON.stringify(errLP));
             }
         });
     }
