@@ -115,14 +115,20 @@ module.exports = {
 								Totals.native(function(err, collection) {
 									if (!err){
 
-										collection.find(where,what).sort({ 'ended_unix': -1 }).toArray(function (err, results) {
+										collection.find(where, what).sort({ 'ended_unix': -1 }).toArray(function (err, results) {
 											if (!err) {
 
-												// everyone's data for the UNPAID PERIOD (realtime data)
+												// everyone's data for all periods
 												DistributionTracker.native(function(err, collection) {
 													if (!err){
 
-														collection.find({ finalized: false }).toArray(function (err, res) {
+														// grab all records, and don't bring in the id of the record.
+														var where = {};
+														var what = {
+															_id: 0
+														};
+
+														collection.find(where, what).sort({ 'started_unix': -1 }).toArray(function (err, res) {
 															if (!err) {
 
 																// generally we'll always have results in DistributionTracker for current unpair period
@@ -143,33 +149,29 @@ module.exports = {
 																	// which will either be the oldest totals record (bad)
 																	// or the most recent, unpaid distribution record (good)
 																	var lastElement = resultsClone.slice(-1)[0];
-
+																	
 																	// if the ended_unix time is 0, it's a current, unpaid distribution
 																	if(lastElement.ended_unix === 0) {
 
 						 												// store our current distribution by grabbing the last item in the array
 						 												resp.current_distribution = lastElement;
+						 												resp.current_distribution.complete_count = res[0].successes;
 
 					                                					// remove the last object element (realtime unpaid distribution) from 
 					                                					// the array, then store past distributions.
 					                                					results.pop();
-					                                				} 
-
-					                                				// we don't have any current distribution calculated yet.
-					                                				else {
-					                                					resp.current_distribution = {};
 					                                				}
-
-						 											resp.current_distribution.complete_count = res[0].successes;
 
 					                                				// we should always have past distributions
 					                                				resp.past_distributions = results;
+					                                				resp.distribution_tracker = res; // all DistributionTracker records
 
 						 											callback(null, resp);
 						 										} 
 
 						 										// we just lifted server and crons have not yet created totals / DT records.
 						 										else {
+						 											// return an empty current_distribution block
 						 											callback(null, { message: 'success', });
 						 										}
 					 										} else {

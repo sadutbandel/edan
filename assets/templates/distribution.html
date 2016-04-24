@@ -153,7 +153,7 @@
 			<!-- END FAUCET STATISTICS -->
 
 			<!-- DISTRIBUTIONS -->
-			<div ng-show="past_distributions" class="sixteen wide column ng-hide">
+			<div ng-show="past_distributions || current_distribution" class="sixteen wide column ng-hide">
 				<div class="ui stacked segment">
 					<h3 class="ui header">My Distributions</h3>
 
@@ -172,22 +172,30 @@
 						<tbody>
 
 							<tr class="positive">
-								<td></td>
-								<td></td>
-								<td>{{ current_distribution.started_unix | date:'M/dd h:mma'}}</td>
+								<td>
+									<i class="circular help icon link popup" data-content="This period is still active." data-variation="wide"></i>
+								</td>
+								<td>
+									<i class="circular help icon link popup" data-content="This period is still active." data-variation="wide"></i>
+								</td>
+								<td>{{ current_distribution.started_unix | date:'M/dd h:mma' }}</td>
 								<td>{{ current_distribution.total_count }}</td>
-								<td>{{ current_distribution.krai_owed }}</td>
-								<td></td>
+								<td>{{ current_distribution.krai_owed | number: 0 }}&nbsp;
+									<i class="circular warning icon link popup" data-content="This number is not final yet and will likely change." data-variation="wide"></i>
+								</td>
+								<td>
+									<i class="circular help icon link popup" data-content="There is no receipt available yet." data-variation="wide"></i>
+								</td>
 							</tr>
 
 							</tr>
 							<tr ng-repeat="record in past_distributions">
 
-								<td>{{ record.paid_unix | date:'M/dd h:mma'}}</td>
-								<td>{{ record.ended_unix | date:'M/dd h:mma'}}</td>
-								<td>{{ record.started_unix | date:'M/dd h:mma'}}</td>
+								<td>{{ record.paid_unix | date:'M/dd h:mma' }}</td>
+								<td>{{ record.ended_unix | date:'M/dd h:mma' }}</td>
+								<td>{{ record.started_unix | date:'M/dd h:mma' }}</td>
 								<td>{{ record.total_count }}</td>
-								<td>{{ record.krai_owed }}</td>
+								<td>{{ record.krai_owed | number: 0 }}</td>
 								<td>
 									<a
 									class="ui mini grey button copy_hash" 

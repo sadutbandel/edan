@@ -10,57 +10,59 @@
 
 module.exports = {
 
-    // reserved functions:
-    // fspResponse, er, upd,
-    // fix any stuck pending records causing perpetual 'Try Again' responses in faucet
+    // Fixes any stuck 'pending' Distribution records to be 'Violation' so user is not stuck.
     fixStuckPending: function(callbackSP) {
 
-        // iterate over our response of distribution records that may be stuck 'pending'
         loopStuckPending = function(respFSP) {
 
             // as long as there are still elements in the array....
             if(respFSP.length > 0) {
 
                 // always use 0 since we're going to remove it from the array when we're done.
-                var key = 0;
+                var keyFSP = 0;
 
                 var whereFSP = { 
-                    id: respFSP[key].id
+                    id: respFSP[keyFSP].id
                 };
 
                 var whatFSP = {
                     modified : TimestampService.unix(),
-                    account: respFSP[key].account,
-                    ip: respFSP[key].account,
-                    sessionID: respFSP[key].account,
+                    account: respFSP[keyFSP].account,
+                    ip: respFSP[keyFSP].account,
+                    sessionID: respFSP[keyFSP].account,
                     status: 'violation',
-                    createdAt: respFSP[key].createdAt,
-                    updatedAt: respFSP[key].updatedAt
+                    createdAt: respFSP[keyFSP].createdAt,
+                    updatedAt: respFSP[keyFSP].updatedAt
                 };
 
                 // Update their stuck 'pending' record as 'violation' so they can continue with requests
-                Distribution.update(where, what).exec(function (errFSP, updatedFSP){
-                    if (!errFSP) {
+                Distribution.native(function(errFSP, collectionFSP) {
+                    if (!errU) {
 
-                        //console.log('Fixing stuck record...');
-                        //console.log(JSON.stringify(updatedFSP[0]));
+                        collectionFSP.update(whereFSP, whatFSP, function (errFSP, updatedFSP) {
+                            if (!errFSP) {
+                                //console.log('Fixing stuck record...');
+                                //console.log(JSON.stringify(updatedFSP[0]));
 
-                        // remove the 1st element object from the array.
-                        respFSP.splice(0,1);
+                                // remove the 1st element object from the array.
+                                respFSP.splice(0,1);
 
-                        //tail-call recursion
-                        loopStuckPending(respFSP);
-
+                                //tail-call recursion
+                                loopStuckPending(respFSP);
+                            } else {
+                                callbackSP(errFSP, null); // query failure
+                            }
+                        });
                     } else {
-                        callbackSP(errFSP, null); // distribution update failure
+                        callbackSP(errFSP, null); // mongo failure
                     }
                 });
             } else {
-                callbackSP(null, true); // completed fixing stuck records
+                callbackSP(null, true); // complete!
             }
         };
 
-        // start finding expired pending records (over 1 minute old)
+        // Find  pnding records over 1 minute old
         Distribution.find({ status: "pending", modified: { "$lte": TimestampService.unix() - 60 }}, function(errFSP, respFSP) {
             if(!errFSP) {
                 loopStuckPending(respFSP); // start tailcall recursion
@@ -96,9 +98,10 @@ module.exports = {
         });
     },
 
-    // 'run' can equal 'last' or 'historical'.
-    //          'last' indicates automation is running
-    //          'historical' indicates manually running
+    // 'run' can equal "last" or "historical"
+    // 
+    //          "last" indicates automation is probably running this function
+    //          "historical" indicates we're manually running this function
     // 
     // First, run finalizeCalculations() to finalize totals for the last unpaid period.
     // Second, run processPayouts() to find all records with "" block hashes.
@@ -109,7 +112,7 @@ module.exports = {
         lastRan;
 
         /**
-         * First, Find the last distribution period that has not be finalized yet (or obviously been paid yet)
+         * First, Find the last distribution period that has not be finalized yet
          * Second, calculate total accounts & total successes for all accounts during this period (last ran to last hour, this runs bi-hourly)
          * Third, save that  data for the period in DistributionTracker & mark the distribution period as 'finalized' but not 'paid'
          * Fourth, move to processPayouts().
@@ -118,9 +121,10 @@ module.exports = {
          */
         finalizeCalculations = function() {
 
-            DistributionTracker.fetch({ limit: 1, finalized: false, paid: false }, function(errFC, respFC) {
-                
+            DistributionTracker.fetch({ limit: 1, finalized: false }, function(errFC, respFC) {
                 if(!errFC) {
+
+                    console.log(respFC);
 
                     lastHourFC = respFC[0].lastHour;
                     lastRanFC = respFC[0].started_unix;
@@ -199,12 +203,11 @@ module.exports = {
                                             ended_unix: lastHourFC,
                                             accounts: accountsCount,
                                             successes: recordsCount,
-                                            finalized: true,
-                                            paid: false
+                                            finalized: true
                                         };
 
-                                        //console.log('whatFC');
-                                        //console.log(JSON.stringify(whatFC));
+                                        console.log('whatFC');
+                                        console.log(JSON.stringify(whatFC));
 
                                         DistributionTracker.update(whatFC, function(errFC, respFC) {
                                             console.log(TimestampService.utc() + ' ---------------- CALCULATIONS FINALIZED ----------------');
@@ -239,7 +242,7 @@ module.exports = {
         // iterate over accounts needing payment
         // reserved:
         //      respLP, objParams, keyLP, errLP, updatedLP
-        loopPayouts = function(respLP, objParamsLP) {
+        loopPayouts = function(respLP) {
 
             // as long as there are still elements in the array....
             if(respLP.length > 0) {
@@ -255,15 +258,19 @@ module.exports = {
                     destination: respLP[keyLP].account
                 };
 
-                //console.log(TimestampService.utc() + ' Sending Payload');
-                //console.log(TimestampService.utc() + ' ' + JSON.stringify(payloadLP));
+                console.log(TimestampService.utc() + ' Sending Payload');
+                console.log(TimestampService.utc() + ' ' + JSON.stringify(payloadLP));
 
                 SendRaiService.send(payloadLP, function(errLP, resLP) {
 
                     if (!errLP) {
 
+                        console.log(TimestampService.utc() + ' Update Totals Post-Send');
+                        console.log(TimestampService.utc() + ' ' + JSON.stringify(resLP));
+
                         var whereLP = { 
-                            id: respLP[keyLP].id
+                            account: respLP[keyLP].account,
+                            started_unix: respLP[keyLP].started_unix
                         };
 
                         var whatLP = {
@@ -278,28 +285,36 @@ module.exports = {
                             raw_rai_owed: respLP[keyLP].raw_rai_owed
                         };
 
-                        //console.log(TimestampService.utc() + ' Update Where LP');
-                        //console.log(TimestampService.utc() + ' ' + JSON.stringify(whereLP));
+                        console.log(TimestampService.utc() + ' Update Where LP');
+                        console.log(TimestampService.utc() + ' ' + JSON.stringify(whereLP));
 
-                        //console.log(TimestampService.utc() + ' Update What LP');
-                        //console.log(TimestampService.utc() + ' ' + JSON.stringify(whatLP));
+                        console.log(TimestampService.utc() + ' Update What LP');
+                        console.log(TimestampService.utc() + ' ' + JSON.stringify(whatLP));
 
                         // SAVE BLOCK HASH RECEIPT in totals row 
                         // We must REBUILD the record properties or else the other properties will be lost.
-                        Totals.update(whereLP, whatLP).exec(function (errLP, updatedLP){
+                        // Update their stuck 'pending' record as 'violation' so they can continue with requests
+                        Totals.native(function(errLP, collectionLP) {
                             if (!errLP) {
 
-                                //console.log(TimestampService.utc() + ' Updating receipt hash...');
-                                //console.log(JSON.stringify(updatedLP[0]));
+                                collectionLP.update(whereLP, whatLP, function (errLP, updatedLP) {
+                                    if (!errLP) {
 
-                                // remove the 1st element object from the array.
-                                respLP.splice(0,1);
+                                        console.log(TimestampService.utc() + ' Updating receipt hash...');
+                                        console.log(JSON.stringify(updatedLP[0]));
 
-                                //tail-call recursion
-                                loopPayouts(respLP, objParamsLP);
+                                        // remove the 1st element object from the array.
+                                        respLP.splice(0,1);
 
+                                        //tail-call recursion
+                                        loopPayouts(respLP);
+
+                                    } else {
+                                        callbackPD(errLP, null); // query failure
+                                    }
+                                });
                             } else {
-                                callbackPD(errLP, null); // totals update failure
+                                callbackPD(errLP, null); // mongo failure
                             }
                         });
                     } else {
@@ -307,44 +322,7 @@ module.exports = {
                     }
                 });
             } else {
-
-                var payloadLP = {
-                    ended_unix: objParamsLP.lastHour,
-                    finalized: true,
-                    paid: false
-                };
-
-                //console.log('payloadLP');
-                //console.log(payloadLP);
-
-                // grab the entire record and update paid = true for this completely paid distribution
-                DistributionTracker.find(payloadLP, function(errLP, respLP) {
-                    
-                    if(!errLP) {
-
-                        // mark this distribution as PAID since we only got to this point since all accounts were paid.
-                        respLP[0].paid = true;
-                        //console.log(respLP[0]);
-
-                        DistributionTracker.native(function(errLP, collectionLP) {
-                            if (!errLP) {
-
-                                collectionLP.update(payloadLP, respLP[0], function (errLP, updatedLP) {
-                                    if (!errLP) {
-                                        //console.log(updatedLP);
-                                        callbackPD(null, true);
-                                    } else {
-                                        callbackPD(errLP, null);
-                                    }
-                                });
-                            } else {
-                                callbackPD(errLP, null);
-                            }
-                        });
-                    } else {
-                        callbackPD(errLP, null); // completed!
-                    }
-                });
+                callbackPD(null, true); // all records paid out
             }
         };
 
@@ -386,165 +364,69 @@ module.exports = {
 
                 // SAVE ENDED_UNIX TIMESTAMP 
                 // We must REBUILD the record properties or else the other properties will be lost.
-                Totals.update(whereLE, whatLE).exec(function (errLE, updatedLE){
+                Totals.native(function(errLE, collectionLE) {
                     if (!errLE) {
 
-                        //console.log(TimestampService.utc() + ' Updating totals ended_unix...');
-                        //console.log(TimestampService.utc() + ' ' + JSON.stringify(updatedLE[0]));
+                        collectionLE.update(whereLE, whatLE, function (errLE, collectionLE) {
+                            if (!errLE) {
 
-                        // remove the 1st element object from the array.
-                        respLE.splice(0,1);
+                                //console.log(TimestampService.utc() + ' Updating totals ended_unix...');
+                                //console.log(TimestampService.utc() + ' ' + JSON.stringify(updatedLE[0]));
 
-                        //tail-call recursion
-                        loopEnded(respLE, objParamsLE);
+                                // remove the 1st element object from the array.
+                                respLE.splice(0,1);
 
-                    } else {
-                        callbackPD(errLE, null); // totals update failure
-                    }
-                });
-            }
+                                //tail-call recursion
+                                loopEnded(respLE, objParamsLE);
 
-            // no more records left
-            else {
-
-                // grab the records needing payouts now that they have their end-times stored.
-                // 
-                //console.log('LoopEnded() Complete... Finding those needing payment')
-                DistributionTracker.fetch({ limit: 2, finalized: true, paid: false }, function(errLE, respLE) {
-                    
-                    if(!errLE) {
-
-                        lastHourLE = respLE[1].lastHour;
-                        lastRanLE = respLE[1].lastRan;
-
-                        var whereLE = { receipt_hash: "", started_unix: lastRanLE };
-
-                        //console.log('Where Totals...');
-                        //console.log(JSON.stringify(whereLE));
-
-                        Totals.find(whereLE, function(errLE, respLE) { 
-                            
-                            if(!errLE) {
-
-                                //console.log('Accounts needing payment');
-                                //console.log(respLE);
-
-                                // start the payout loop the first time.
-                                loopPayouts(respLE, objParamsLE);
                             } else {
-                                callbackPD(errLE, null); // totals update failure
+                                callbackPD(errLE, null); // query failure
                             }
                         });
                     } else {
-                        callbackPD(errLE, null); // totals update failure
+                        callbackPD(errLE, null); // mongo failure
                     }
                 });
             }
-        };
 
-        // loop over distributionTracker result(s) and either run loopPayouts() or loopEnded()
-        // reserved:
-        //      respDT, responseDT, errDT
-        loopDt = function(respDT) {
-
-            //console.log(TimestampService.utc() + ' loopDt() respDT.length');
-            //console.log(TimestampService.utc() + ' ' + JSON.stringify(respDT));
-            //console.log(TimestampService.utc() + ' ' + respDT.length);
-
-            var keyDT = 0;
-
-            if(respDT.length > 0) {
-
-                var lastHourDT = respDT[keyDT].lastHour,
-                lastRanDT = respDT[keyDT].lastRan;
-
-                var whereDT = { receipt_hash: "", started_unix: lastRanDT };
-
-                //console.log('Where Totals...');
-                //console.log(JSON.stringify(whereDT));
-
-                Totals.find(whereDT, function(errDT, responseDT) { 
-                    
-                    if(!errDT) {
-
-                        // historical? go storageight to payouts and skip marking totals ended_unix timestamps again
-                        if(run === 'historical') {
-                            loopPayouts(responseDT, { lastHour: lastHourDT, lastRan: lastRanDT });
-                        }
-
-                        // our most recent distribution needs to have it's totals records ended_unix times marked ( they are 0 now )
-                        // after this, loopEnded() will lead to loopPayouts()
-                        else if(run === 'last') {
-                            loopEnded(responseDT, { lastHour: lastHourDT, lastRan: lastRanDT });
-                        }
-
-                        // remove the first element from the original array before re-passing into loopDt()
-                        respDT.splice(0,1);
-
-                        // loop over any remaining results
-                        loopDt(respDT);
-
-                    } else {
-                        callbackPD({ error: errDT }, null);
-                    }
-                });
-            } else {
-                callbackPD(null, true); // success
+            // no more records left? process payouts!
+            else {
+                processPayouts();
             }
         };
 
         /**
+         * Process Payouts
          *
-         * 'when' is either 'historical' or 'last'.
-         *     'last' indicates the most recently finished distribution.
-         *     'historical' indicates we're running this manually from bootstrap and need to do this for history.
-         * First, find the last finalized, unpaid period.
-         * Second, using the unix times of that last period, 
-         *         find records in Totals that need payment in the last finalized-unpaid period.
-         * Third,
-         * 
+         * Find all empty receipt_hashes and loop over the results to process payouts per account.
+         * @return {[type]} [description]
          */
-        processPayouts = function(whenPP) {
+        processPayouts = function() {
 
-            var limitedPP;
+            // grab all records needing payouts
+            var wherePP = { receipt_hash: "" };
 
-            if(whenPP === 'last') {
-                limitedPP = 2; // we need the last 2 so we can grab the start_unix of the most recently-finalized record.
-            }
-            else if(whenPP === 'historical') {
-                limitedPP = 5;
-            }
+            //console.log('Where Totals...');
+            //console.log(JSON.stringify(whereLE));
 
-            var payloadPP = { 
-                limit: limitedPP,
-                finalized: true,
-                paid: false
-            };
-
-            DistributionTracker.fetch(payloadPP, function(errPP, respPP) {
+            Totals.find(wherePP, function(errPP, respPP) { 
                 
                 if(!errPP) {
 
-                    //console.log('DT PP respPP');
-                    //console.log(JSON.stringify(respPP));
+                    console.log('Accounts needing payment');
+                    console.log(respPP);
 
-                    if(whenPP === 'last') {
-                        respPP.splice(0,1); // just use the prior record
-                        loopDt(respPP);
-                    }
-                    else if(whenPP === 'historical') {
-                        loopDt(respPP);
-                    }
-                   
+                    // loop over all accounts needing payouts
+                    loopPayouts(respPP);
                 } else {
-                    callbackPD({ error: errPP }, null);
+                    callbackPD(errPP, null); // totals update failure
                 }
             });
         };
 
         // if we want to run payouts historically we must say so.
         if(run === 'historical') {
-            processPayouts('historical');
+            processPayouts();
         }
     },
 

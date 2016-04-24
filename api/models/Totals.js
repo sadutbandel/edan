@@ -104,6 +104,12 @@ module.exports = {
 		 			]
 				};
 
+				//console.log('respC');
+				//console.log(JSON.stringify(respC));
+
+				//console.log('matchC');
+				//console.log(JSON.stringify(matchC));
+
 				// count 'success' records and group by account.
 				var groupC = {
 					_id: '$account',
@@ -255,7 +261,6 @@ module.exports = {
 
 								//console.log(TimestampService.utc() + ' Update What PT');
 								//console.log(TimestampService.utc() + ' ' + JSON.stringify(recordsPT[0]));
-
 								Totals.native(function(errPT, collectionPT) {
 									if (!errPT) {
 
@@ -293,8 +298,7 @@ module.exports = {
 								            ended_unix: 0,
 								            accounts: accountsCount,
 								            successes: recordsCount,
-								            finalized: false,
-								            paid: false
+								            finalized: false
 								        };
 
 								        // if there is a results, retain the created_unix time 

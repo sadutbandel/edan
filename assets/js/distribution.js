@@ -198,7 +198,10 @@
 						}
 
 						// if we have no results, start with 0.
+						// 
+						// if $scope.current_distribution is older htan....
 						if(!data.current_distribution) {
+							data.current_distribution = {};
 							data.current_distribution.total_count = 0;
 						}
 
@@ -207,10 +210,14 @@
 
 						// store (or re-store) current and past distributions
 						$scope.current_distribution = data.current_distribution;
-						$scope.past_distributions = data.past_distributions;
 
-						//$('.copy_hash').popup({ popup:true }); // activate popups
-						
+						// activate popups
+						$('.popup').popup();
+
+						// if there are past distributions...
+						if(data.past_distributions) {
+							$scope.past_distributions = data.past_distributions;
+						}						
 					} else { // non-success messages
 						$scope.button = button[data.message];
 						$timeout(function() {

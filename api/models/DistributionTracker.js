@@ -46,13 +46,7 @@ module.exports = {
 			type:'boolean',
 			required:true,
 			unique: false
-		},
-		// whether or not all accounts have been paid yet.
-		paid: {
-			type:'boolean',
-			required:true,
-			unique: false
-		},
+		}
 	},
 
 	/**
@@ -60,8 +54,7 @@ module.exports = {
 	 *
 	 * params = {
 	 * 	limit: <positive integer>,
-	 * 	finalized: true/false,
-	 * 	paid: true/false
+	 * 	finalized: true/false
 	 * }
 	 *
 	 * Returns { lastHour, lastRan, hoursSinceLastRan }
@@ -70,8 +63,11 @@ module.exports = {
 
 		var recordsF = [];
 
+		// Loop through every DistributionTracker record in the result.
+		// Create a payload which returns Last hour, Last ran, Hours since last ran, the created_unix and started_unix times
 		loopDtResults = function(resultsF) {
 
+			// as long as the loop still has elements...
 			if(resultsF.length > 0) {
 
 				var keyF = 0,
@@ -87,8 +83,12 @@ module.exports = {
 	      			lastRan: lastRanF,
 	      		});
 
+	  			// remove the first element from the array
 	      		resultsF.splice(0,1);
+
+	      		// pass the lesser results to the loop again til empty
 	      		loopDtResults(resultsF);
+
 	      	} else {
 	      		callbackF(null, recordsF);
 	      	}
@@ -104,20 +104,9 @@ module.exports = {
 					}
 				};
 
-				if(paramsF.paid) {
-					findF.paid = paramsF.paid;
-				}
-
-				//console.log(TimestampService.utc() + ' DistributionTracker.fetch() find where');
-				//console.log(TimestampService.utc() + ' ' + JSON.stringify(findF));
-
 				// ensure we don't accidentally grab a record that minutely realtime cron just created.
 				collectionF.find(findF).limit(paramsF.limit).sort({ '$natural': -1 }).toArray(function (errF, resultsF) {
 					if (!errF) {
-
-						//console.log(TimestampService.utc() + ' DistributionTracker.fetch() resultsF');
-						//console.log(TimestampService.utc() + ' ' + JSON.stringify(resultsF));
-
 						loopDtResults(resultsF);
 					} else {
 						callbackF(errF, null);
@@ -149,8 +138,7 @@ module.exports = {
             ended_unix: dataU.ended_unix,
             accounts: dataU.accounts,
             successes: dataU.successes,
-            finalized: dataU.finalized,
-            paid: dataU.paid
+            finalized: dataU.finalized
         };
 
         var whereU = {
