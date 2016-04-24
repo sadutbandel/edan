@@ -293,11 +293,6 @@ module.exports = {
 
 						            if(!errPT) {
 
-						            	/// no results?....
-						            	/// 
-						            	/// 
-						            	/// 
-
 						            	var started_unix;
 
 						            	//console.log('resPT');
