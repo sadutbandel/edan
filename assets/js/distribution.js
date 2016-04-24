@@ -197,6 +197,11 @@
 							}
 						}
 
+						// if we have no results, start with 0.
+						if(!data.current_distribution) {
+							data.current_distribution.total_count = 0;
+						}
+
 						// increase my total count.
 						data.current_distribution.total_count++;
 
