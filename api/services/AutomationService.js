@@ -211,8 +211,7 @@ module.exports = {
 
                                         DistributionTracker.update(whatFC, function(errFC, respFC) {
                                             console.log(TimestampService.utc() + ' ---------------- CALCULATIONS FINALIZED ----------------');
-
-                                            //processPayouts();
+                                            processPayouts();
                                         });
                                     }
                                 } else {
@@ -254,8 +253,8 @@ module.exports = {
                     destination: respLP[keyLP].account
                 };
 
-                console.log(TimestampService.utc() + ' --- Sending KRAI ---');
-                console.log(TimestampService.utc() + ' ' + JSON.stringify(payloadLP));
+                //console.log(TimestampService.utc() + ' --- Sending KRAI ---');
+                //console.log(TimestampService.utc() + ' ' + JSON.stringify(payloadLP));
 
                 SendRaiService.send(payloadLP, function(errLP, resLP) {
 
@@ -296,8 +295,8 @@ module.exports = {
                                 collectionLP.update(whereLP, whatLP, function (errLP, updatedLP) {
                                     if (!errLP) {
 
-                                        console.log(TimestampService.utc() + ' Updating receipt hash...');
-                                        console.log(JSON.stringify(updatedLP[0]));
+                                        //console.log(TimestampService.utc() + ' Updating receipt hash...');
+                                        //console.log(JSON.stringify(updatedLP[0]));
 
                                         // remove the 1st element object from the array.
                                         respLP.splice(0,1);

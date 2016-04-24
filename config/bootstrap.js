@@ -11,6 +11,9 @@
 
 module.exports.bootstrap = function(cb) {
    
+   // 'none' is the same as commenting this block out.
+   // 'payouts' runs pay outs again, ASSUMING final calculations have been done.
+   // 'last' runs final calculations for the last and then processess payouts........ dont run this if we can help it.
    AutomationService.distributionThenUpdateSupply('none', function(errPD, respPD) {
       if(!errPD) {
          console.log(TimestampService.utc() + ' ---------------- DISTRIBUTION PROCESSING SUCCESS ----------------- ');                       

@@ -62,8 +62,8 @@ module.exports = {
 				collectionF.find().limit(1).sort({ 'started_unix': -1 }).toArray(function (errF, resultsF) {
 					if (!errF) {
 						
-						console.log(TimestampService.utc() + ' resultsF');
-						console.log(TimestampService.utc() + ' ' + JSON.stringify(resultsF));
+						//console.log(TimestampService.utc() + ' resultsF');
+						//console.log(TimestampService.utc() + ' ' + JSON.stringify(resultsF));
 
 						var keyF = 0,
 						lastHourF = TimestampService.lastHour(), // the last hour that ended (if 7:15pm, then 7pm)
@@ -134,19 +134,19 @@ module.exports = {
 			started_unix: payloadU.started_unix
 		};
 
-		console.log(TimestampService.utc() + ' Update DT Where');
-		console.log(TimestampService.utc() + ' ' + JSON.stringify(whereU));
+		//console.log(TimestampService.utc() + ' Update DT Where');
+		//console.log(TimestampService.utc() + ' ' + JSON.stringify(whereU));
 
-		console.log(TimestampService.utc() + ' Update DT Data');
-		console.log(TimestampService.utc() + ' ' + JSON.stringify(payloadU));
+		//console.log(TimestampService.utc() + ' Update DT Data');
+		//console.log(TimestampService.utc() + ' ' + JSON.stringify(payloadU));
 
 		DistributionTracker.native(function(errU, collectionU) {
 			if (!errU) {
 
 				collectionU.update(whereU, payloadU, { upsert: true }, function (errU, updatedU) {
 					if (!errU) {
-						console.log(TimestampService.utc() + ' Updated DT');
-						console.log(TimestampService.utc() + ' ' + JSON.stringify(updatedU));
+						//console.log(TimestampService.utc() + ' Updated DT');
+						//console.log(TimestampService.utc() + ' ' + JSON.stringify(updatedU));
 						callbackU(null, true);
 					} else {
 						callbackU(errU, null);
