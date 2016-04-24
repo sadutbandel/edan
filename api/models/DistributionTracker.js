@@ -73,6 +73,7 @@ module.exports = {
 		loopDtResults = function(resultsF) {
 
 			if(resultsF.length > 0) {
+
 				var keyF = 0,
 				lastHourF = TimestampService.lastHour(), // the last hour that ended (if 7:15pm, then 7pm)
 				lastRanF = resultsF[keyF].ended_unix, // used to determine how many hours ago we last ran this
@@ -107,12 +108,16 @@ module.exports = {
 					findF.paid = paramsF.paid;
 				}
 
-				//console.log(TimestampService.utc() + ' DistributionTracker.fetch()');
+				//console.log(TimestampService.utc() + ' DistributionTracker.fetch() find where');
 				//console.log(TimestampService.utc() + ' ' + JSON.stringify(findF));
 
 				// ensure we don't accidentally grab a record that minutely realtime cron just created.
 				collectionF.find(findF).limit(paramsF.limit).sort({ '$natural': -1 }).toArray(function (errF, resultsF) {
 					if (!errF) {
+
+						//console.log(TimestampService.utc() + ' DistributionTracker.fetch() resultsF');
+						//console.log(TimestampService.utc() + ' ' + JSON.stringify(resultsF));
+
 						loopDtResults(resultsF);
 					} else {
 						callbackF(errF, null);

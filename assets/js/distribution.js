@@ -164,32 +164,46 @@
 							$scope.button = button.default;
 						}, 1000);
 
-						// prepare to preserve our UI-total count to check if it's more updated than the server one or not.
-						var total_count;
 
-						// if we have a count for current distribution already, add on to it until data-source is bigger. (every minute)
+						var total_count;
+					
+						// if we have already gotten current_distribution information...
 						if($scope.current_distribution){
 
-							ui_total_count = $scope.current_distribution.total_count;
-							ui_total_count++;
+							// check if the period the data returned is the same as the one we have in store
+							// if we're in a new distribution period....
+							if(data.current_distribution.started_unix !== $scope.current_distribution.started_unix) {
+								
+							} 
+							// if we're in the same period as when we checked
+							else {
 
-							if(ui_total_count >= data.current_distribution.total_count) {
-								var diff = ui_total_count - data.current_distribution.total_count;
-								if(diff >= 10) {
-									ui_total_count = data.current_distribution.total_count;
-								} else {
-									data.current_distribution.total_count = ui_total_count;
+								total_count = $scope.current_distribution.total_count;
+
+								// check if our stored count is greater than what the server is returning
+								// this difference will always increase until a minute has gone by in which the server
+								// will return the most actual up-to-date count. The UI count should match though.
+								if(total_count >= data.current_distribution.total_count) {
+
+									var diff = total_count - data.current_distribution.total_count;
+
+									// overwrite our assumed count with the real count.
+									if(diff >= 10) {
+										total_count = data.current_distribution.total_count;
+									}
+
+									data.current_distribution.total_count = total_count;
 								}
 							}
-						} else {
-							data.current_distribution.total_count++;
 						}
 
-						// store some relevant data in the front-end for the account submitted
+						// increase my total count.
+						data.current_distribution.total_count++;
+
+						// store (or re-store) current and past distributions
 						$scope.current_distribution = data.current_distribution;
-						$scope.hoursSinceLastRan = data.hoursSinceLastRan;
 						$scope.past_distributions = data.past_distributions;
-						
+
 						//$('.copy_hash').popup({ popup:true }); // activate popups
 						
 					} else { // non-success messages

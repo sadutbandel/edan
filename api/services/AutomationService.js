@@ -123,7 +123,7 @@ module.exports = {
                 if(!errFC) {
 
                     lastHourFC = respFC[0].lastHour;
-                    lastRanFC = respFC[0].lastRan;
+                    lastRanFC = respFC[0].started_unix;
 
                     var matchFC = {
 
@@ -202,6 +202,9 @@ module.exports = {
                                             finalized: true,
                                             paid: false
                                         };
+
+                                        //console.log('whatFC');
+                                        //console.log(JSON.stringify(whatFC));
 
                                         DistributionTracker.update(whatFC, function(errFC, respFC) {
                                             console.log(TimestampService.utc() + ' ---------------- CALCULATIONS FINALIZED ----------------');

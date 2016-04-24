@@ -92,7 +92,7 @@ module.exports = {
 		 					if(!error) {
 
 		 						/**
-		 						 * Pull MY totals records (including realtime data for current unpaid period)
+		 						 * Pull MY totals records for all-time, including my realtime data for the current unpaid period
 		 						 * @type {Object}
 		 						 */
 								var what = {
@@ -111,13 +111,14 @@ module.exports = {
 								};
 
 								// my records
+								// if I have no records, this won't show.
 								Totals.native(function(err, collection) {
 									if (!err){
 
 										collection.find(where,what).sort({ 'ended_unix': -1 }).toArray(function (err, results) {
 											if (!err) {
 
-												// everyone's data
+												// everyone's data for the UNPAID PERIOD (realtime data)
 												DistributionTracker.native(function(err, collection) {
 													if (!err){
 
@@ -125,6 +126,8 @@ module.exports = {
 															if (!err) {
 
 																// generally we'll always have results in DistributionTracker for current unpair period
+																// if there are no results somehow in Distribution (like when the finalizationg / payout rolls overs),
+																// then we will just indicate that 
 																if(res.length > 0) {
 
 																	// convert unix timestamps to milliseconds fo angular
@@ -136,13 +139,30 @@ module.exports = {
 
 																	var resultsClone = JSON.parse(JSON.stringify(results));
 
-					 												// store our current distribution by grabbing the last item in the array
-					 												resp.current_distribution = resultsClone.slice(-1)[0];
-					 												resp.current_distribution.complete_count = res[0].successes;
+																	// grab the last element in the array
+																	// which will either be the oldest totals record (bad)
+																	// or the most recent, unpaid distribution record (good)
+																	var lastElement = resultsClone.slice(-1)[0];
 
-					                                				// remove the last object element (realtime unpaid distribution) from 
-					                                				// the array, then store past distributions.
-					                                				results.pop();
+																	// if the ended_unix time is 0, it's a current, unpaid distribution
+																	if(lastElement.ended_unix === 0) {
+
+						 												// store our current distribution by grabbing the last item in the array
+						 												resp.current_distribution = lastElement;
+
+					                                					// remove the last object element (realtime unpaid distribution) from 
+					                                					// the array, then store past distributions.
+					                                					results.pop();
+					                                				} 
+
+					                                				// we don't have any current distribution calculated yet.
+					                                				else {
+					                                					resp.current_distribution = {};
+					                                				}
+
+						 											resp.current_distribution.complete_count = res[0].successes;
+
+					                                				// we should always have past distributions
 					                                				resp.past_distributions = results;
 
 						 											callback(null, resp);
@@ -150,7 +170,7 @@ module.exports = {
 
 						 										// we just lifted server and crons have not yet created totals / DT records.
 						 										else {
-						 											callback({ message: 'try_again'}, null);
+						 											callback(null, { message: 'success', });
 						 										}
 					 										} else {
 							 									callback(err, null);
@@ -165,7 +185,7 @@ module.exports = {
 			 								}
 			 							});
 	 								} else {
-	 									callback(err, null);
+	 									callback(null, { message: 'success' });
 	 								}
 	 							});
 		 					} else {	
