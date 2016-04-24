@@ -9,19 +9,23 @@ module.exports.schedule = {
         // this finalizes calculations for the last period, then pays out participating accounts (every 2 hours)
         processDistribution : {
 
-            cron : "0 * * * *",
+            cron : "10 * * * *",
             task : function (context, sails) {
 
                 // production-level CRON.
                 if(sails.config.port === 1337) {
 
-                    AutomationService.distributionThenUpdateSupply('last', function(errPD, respPD) {
-                        if(!errPD) {
-                            console.log(TimestampService.utc() + ' ---------------- DISTRIBUTION PROCESSING SUCCESS ----------------- ');                       
-                        } else {
-                            console.log(TimestampService.utc() + ' ---------------- DISTRIBUTION PROCESSING FAILURE! ----------------- ' + JSON.stringify(errPD));                       
-                        }
-                    });
+                    // prevent collision with minutely calculations
+                    setTimeout(function () {
+                        AutomationService.distributionThenUpdateSupply('last', function(errPD, respPD) {
+                            if(!errPD) {
+                                console.log(TimestampService.utc() + ' ---------------- DISTRIBUTION PROCESSING SUCCESS ----------------- ');                       
+                            } else {
+                                console.log(TimestampService.utc() + ' ---------------- DISTRIBUTION PROCESSING FAILURE! ----------------- ' + JSON.stringify(errPD));                       
+                            }
+                        });
+                    }, 30000);
+
                 } 
             },
             context : {}
@@ -51,7 +55,7 @@ module.exports.schedule = {
         },
 
         // Update the totals calculations for the current unpaid period every minute
-        updateTotals : {
+        processTotals : {
 
             // run every minute
             cron : "* * * * *",

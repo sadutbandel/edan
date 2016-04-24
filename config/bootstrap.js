@@ -11,15 +11,13 @@
 
 module.exports.bootstrap = function(cb) {
    
-   /*
-   AutomationService.distributionThenUpdateSupply('historical', function(errPD, respPD) {
+   AutomationService.distributionThenUpdateSupply('none', function(errPD, respPD) {
       if(!errPD) {
          console.log(TimestampService.utc() + ' ---------------- DISTRIBUTION PROCESSING SUCCESS ----------------- ');                       
       } else {
          console.log(TimestampService.utc() + ' ---------------- DISTRIBUTION PROCESSING FAILURE! ----------------- ' + JSON.stringify(errPD));                       
       }
    });
-   */
   
    // allows us to retrieve the remote-client IP and not localhost
    sails.hooks.http.app.set('trust proxy', true);

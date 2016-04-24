@@ -84,10 +84,13 @@ module.exports = {
 	 **/
 	calculate: function(callbackC) {
 
-		//console.log('Calculate DT.fetch()');
-		DistributionTracker.fetch({ limit: 1, finalized: true }, function(errC, respC) {
+		// last distributionTracker record
+		DistributionTracker.last(function(errC, respC) {
 	        
 	      	if(!errC) {
+
+	      		//console.log('respC');
+	      		//console.log(respC);
 
 				// match only 'accepted' records that are in the current, unpaid distribution timeframe (realtime data)
 				var matchC = {
@@ -95,7 +98,7 @@ module.exports = {
 					'$and': [
 						{
 							modified : { 
-			 					'$gte': respC[0].lastRan
+			 					'$gte': respC.lastRan
 			 				}
 			 			},
 			 			{ 
@@ -103,9 +106,6 @@ module.exports = {
 			 			},
 		 			]
 				};
-
-				//console.log('respC');
-				//console.log(JSON.stringify(respC));
 
 				//console.log('matchC');
 				//console.log(JSON.stringify(matchC));
@@ -139,8 +139,8 @@ module.exports = {
 								 * If matches ARE found, then we should get a list of accounts with counts.
 								 */
 								else {
-									respC[0].results = resultsC;
-									callbackC(null, respC[0]);
+									respC.results = resultsC;
+									callbackC(null, respC);
 								}
 							} else {
 								callbackC({ error: errC }, null);
@@ -237,10 +237,9 @@ module.exports = {
 						}
 
 						/**
-						 * Iterate through all records again to update the realtime records for the unpaid distribution
+						 * Iterate through all account records for the unpaid distribution &
+						 * update their record with their updated stats
 						 */
-						
-						// iterate over our response of accounts needing payment
         				loopTotals = function(recordsPT) {
 
         					if(recordsPT.length > 0) {
@@ -252,15 +251,16 @@ module.exports = {
 										},
 										{
 											started_unix: recordsPT[0].started_unix
+											//started_unix: recordsPT[0].ended_unix
 										}
 									]
 								};
 
-								//console.log(TimestampService.utc() + ' Update Where PT');
-								//console.log(TimestampService.utc() + ' ' + JSON.stringify(wherePT));
+								console.log(TimestampService.utc() + ' Update Where PT');
+								console.log(TimestampService.utc() + ' ' + JSON.stringify(wherePT));
 
-								//console.log(TimestampService.utc() + ' Update What PT');
-								//console.log(TimestampService.utc() + ' ' + JSON.stringify(recordsPT[0]));
+								console.log(TimestampService.utc() + ' Update What PT');
+								console.log(TimestampService.utc() + ' ' + JSON.stringify(recordsPT[0]));
 								Totals.native(function(errPT, collectionPT) {
 									if (!errPT) {
 
@@ -293,8 +293,25 @@ module.exports = {
 
 						            if(!errPT) {
 
+						            	/// no results?....
+						            	/// 
+						            	/// 
+						            	/// 
+
+						            	var started_unix;
+
+						            	//console.log('resPT');
+						            	//console.log(JSON.stringify(resPT));
+
+						            	// if there is a currenty open unpaid distribution, use it.
+						            	if(respPT.lastRan === 0) {
+						            		started_unix = respPT.lastHour;
+						            	} else {
+						            		started_unix = respPT.lastRan;
+						            	}
+
 						            	var payloadPT = {
-								            started_unix: respPT.lastRan,
+								            started_unix: started_unix,
 								            ended_unix: 0,
 								            accounts: accountsCount,
 								            successes: recordsCount,
@@ -323,6 +340,9 @@ module.exports = {
 						        });
 							}
 						};
+
+						console.log(TimestampService.utc() + ' recordsPT');
+						console.log(TimestampService.utc() + ' ' + JSON.stringify(recordsPT));
 
 						// kick off looping through totals.
 						loopTotals(recordsPT);

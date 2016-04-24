@@ -37,7 +37,7 @@ module.exports = {
 
                 // Update their stuck 'pending' record as 'violation' so they can continue with requests
                 Distribution.native(function(errFSP, collectionFSP) {
-                    if (!errU) {
+                    if (!errFSP) {
 
                         collectionFSP.update(whereFSP, whatFSP, function (errFSP, updatedFSP) {
                             if (!errFSP) {
@@ -98,10 +98,10 @@ module.exports = {
         });
     },
 
-    // 'run' can equal "last" or "historical"
+    // 'run' can equal "last" or "payouts"
     // 
     //          "last" indicates automation is probably running this function
-    //          "historical" indicates we're manually running this function
+    //          "payouts" indicates we're manually running this function
     // 
     // First, run finalizeCalculations() to finalize totals for the last unpaid period.
     // Second, run processPayouts() to find all records with "" block hashes.
@@ -121,13 +121,15 @@ module.exports = {
          */
         finalizeCalculations = function() {
 
-            DistributionTracker.fetch({ limit: 1, finalized: false }, function(errFC, respFC) {
+            // false indicates "not finalized"
+            DistributionTracker.last(function(errFC, respFC) {
                 if(!errFC) {
 
-                    console.log(respFC);
+                    //console.log('respFC');
+                    //console.log(respFC);
 
-                    lastHourFC = respFC[0].lastHour;
-                    lastRanFC = respFC[0].started_unix;
+                    lastHourFC = respFC.lastHour;
+                    lastRanFC = respFC.started_unix;
 
                     var matchFC = {
 
@@ -194,29 +196,23 @@ module.exports = {
                                         }
 
                                         // create a DistributionTracker payload
-                                        // mark this period as Finalized!
-                                        // mark this period as NOT paid yet...
-                                        
+                                        // mark this period as Finalized!                                        
                                         var whatFC = {
-                                            created_unix: respFC[0].created_unix,
-                                            started_unix: respFC[0].started_unix,
+                                            created_unix: respFC.created_unix,
+                                            started_unix: respFC.started_unix,
                                             ended_unix: lastHourFC,
                                             accounts: accountsCount,
                                             successes: recordsCount,
                                             finalized: true
                                         };
 
-                                        console.log('whatFC');
-                                        console.log(JSON.stringify(whatFC));
+                                        //console.log('whatFC');
+                                        //console.log(JSON.stringify(whatFC));
 
                                         DistributionTracker.update(whatFC, function(errFC, respFC) {
                                             console.log(TimestampService.utc() + ' ---------------- CALCULATIONS FINALIZED ----------------');
 
-                                            // once calculations are finalized, they won't ever be finalized again,
-                                            // nor should they need to be. payouts process can fail NP now like if RPC
-                                            // gets overloaded. we can simply re-run it without worrying about
-                                            // any calculations needing to be finalized.
-                                            processPayouts('last');
+                                            //processPayouts();
                                         });
                                     }
                                 } else {
@@ -233,7 +229,7 @@ module.exports = {
             });
         };
 
-        // historical doesn't need to re-finalize (unless something freaky happens with Distribution records collection count?)
+        // payouts doesn't need to re-finalize (unless something freaky happens with Distribution records collection count?)
         // this is only triggered by the cron
         if(run === 'last') {
             finalizeCalculations();
@@ -258,15 +254,15 @@ module.exports = {
                     destination: respLP[keyLP].account
                 };
 
-                console.log(TimestampService.utc() + ' Sending Payload');
+                console.log(TimestampService.utc() + ' --- Sending KRAI ---');
                 console.log(TimestampService.utc() + ' ' + JSON.stringify(payloadLP));
 
                 SendRaiService.send(payloadLP, function(errLP, resLP) {
 
                     if (!errLP) {
 
-                        console.log(TimestampService.utc() + ' Update Totals Post-Send');
-                        console.log(TimestampService.utc() + ' ' + JSON.stringify(resLP));
+                        //console.log(TimestampService.utc() + ' Update Totals Post-Send');
+                        //console.log(TimestampService.utc() + ' ' + JSON.stringify(resLP));
 
                         var whereLP = { 
                             account: respLP[keyLP].account,
@@ -285,11 +281,11 @@ module.exports = {
                             raw_rai_owed: respLP[keyLP].raw_rai_owed
                         };
 
-                        console.log(TimestampService.utc() + ' Update Where LP');
-                        console.log(TimestampService.utc() + ' ' + JSON.stringify(whereLP));
+                        //console.log(TimestampService.utc() + ' Update Where LP');
+                        ///console.log(TimestampService.utc() + ' ' + JSON.stringify(whereLP));
 
-                        console.log(TimestampService.utc() + ' Update What LP');
-                        console.log(TimestampService.utc() + ' ' + JSON.stringify(whatLP));
+                        //console.log(TimestampService.utc() + ' Update What LP');
+                        //console.log(TimestampService.utc() + ' ' + JSON.stringify(whatLP));
 
                         // SAVE BLOCK HASH RECEIPT in totals row 
                         // We must REBUILD the record properties or else the other properties will be lost.
@@ -330,9 +326,6 @@ module.exports = {
         // reserved:
         //      respLE, objParamsLE, keyLE, errLE, updatedLE
         loopEnded = function(respLE, objParamsLE) {
-
-            //console.log('Loop Ended params');
-            //console.log(JSON.stringify(objParamsLE));
 
             if(respLE.length > 0) {
 
@@ -413,8 +406,8 @@ module.exports = {
                 
                 if(!errPP) {
 
-                    console.log('Accounts needing payment');
-                    console.log(respPP);
+                    //console.log('Accounts needing payment');
+                    //console.log(respPP);
 
                     // loop over all accounts needing payouts
                     loopPayouts(respPP);
@@ -425,13 +418,17 @@ module.exports = {
         };
 
         // if we want to run payouts historically we must say so.
-        if(run === 'historical') {
+        if(run === 'payouts') {
             processPayouts();
         }
     },
 
     // run processDistribution() & loadAvailableSupply()
     distributionThenUpdateSupply: function(run, callbackDU) {
+
+        if(run === 'none') {
+            callbackDU('Manual distribution skipped (bootstrap.js)', null);
+        }
 
         // make sure this finalizes calculations and processes payouts for the past distribution only
         AutomationService.processDistribution(run, function(errDU, respDU) {
