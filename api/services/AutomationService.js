@@ -108,9 +108,6 @@ module.exports = {
     // Third, run loopPayouts using those found record's accounts to distribute to owed Krai to the Totals record needing it.
     processDistribution: function(run, callbackPD) {
 
-        var lastHour,
-        lastRan;
-
         /**
          * First, Find the last distribution period that has not be finalized yet
          * Second, calculate total accounts & total successes for all accounts during this period (last ran to last hour, this runs bi-hourly)
@@ -128,7 +125,7 @@ module.exports = {
                     //console.log('respFC');
                     //console.log(respFC);
 
-                    lastHourFC = respFC.lastHour;
+                    var lastHourFC = respFC.lastHour,
                     lastRanFC = respFC.started_unix;
 
                     var matchFC = {
@@ -211,7 +208,7 @@ module.exports = {
 
                                         DistributionTracker.update(whatFC, function(errFC, respFC) {
                                             console.log(TimestampService.utc() + ' ---------------- CALCULATIONS FINALIZED ----------------');
-                                            processPayouts();
+                                            processEndedUnix();
                                         });
                                     }
                                 } else {
@@ -228,15 +225,9 @@ module.exports = {
             });
         };
 
-        // payouts doesn't need to re-finalize (unless something freaky happens with Distribution records collection count?)
-        // this is only triggered by the cron
-        if(run === 'last') {
-            finalizeCalculations();
-        }
-
-        // iterate over accounts needing payment
-        // reserved:
-        //      respLP, objParams, keyLP, errLP, updatedLP
+        /**
+         * Loop over all Totals.js records (accounts) to send distribution and update hash receipt blocks.
+         */
         loopPayouts = function(respLP) {
 
             // as long as there are still elements in the array....
@@ -321,10 +312,10 @@ module.exports = {
             }
         };
 
-        // iterate over all totals records for each account with empty hash and update ended timestamps
-        // reserved:
-        //      respLE, objParamsLE, keyLE, errLE, updatedLE
-        loopEnded = function(respLE, objParamsLE) {
+        /**
+         * Loop over all Totals.js records (accounts) to update their ended_unix timestamps before paying out.
+         */
+        loopEnded = function(respLE) {
 
             if(respLE.length > 0) {
 
@@ -341,7 +332,7 @@ module.exports = {
                     account: respLE[keyLE].account,
                     total_count: respLE[keyLE].total_count,
                     started_unix: respLE[keyLE].started_unix,
-                    ended_unix: objParamsLE.lastHour,
+                    ended_unix: TimestampService.lastHour(),
                     percentage_owed: respLE[keyLE].percentage_owed,
                     krai_owed: respLE[keyLE].krai_owed,
                     raw_rai_owed: respLE[keyLE].raw_rai_owed
@@ -369,7 +360,7 @@ module.exports = {
                                 respLE.splice(0,1);
 
                                 //tail-call recursion
-                                loopEnded(respLE, objParamsLE);
+                                loopEnded(respLE);
 
                             } else {
                                 callbackPD(errLE, null); // query failure
@@ -388,36 +379,49 @@ module.exports = {
         };
 
         /**
-         * Process Payouts
-         *
-         * Find all empty receipt_hashes and loop over the results to process payouts per account.
-         * @return {[type]} [description]
+         * Loops over all empty ("") receipt_hashes for realtime records (ended_unix: 0) to update their ended_unix timestamps
+         */
+        processEndedUnix = function() {
+
+            // grab all records needing payouts where they have been finalized (not a realtime record)
+            var wherePE = { receipt_hash: "", ended_unix: 0 };
+
+            Totals.find(wherePE, function(errPE, respPE) { 
+                
+                if(!errPE) {
+                    loopEnded(respPE); // start loopEnded 
+                } else {
+                    callbackPD(errPE, null); // query failure
+                }
+            });
+        }
+
+        /**
+         * Loops over all empty ("") receipt_hashes to process payouts for each account.
          */
         processPayouts = function() {
 
-            // grab all records needing payouts
-            var wherePP = { receipt_hash: "" };
-
-            //console.log('Where Totals...');
-            //console.log(JSON.stringify(whereLE));
+            // grab all records needing payouts where they have been finalized (not a realtime record)
+            var wherePP = { receipt_hash: "", ended_unix: { "$ne": 0 }};
 
             Totals.find(wherePP, function(errPP, respPP) { 
                 
                 if(!errPP) {
-
-                    //console.log('Accounts needing payment');
-                    //console.log(respPP);
-
-                    // loop over all accounts needing payouts
-                    loopPayouts(respPP);
+                    loopPayouts(respPP); // start loopPayout 
                 } else {
-                    callbackPD(errPP, null); // totals update failure
+                    callbackPD(errPP, null); // query failure
                 }
             });
         };
 
-        // if we want to run payouts historically we must say so.
-        if(run === 'payouts') {
+        /**
+         * Using bootstrap.js(manual) or schedule.js(automatic)...
+         * We can run everything simply using 'last', which starts by finalizing calculations...
+         * OR we can just run 'payouts' assuming the final calculations have been completed...
+         */
+        if(run === 'last') {
+            finalizeCalculations();
+        } else if(run === 'payouts') {
             processPayouts();
         }
     },
