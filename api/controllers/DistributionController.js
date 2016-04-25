@@ -9,7 +9,7 @@ module.exports = {
 	create: function (req, res) {
 
 		// only allow my IP to use distribution in dev ( REMOVE BEFORE PUSH )
-		if(req.headers['x-forwarded-for'] == '96.247.120.158' || req.headers['x-forwarded-for'] == '108.253.240.212') {
+		//if(req.headers['x-forwarded-for'] == '96.247.120.158' || req.headers['x-forwarded-for'] == '108.253.240.212') {
 
 			// ensure session is set. non-users won't get sessions (command-line CURLs for example)
 			if(req.session.started) {
@@ -36,6 +36,6 @@ module.exports = {
 			} else {
 				res.send('Goodbye');
 			}
-		}
+		//}
 	}
 };
