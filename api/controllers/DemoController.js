@@ -10,19 +10,24 @@ module.exports = {
 	// override the POST/create route/action
 	create: function (req, res) {
 
-		this.parameters = {
-			account: req.session.payment.account,
-		};
+		if(req.session) {
 
-		SimulateRaiPaymentService.send(this.parameters, function(err, resp) {
-			
-			if(!err) {
-				res.send(resp);
+			this.parameters = {
+				account: req.session.payment.account,
+			};
 
-			} else {
-				console.log(TimestampService.utc() + ' [DemoController.js] (err) sending free rai... ' + JSON.stringify(err));
-				res.send(err);
-			}
-		});
+			SimulateRaiPaymentService.send(this.parameters, function(err, resp) {
+				
+				if(!err) {
+					res.send(resp);
+
+				} else {
+					console.log(TimestampService.utc() + ' [DemoController.js] (err) sending free rai... ' + JSON.stringify(err));
+					res.send(err);
+				}
+			});
+		} else {
+			res.send('Goodbye');
+		}
 	}
 };
