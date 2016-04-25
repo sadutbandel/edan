@@ -168,45 +168,50 @@
 						}, 1000);
 
 						var saved_total_count,
-						fetchNew = false; // whether or not we need to overwrite the $scope data or not
+						createNew = false; // whether or not we need to overwrite the $scope data or not
 
 						// if we've already hit this form and received info...
 						if($scope.current_distribution) {
-
-							// then make sure the current distribution is returning data before proceeding...
-							if(data.current_distribution) {
-
-								// if the time periods changed between what we have saved and what the server is returning...
-								if(data.current_distribution.started_unix !== $scope.current_distribution.started_unix) {
-									console.log('Periods changed!');
-									console.log(data.current_distribution.started_unix);
-									console.log($scope.current_distribution.started_unix);
-									fetchNew = true;
-								}
-
-								// is the account they are using changing? if so, update with realtime data
-								if($scope.lastAccount !== $scope.account) {
-									fetchNew = true;
-								}
-
-							} else {
-								// NO DATA
-								console.log('data.current_distribution not set');
-								fetchNew = true;
-							}
 
 							// store the count we have in $scope for processing
 							if($scope.current_distribution.total_count) {
 								saved_total_count = $scope.current_distribution.total_count;
 							}
 
+							// then make sure the current distribution is returning data before proceeding...
+							if(data.current_distribution && $scope.current_distribution.started_unix) {
+
+								// if the time periods changed between what we have saved and what the server is returning...
+								if(data.current_distribution.started_unix !== $scope.current_distribution.started_unix) {
+									console.log('Periods changed!');
+									console.log(data.current_distribution.started_unix);
+									console.log($scope.current_distribution.started_unix);
+									createNew = true;
+								}
+
+								// is the account they are using changing? if so, update with realtime data
+								if($scope.lastAccount !== $scope.account) {
+									createNew = true;
+								}
+
+							} else {
+								// NO DATA
+								console.log('data.current_distribution not set');
+								createNew = true;
+							}
+
 						} else {
-							// NEW WEB VISITOR
-							console.log('$scope.current_distribution not set');
+
+							// only create new if they have no data
+							if(!data.current_distribution) {
+								// NEW WEB VISITOR /w NO DATA
+								console.log('$scope.current_distribution not set');
+								createNew = true;
+							}
 						}
 						
-						// if any of the above checks triggered fetchNew = true, then
-						if(fetchNew) {
+						// if any of the above checks triggered createNew = true, then
+						if(createNew) {
 							data.current_distribution = {};
 							data.current_distribution.total_count = 0;
 						}

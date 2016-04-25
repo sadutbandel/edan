@@ -237,8 +237,8 @@ module.exports = {
                 var keyLP = 0;
                     
                 var payloadLP = {
-                    amount: '1000000000000000000000000000',
-                    //amount: resp[keyLP].raw_rai_owed,
+                    //amount: '1000000000000000000000000000', // TEST
+                    amount: respLP[keyLP].raw_rai_owed,
                     wallet: Globals.paymentWallets.production,
                     source: Globals.faucetAddress,
                     destination: respLP[keyLP].account
