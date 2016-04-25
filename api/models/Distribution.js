@@ -155,10 +155,10 @@ module.exports = {
 
 																	// Merge total successes and accounts into "My Distributions"
 																	for(key in resultsNew) {
-																		if(resNew[key].successes) {
+																		if(resNew[key]) {
 																			resultsNew[key].successes = resNew[key].successes;
 																		}
-																		if(resNew[key].accounts) {
+																		if(resNew[key]) {
 																			resultsNew[key].accounts = resNew[key].accounts;
 																		}
 																		newResults.push(resultsNew[key]);// re-store our merged datas

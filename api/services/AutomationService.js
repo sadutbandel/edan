@@ -30,29 +30,28 @@ module.exports = {
                     account: respFSP[keyFSP].account,
                     ip: respFSP[keyFSP].account,
                     sessionID: respFSP[keyFSP].account,
-                    status: 'violation',
-                    createdAt: respFSP[keyFSP].createdAt,
-                    updatedAt: respFSP[keyFSP].updatedAt
+                    status: 'violation'
                 };
 
+                //console.log('whereFSP');
+                //console.log(whereFSP);
+
+                //console.log('whatFSP');
+                //console.log(whatFSP);
+
                 // Update their stuck 'pending' record as 'violation' so they can continue with requests
-                Distribution.native(function(errFSP, collectionFSP) {
+                Distribution.update(whereFSP, whatFSP, function(errFSP, updatedFSP) {
                     if (!errFSP) {
+                            
+                        //console.log('Fixing stuck record...');
+                        //console.log(JSON.stringify(updatedFSP[0]));
 
-                        collectionFSP.update(whereFSP, whatFSP, function (errFSP, updatedFSP) {
-                            if (!errFSP) {
-                                //console.log('Fixing stuck record...');
-                                //console.log(JSON.stringify(updatedFSP[0]));
+                        // remove the 1st element object from the array.
+                        respFSP.splice(0,1);
 
-                                // remove the 1st element object from the array.
-                                respFSP.splice(0,1);
+                        //tail-call recursion
+                        loopStuckPending(respFSP);
 
-                                //tail-call recursion
-                                loopStuckPending(respFSP);
-                            } else {
-                                callbackSP(errFSP, null); // query failure
-                            }
-                        });
                     } else {
                         callbackSP(errFSP, null); // mongo failure
                     }

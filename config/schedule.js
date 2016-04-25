@@ -9,13 +9,13 @@ module.exports.schedule = {
         // this finalizes calculations for the last period, then pays out participating accounts (every 2 hours)
         processDistribution : {
 
-            cron : "0 * * * *",
+            cron : "0 */2 * * *",
             task : function (context, sails) {
 
                 // production-level CRON.
                 if(sails.config.port === 1338) {
 
-                    // prevent collision with minutely calculations
+                    // NEED TO TEST IF THIS IS ACTUALLY PREVENTING A COLLISION OR NOT? LEAVING IT FOR NOW.
                     setTimeout(function () {
                         AutomationService.distributionThenUpdateSupply('last', function(errPD, respPD) {
                             if(!errPD) {
@@ -64,22 +64,14 @@ module.exports.schedule = {
                 // production-level CRON.
                 if(sails.config.port === 1338) {
 
-                    //setTimeout(function () {
-
-                        Totals.processTotals(function(errUT, respUT) {
-
-                            /**
-                             * Results found! (GOOD) CONTINUE request
-                             * We have the total Krai being paid out
-                             */
-                            if(!errUT) {
-                                console.log(TimestampService.utc() + ' ---------------- TOTALS RECALCULATION SUCCESS ---------------- ');
-                            } else {
-                                console.log(TimestampService.utc() + ' ---------------- TOTALS RECALCULATION FAILED! ---------------- ' + JSON.stringify(errUT));
-                            }
-                        });
-
-                    //}, 5000);
+                    // AUTO CALCULATE EVERYONE'S SUCCESS COUNTS
+                    Totals.processTotals(function(errUT, respUT) {
+                        if(!errUT) {
+                            console.log(TimestampService.utc() + ' ---------------- TOTALS RECALCULATION SUCCESS ---------------- ');
+                        } else {
+                            console.log(TimestampService.utc() + ' ---------------- TOTALS RECALCULATION FAILED! ---------------- ' + JSON.stringify(errUT));
+                        }
+                    });
                 }
             },
             context : {}
