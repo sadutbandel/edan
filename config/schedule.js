@@ -13,7 +13,7 @@ module.exports.schedule = {
             task : function (context, sails) {
 
                 // production-level CRON.
-                if(sails.config.port === 1337) {
+                if(sails.config.port === 1338) {
 
                     // prevent collision with minutely calculations
                     setTimeout(function () {
@@ -39,7 +39,7 @@ module.exports.schedule = {
             task : function (context, sails) {
 
                 // production-level CRON.
-                if(sails.config.port === 1337) {
+                if(sails.config.port === 1338) {
 
                     // FIND RECORDS OLDER THAN 1 MINUTE
                     AutomationService.fixStuckPending(function(errSP, respSP) {
@@ -62,7 +62,7 @@ module.exports.schedule = {
             task : function (context, sails) {
 
                 // production-level CRON.
-                if(sails.config.port === 1337) {
+                if(sails.config.port === 1338) {
 
                     //setTimeout(function () {
 
