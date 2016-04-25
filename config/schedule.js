@@ -9,7 +9,7 @@ module.exports.schedule = {
         // this finalizes calculations for the last period, then pays out participating accounts (every 2 hours)
         processDistribution : {
 
-            cron : "0 * * * *",
+            cron : "0 */2 * * *",
             task : function (context, sails) {
 
                 // production-level CRON.
