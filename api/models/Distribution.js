@@ -175,20 +175,22 @@ module.exports = {
 																	// or the most recent, unpaid distribution record (good)
 																	var lastElement = resultsClone.slice(-1)[0];
 
-																	// if the ended_unix time === 0, then this is a current unpaid distribution record
-																	// so store this as the current_distribution
-																	// then create a complete_count property as well
-																	if(lastElement.ended_unix === 0) {
+																	if(lastElement) {
+																		
+																		// if the ended_unix time === 0, then this is a current unpaid distribution record
+																		// so store this as the current_distribution
+																		// then create a complete_count property as well
+																		if(lastElement.ended_unix === 0) {
 
-						 												// store our current distribution by grabbing the last item in the array
-						 												resp.current_distribution = lastElement;
-						 												resp.current_distribution.complete_count = res[0].successes;
+							 												// store our current distribution by grabbing the last item in the array
+							 												resp.current_distribution = lastElement;
+							 												resp.current_distribution.complete_count = res[0].successes;
 
-					                                					// remove the last object element (realtime unpaid distribution) from 
-					                                					// the array, then store past distributions.
-					                                					results.pop();
-					                                				}
-
+						                                					// remove the last object element (realtime unpaid distribution) from 
+						                                					// the array, then store past distributions.
+						                                					results.pop();
+						                                				}
+						                                			}
 					                                				// we should always have past distributions
 					                                				resp.past_distributions = results;
 
