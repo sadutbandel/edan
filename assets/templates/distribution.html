@@ -158,17 +158,30 @@
 				<div class="ui stacked segment">
 					<h3 class="ui header">My Distributions</h3>
 
-					<table class="ui celled compact table">
+					<div ng-show="no_records" class="ui compact message ng-hide">
+						<p>Please wait 1 minute for data to become available.</p>
+					</div>
+
+					<table ng-show="!no_records" class="ui celled compact table ng-hide">
 						<thead>
 							<tr>
-								<th>Paid Time</th>
-								<th>Period End</th>
-								<th>Period Start</th>
-								<th>Count</th>
-								<th>Krai Owed</th>
-								<th>Receipt</th>
-								
+								<th></th>
+								<th colspan="2">Period</th>
+								<th colspan="2">Successes</th>
+								<th></th>
+								<th></th>
+								<th></th>
 							</tr>
+						    <tr>
+								<th>Paid Time</th>
+						      	<th>End</th>
+						      	<th>Start</th>
+						      	<th>Mine</th>
+						      	<th>All</th>
+						      	<th>Accounts</th>
+						      	<th>Krai&nbsp;<i class="circular warning icon link popup" data-content="Current period is subject to change" data-variation="wide"></i></th>
+								<th>Receipt</th>
+						    </tr>
 						</thead>
 						<tbody>
 
@@ -179,11 +192,18 @@
 								<td>
 									<i class="circular help icon link popup" data-content="This period is still active." data-variation="wide"></i>
 								</td>
-								<td>{{ current_distribution.started_unix | date:'M/dd h:mma' }}</td>
-								<td>{{ current_distribution.total_count }}</td>
-								<td>{{ current_distribution.krai_owed | number: 0 }}&nbsp;
-									<i class="circular warning icon link popup" data-content="This number is not final yet and will likely change." data-variation="wide"></i>
+								<td>
+									<span ng-show="current_distribution.started_unix" class="ng-hide">
+										{{ current_distribution.started_unix | date:'M/dd, ha' }}
+									</span>
+									<span ng-show="!current_distribution.started_unix" class="ng-hide">
+										<i class="circular help icon link popup" data-content="Data takes 1-minute to load after distribution" data-variation="wide"></i>
+									</span>
 								</td>
+								<td>{{ current_distribution.total_count }}</td>
+								<td>{{ current_distribution.successes }}</td>
+								<td>{{ current_distribution.accounts }}</td>
+								<td>{{ current_distribution.krai_owed | number: 0 }}</td>
 								<td>
 									<i class="circular help icon link popup" data-content="There is no receipt available yet." data-variation="wide"></i>
 								</td>
@@ -192,18 +212,20 @@
 							</tr>
 							<tr ng-repeat="record in past_distributions">
 
-								<td>{{ record.paid_unix | date:'M/dd h:mma' }}</td>
-								<td>{{ record.ended_unix | date:'M/dd h:mma' }}</td>
-								<td>{{ record.started_unix | date:'M/dd h:mma' }}</td>
+								<td>{{ record.paid_unix | date:'M/dd, ha' }}</td>
+								<td>{{ record.ended_unix | date:'M/dd, ha' }}</td>
+								<td>{{ record.started_unix | date:'M/dd, ha' }}</td>
 								<td>{{ record.total_count }}</td>
+								<td>{{ record.successes }}</td>
+								<td>{{ record.accounts }}</td>
 								<td>{{ record.krai_owed | number: 0 }}</td>
 								<td>
 									<a
-									class="ui mini grey button copy_hash" 
+									class="ui mini button copy_hash" 
 									data-content="Copied {{ record.receipt_hash }}"
 									ngclipboard 
 									data-clipboard-text="{{ record.receipt_hash }}">
-										<i class="clipboard icon"></i> Hash
+										<i class="clipboard icon"></i>
 									</a>
 								</td>
 							</tr>

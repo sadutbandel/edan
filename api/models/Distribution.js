@@ -131,26 +131,53 @@ module.exports = {
 														collection.find(where, what).sort({ 'started_unix': -1 }).toArray(function (err, res) {
 															if (!err) {
 
-																// generally we'll always have results in DistributionTracker for current unpair period
-																// if there are no results somehow in Distribution (like when the finalizationg / payout rolls overs),
-																// then we will just indicate that 
+																// we always have results, unless payments just occurred
+																// and/or if we don't have any counts this minute yet.
 																if(res.length > 0) {
 
-																	// convert unix timestamps to milliseconds fo angular
+																	// turn each object's key into 'started_unix' timestamp
+																	// this will let us match the matching objects in both
+																	// My Distributions (results)
+																	// and Past Distributions (res)
+																	var resultsNew = {};
+																	var resNew = {};
+
 																	for(key in results) {
+																		var newKey = results[key].started_unix;
+																		resultsNew[newKey] = results[key];
+																	}
+																	for(key in res) {
+																		var newKey = res[key].started_unix;
+																		resNew[newKey] = res[key];
+																	}
+
+																	var newResults = [];
+
+																	// Merge total successes and accounts into "My Distributions"
+																	for(key in resultsNew) {
+																		resultsNew[key].successes = resNew[key].successes;
+																		resultsNew[key].accounts = resNew[key].accounts;
+																		newResults.push(resultsNew[key]);// re-store our merged datas
+																	}
+
+																	// convert unix timestamps to milliseconds for angular digestion
+																	for(key in newResults) {
 																		results[key].paid_unix = results[key].paid_unix * 1000;
 																		results[key].started_unix = results[key].started_unix * 1000;
 																		results[key].ended_unix = results[key].ended_unix * 1000;
 																	}
 
-																	var resultsClone = JSON.parse(JSON.stringify(results));
+																	// create a clone of the results
+																	var resultsClone = JSON.parse(JSON.stringify(newResults));
 
 																	// grab the last element in the array
-																	// which will either be the oldest totals record (bad)
+																	// this will either be the oldest totals record (bad)
 																	// or the most recent, unpaid distribution record (good)
 																	var lastElement = resultsClone.slice(-1)[0];
-																	
-																	// if the ended_unix time is 0, it's a current, unpaid distribution
+
+																	// if the ended_unix time === 0, then this is a current unpaid distribution record
+																	// so store this as the current_distribution
+																	// then create a complete_count property as well
 																	if(lastElement.ended_unix === 0) {
 
 						 												// store our current distribution by grabbing the last item in the array
@@ -164,15 +191,17 @@ module.exports = {
 
 					                                				// we should always have past distributions
 					                                				resp.past_distributions = results;
-					                                				resp.distribution_tracker = res; // all DistributionTracker records
+
+					                                				// this is all past distributions. we could enable anytime for use.
+					                                				//resp.distribution_tracker = res; // all DistributionTracker records
 
 						 											callback(null, resp);
 						 										} 
 
-						 										// we just lifted server and crons have not yet created totals / DT records.
+						 										// if the server was just-lifted, or if they don't have any records yet
+						 										// then they will get a little message indicating that instead of nothing.
 						 										else {
-						 											// return an empty current_distribution block
-						 											callback(null, { message: 'success', });
+						 											callback(null, { message: 'success', no_records: true });
 						 										}
 					 										} else {
 							 									callback(err, null);

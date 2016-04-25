@@ -151,10 +151,13 @@
 				
 				$http.post('/distribution', this.payload).success(function(data) {
 
+					// save the account we're using in $scope for use in processing below
+					$scope.lastAccount = $scope.account;
+
 					// possible return response: {"message":"success", lastRan":1460422800,"hoursSinceLastRan":18, past_distributions: [ objs ] }
 					if(data.past_distributions) {
 						
-						// clear recaptcha for re-use right-away so front-end exploiters have no advantage.
+						// clear recaptcha for re-use right-away so front-end exploiters have no advantage against regular users.
 						vcRecaptchaService.reload($scope.widgetId);						
 						$scope.init();
 
@@ -164,67 +167,95 @@
 							$scope.button = button.default;
 						}, 1000);
 
+						var saved_total_count,
+						fetchNew = false; // whether or not we need to overwrite the $scope data or not
 
-						var total_count;
-					
-						// if we have already gotten current_distribution information...
-						if($scope.current_distribution){
+						// if we've already hit this form and received info...
+						if($scope.current_distribution) {
 
-							// check if the period the data returned is the same as the one we have in store
-							// if we're in a new distribution period....
-							if(data.current_distribution.started_unix !== $scope.current_distribution.started_unix) {
-								
-							} 
-							// if we're in the same period as when we checked
-							else {
+							// then make sure the current distribution is returning data before proceeding...
+							if(data.current_distribution) {
 
-								total_count = $scope.current_distribution.total_count;
-
-								// check if our stored count is greater than what the server is returning
-								// this difference will always increase until a minute has gone by in which the server
-								// will return the most actual up-to-date count. The UI count should match though.
-								if(total_count >= data.current_distribution.total_count) {
-
-									var diff = total_count - data.current_distribution.total_count;
-
-									// overwrite our assumed count with the real count.
-									if(diff >= 10) {
-										total_count = data.current_distribution.total_count;
-									}
-
-									data.current_distribution.total_count = total_count;
+								// if the time periods changed between what we have saved and what the server is returning...
+								if(data.current_distribution.started_unix !== $scope.current_distribution.started_unix) {
+									console.log('Periods changed!');
+									console.log(data.current_distribution.started_unix);
+									console.log($scope.current_distribution.started_unix);
+									fetchNew = true;
 								}
-							}
-						}
 
-						// if we have no results, start with 0.
-						// 
-						// if $scope.current_distribution is older htan....
-						if(!data.current_distribution) {
+								// is the account they are using changing? if so, update with realtime data
+								if($scope.lastAccount !== $scope.account) {
+									fetchNew = true;
+								}
+
+							} else {
+								// NO DATA
+								console.log('data.current_distribution not set');
+								fetchNew = true;
+							}
+
+							// store the count we have in $scope for processing
+							if($scope.current_distribution.total_count) {
+								saved_total_count = $scope.current_distribution.total_count;
+							}
+
+						} else {
+							// NEW WEB VISITOR
+							console.log('$scope.current_distribution not set');
+						}
+						
+						// if any of the above checks triggered fetchNew = true, then
+						if(fetchNew) {
 							data.current_distribution = {};
 							data.current_distribution.total_count = 0;
 						}
 
-						// increase my total count.
-						data.current_distribution.total_count++;
+						// if our $scope cont is greater than what was returned,
+						// make sure it isn't too big or we know we should be using
+						// the count returned to us by the server
+						if(data.current_distribution) {
+							if(saved_total_count >= data.current_distribution.total_count) {
 
-						// store (or re-store) current and past distributions
-						$scope.current_distribution = data.current_distribution;
+								var diff = saved_total_count - data.current_distribution.total_count;
+
+								// overwrite our assumed count with the real count.
+								if(diff >= 10) {
+									saved_total_count = data.current_distribution.total_count;
+								}
+
+								data.current_distribution.total_count = saved_total_count;
+							}
+
+							// increase my total count.
+							data.current_distribution.total_count++;
+
+							// store (or re-store) current and past distributions
+							$scope.current_distribution = data.current_distribution;
+						}
+
+						if(data.past_distributions) {
+							$scope.past_distributions = data.past_distributions;
+						}
 
 						// activate popups
 						$('.popup').popup();
 
-						// if there are past distributions...
-						if(data.past_distributions) {
-							$scope.past_distributions = data.past_distributions;
-						}						
-					} else { // non-success messages
+					}
+					// either errors or no past distributions or 
+					else { 
 						$scope.button = button[data.message];
 						$timeout(function() {
 							vcRecaptchaService.reload($scope.widgetId);
 							$scope.init();
 							$scope.button = button.default;
 						}, 1000);
+					}
+
+					if(data.no_records) {
+						$scope.no_records = true;
+					} else {
+						$scope.no_records = false;
 					}
 				})
 				.error(function(data, status) {
