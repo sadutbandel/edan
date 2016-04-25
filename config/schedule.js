@@ -44,7 +44,7 @@ module.exports.schedule = {
                     // FIND RECORDS OLDER THAN 1 MINUTE
                     AutomationService.fixStuckPending(function(errSP, respSP) {
                         if(!errSP) {
-                            //console.log(TimestampService.utc() + ' ---------------- STUCK PENDING SUCCESS ----------------- ');
+                            console.log(TimestampService.utc() + ' ---------------- STUCK PENDING SUCCESS ----------------- ');
                         } else {
                             console.log(TimestampService.utc() + ' ---------------- STUCK PENDING FAILED! ----------------- ' + JSON.stringify(errSP));
                         }
