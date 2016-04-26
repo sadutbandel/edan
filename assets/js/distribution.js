@@ -142,21 +142,20 @@
 
 			if($scope.validateForm()) {
 
+				// mark request as queued
 				$scope.button = button.queued;
 
+				// create a payload
 				this.payload = {
 					account: $scope.account,
 					response: $scope.response
 				};
 				
+				// deliver the payload
 				$http.post('/distribution', this.payload).success(function(data) {
+				
+					if(data.message === 'success') {
 
-					// save the account we're using in $scope for use in processing below
-					$scope.lastAccount = $scope.account;
-
-					// possible return response: {"message":"success", lastRan":1460422800,"hoursSinceLastRan":18, past_distributions: [ objs ] }
-					if(data.past_distributions) {
-						
 						// clear recaptcha for re-use right-away so front-end exploiters have no advantage against regular users.
 						vcRecaptchaService.reload($scope.widgetId);						
 						$scope.init();
@@ -167,87 +166,92 @@
 							$scope.button = button.default;
 						}, 1000);
 
-						var saved_total_count,
-						createNew = false; // whether or not we need to overwrite the $scope data or not
+						// store my current distribution
+						var CD = data.current_distribution;
 
-						// if we've already hit this form and received info...
-						if($scope.current_distribution) {
+						// update $scope with the current distribution
+						currDist = function() {
+							$scope.current_distribution = CD;
+						}
 
-							// store the count we have in $scope for processing
-							if($scope.current_distribution.total_count) {
-								saved_total_count = $scope.current_distribution.total_count;
-							}
-
-							// then make sure the current distribution is returning data before proceeding...
-							if(data.current_distribution && $scope.current_distribution.started_unix) {
-
-								// if the time periods changed between what we have saved and what the server is returning...
-								if(data.current_distribution.started_unix !== $scope.current_distribution.started_unix) {
-									console.log('Periods changed!');
-									console.log(data.current_distribution.started_unix);
-									console.log($scope.current_distribution.started_unix);
-									createNew = true;
-								}
-
-								// is the account they are using changing? if so, update with realtime data
-								if($scope.lastAccount !== $scope.account) {
-									createNew = true;
-								}
-
-							} else {
-								// NO DATA
-								console.log('data.current_distribution not set');
-								createNew = true;
-							}
-
+						// this only happens if there is no DistributionTracker record yet
+						// that can happen for 1 minute after payouts.
+						if(data.no_records) {
+							$scope.no_records = true;
 						} else {
-
-							// only create new if they have no data
-							if(!data.current_distribution) {
-								// NEW WEB VISITOR /w NO DATA
-								console.log('$scope.current_distribution not set');
-								createNew = true;
-							}
-						}
-						
-						// if any of the above checks triggered createNew = true, then
-						if(createNew) {
-							data.current_distribution = {};
-							data.current_distribution.total_count = 0;
+							$scope.no_records = false;
 						}
 
-						// if our $scope cont is greater than what was returned,
-						// make sure it isn't too big or we know we should be using
-						// the count returned to us by the server
-						if(data.current_distribution) {
-							if(saved_total_count >= data.current_distribution.total_count) {
-
-								var diff = saved_total_count - data.current_distribution.total_count;
-
-								// overwrite our assumed count with the real count.
-								if(diff >= 10) {
-									saved_total_count = data.current_distribution.total_count;
-								}
-
-								data.current_distribution.total_count = saved_total_count;
-							}
-
-							// increase my total count.
-							data.current_distribution.total_count++;
-
-							// store (or re-store) current and past distributions
-							$scope.current_distribution = data.current_distribution;
-						}
-
+						// store my past distributions every time. 
+						// this historical data does not change like our
+						// realtime current distribution does.
 						if(data.past_distributions) {
 							$scope.past_distributions = data.past_distributions;
 						}
 
+						// new visitor with data, set current_distributions $scope
+						if(!$scope.current_distribution) {
+
+							// set data if it exists
+							if(CD) {
+								currDist();
+							}
+
+							// no data yet, create a new payload.
+							else {
+								$scope.current_distribution = {};
+								$scope.current_distribution.total_count = 0;
+							}
+						} 
+
+						// returning visitor, $scope.current_distribution is set.
+						else {
+
+							// if there is no current_distribution data, payouts must have just happened.
+							if(!CD) {
+
+								// first time this will run
+								if(!$scope.current_distribution.waiting) {
+									$scope.current_distribution = {};
+									$scope.current_distribution.waiting = true; // this makes this section run once.
+									$scope.current_distribution.total_count = 0;
+								}
+
+							} else {
+
+								// if the server payload is more up-to-date...
+								// then the distribution period must have just ended.
+								if(CD.started_unix > $scope.current_distribution.started_unix) {
+									currDist();
+								}
+
+								// if my total count on the server is more up-to-date...
+								if(CD.total_count > $scope.current_distribution.total_count || !$scope.current_distribution.total_count) {
+									currDist();
+								}
+								// if the complete count on the server is more up-to-date...
+								if(CD.complete_count > $scope.current_distribution.complete_count || !$scope.current_distribution.complete_count) {
+									currDist();
+								}
+
+								// if the account they are submitting is different, update the payload.
+								if($scope.account !== $scope.lastAccount) {
+									currDist();
+								}
+							}
+						}
+
+						// increase my count
+						$scope.current_distribution.total_count++;
+
+						// save the account we're submitting to see if it changes.
+						$scope.lastAccount = $scope.account;
+
 						// activate popups
 						$('.popup').popup();
-
 					}
-					// either errors or no past distributions or 
+
+					// non-success
 					else { 
 						$scope.button = button[data.message];
 						$timeout(function() {
@@ -255,12 +259,6 @@
 							$scope.init();
 							$scope.button = button.default;
 						}, 1000);
-					}
-
-					if(data.no_records) {
-						$scope.no_records = true;
-					} else {
-						$scope.no_records = false;
 					}
 				})
 				.error(function(data, status) {

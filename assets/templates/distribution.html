@@ -98,8 +98,8 @@
 
 			<!-- IN PROGRESS DISTRIBUTION -->
 			<div ng-show="past_distributions" class="sixteen wide column ng-hide">
-				<div class="ui statistics">
-					<div class="green statistic">
+				<div class="ui small statistics">
+					<div class="orange statistic">
 						<div class="value">
 							{{ current_distribution.total_count }}
 						</div>
@@ -115,6 +115,23 @@
 							Total Count
 						</div>
 					</div>
+					<div class="blue statistic">
+						<div class="value">
+							{{ current_distribution.accounts }}
+						</div>
+						<div class="label">
+							Accounts
+						</div>
+					</div>
+					<div class="green statistic">
+						<div class="value">
+							{{ current_distribution.krai_owed | number: 0 }}
+						</div>
+						<div class="label">
+							My Krai Estimate
+						</div>
+					</div>
+
 				</div>
 			</div>
 			<!-- END IN PROGRESS DISTRIBUTION -->
@@ -215,9 +232,9 @@
 								<td>{{ record.paid_unix | date:'M/dd, ha' }}</td>
 								<td>{{ record.ended_unix | date:'M/dd, ha' }}</td>
 								<td>{{ record.started_unix | date:'M/dd, ha' }}</td>
-								<td>{{ record.total_count }}</td>
-								<td>{{ record.successes }}</td>
-								<td>{{ record.accounts }}</td>
+								<td>{{ record.total_count | number: 0 }}</td>
+								<td>{{ record.successes | number: 0 }}</td>
+								<td>{{ record.accounts | number: 0 }}</td>
 								<td>{{ record.krai_owed | number: 0 }}</td>
 								<td>
 									<a
