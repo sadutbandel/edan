@@ -72,27 +72,25 @@ module.exports = {
     },
 
     // fetch & load the available supply from the RPC into mongo
-    loadAvailableSupply: function(callbackLS) {
+    loadAvailableSupply: function(callback) {
 
-        AvailableSupplyService.fetch(function(errLS, respLS) {
+        AvailableSupplyService.fetch(function(err, resp) {
 
-            if(!errLS) {
-                    
-                var payloadLS = {
-                    modified: TimestampService.unix(),
-                    raw_krai: respLS
-                };
+            if(!err) {
 
                 // add a new entry for available supply
-                AvailableSupply.create(payloadLS, function(errLS, respLS) {
-                    if(!errLS) {
-                        callbackLS(null, respLS);
+                AvailableSupply.create({
+                    modified: TimestampService.unix(),
+                    raw_krai: resp
+                }, function(err, resp) {
+                    if(!err) {
+                        callback(null, resp);
                     } else {
-                        callbackLS(errLS, null);
+                        callback(err, null);
                     }
                 });
             } else {
-                callbackLS(errLS, null);
+                callback(err, null);
             }
         });
     },
@@ -146,8 +144,8 @@ module.exports = {
                         ]
                     };
 
-                    //console.log('matchFC');
-                    //console.log(JSON.stringify(matchFC));
+                    console.log('matchFC');
+                    console.log(JSON.stringify(matchFC));
 
                     var groupFC = {
                         _id: '$account',
@@ -202,12 +200,17 @@ module.exports = {
                                             finalized: true
                                         };
 
-                                        //console.log('whatFC');
-                                        //console.log(JSON.stringify(whatFC));
+                                        console.log('whatFC');
+                                        console.log(JSON.stringify(whatFC));
 
                                         DistributionTracker.update(whatFC, function(errFC, respFC) {
-                                            console.log(TimestampService.utc() + ' ---------------- CALCULATIONS FINALIZED ----------------');
-                                            processEndedUnix();
+                                            if(!errFC) {
+                                                console.log(TimestampService.utc() + ' ---------------- FINALIZING CALCULATIONS SUCCESS ----------------');
+                                                processEndedUnix();
+                                            } else {
+                                                console.log(TimestampService.utc() + ' ---------------- FINALIZING CALCULATIONS ERROR! ----------------');
+                                                callbackPD({ error: errFC }, null);
+                                            }
                                         });
                                     }
                                 } else {
@@ -236,6 +239,7 @@ module.exports = {
                 var keyLP = 0;
                     
                 var payloadLP = {
+                    //amount: '0', // TEST
                     //amount: '1000000000000000000000000000', // TEST
                     amount: respLP[keyLP].raw_rai_owed,
                     wallet: Globals.paymentWallets.production,

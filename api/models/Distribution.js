@@ -195,8 +195,11 @@ module.exports = {
 						                                					results.pop();
 						                                				}
 						                                			}
-					                                				// we should always have past distributions
-					                                				resp.past_distributions = results;
+
+						                                			// if we have past distributions...
+						                                			if(results) {
+					                                					resp.past_distributions = results; // original object.
+					                                				}
 
 					                                				// this is all past distributions. we could enable anytime for use.
 					                                				//resp.distribution_tracker = res; // all DistributionTracker records

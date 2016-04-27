@@ -40,7 +40,6 @@ module.exports = {
 		    		payload.response = JSON.parse(payload.response); // responses come in objects
 		    		callback(null, payload);
 		    	} else {
-		    		console.log(JSON.stringify(payload));
 		    		callback(payload, null);
 		    	}
 		    });

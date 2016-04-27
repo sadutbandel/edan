@@ -175,7 +175,7 @@ module.exports = {
 	processTotals: function(callbackPT) {
 
 		Totals.totalKrai(function(errPT, respPT) {
-
+			
 			/**
 			 * Results found! (GOOD) CONTINUE request
 			 * We have the total Krai being paid out

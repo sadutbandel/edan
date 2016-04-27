@@ -21,6 +21,17 @@ module.exports.bootstrap = function(cb) {
          console.log(TimestampService.utc() + ' ---------------- DISTRIBUTION PROCESSING FAILURE! ----------------- ' + JSON.stringify(errPD));                       
       }
    });
+
+   // Load the available supply into MongoDB as a cached-version.
+   /*
+   AutomationService.loadAvailableSupply(function(err, resp) {
+      if(!err) {
+         console.log(TimestampService.utc() + ' ---------------- LOAD AVAILABLE SUPPLY SUCCESS----------------- ');                       
+      } else {
+         console.log(TimestampService.utc() + ' ---------------- LOAD AVAILABLE SUPPLY FAILURE! ----------------- ' + JSON.stringify(err));                       
+      }
+   });
+   */
   
    // allows us to retrieve the remote-client IP and not localhost
    sails.hooks.http.app.set('trust proxy', true);
