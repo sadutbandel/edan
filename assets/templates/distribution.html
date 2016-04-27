@@ -99,7 +99,7 @@
 			<!-- IN PROGRESS DISTRIBUTION -->
 			<div ng-show="past_distributions" class="sixteen wide column ng-hide">
 				<div class="ui small statistics">
-					<div class="orange statistic">
+					<div ng-show="current_distribution.total_count" class="orange statistic ng-hide">
 						<div class="value">
 							{{ current_distribution.total_count }}
 						</div>
@@ -107,7 +107,7 @@
 							My Count
 						</div>
 					</div>
-					<div class="grey statistic">
+					<div ng-show="current_distribution.complete_count" class="grey statistic ng-hide">
 						<div class="value">
 							{{ current_distribution.complete_count }}
 						</div>
@@ -115,7 +115,7 @@
 							Total Count
 						</div>
 					</div>
-					<div class="blue statistic">
+					<div ng-show="current_distribution.accounts" class="blue statistic ng-hide">
 						<div class="value">
 							{{ current_distribution.accounts }}
 						</div>
@@ -123,7 +123,7 @@
 							Accounts
 						</div>
 					</div>
-					<div class="green statistic">
+					<div ng-show="current_distribution.krai_owed" class="green statistic ng-hide">
 						<div class="value">
 							{{ current_distribution.krai_owed | number: 0 }}
 						</div>
