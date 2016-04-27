@@ -101,7 +101,7 @@
 				<div class="ui small statistics">
 					<div ng-show="current_distribution.total_count" class="orange statistic ng-hide">
 						<div class="value">
-							{{ current_distribution.total_count }}
+							{{ current_distribution.total_count | number: 0 }}
 						</div>
 						<div class="label">
 							My Count
@@ -109,7 +109,7 @@
 					</div>
 					<div ng-show="current_distribution.complete_count" class="grey statistic ng-hide">
 						<div class="value">
-							{{ current_distribution.complete_count }}
+							{{ current_distribution.complete_count | number: 0 }}
 						</div>
 						<div class="label">
 							Total Count
@@ -117,7 +117,7 @@
 					</div>
 					<div ng-show="current_distribution.accounts" class="blue statistic ng-hide">
 						<div class="value">
-							{{ current_distribution.accounts }}
+							{{ current_distribution.accounts | number: 0 }}
 						</div>
 						<div class="label">
 							Accounts
@@ -217,9 +217,9 @@
 										<i class="circular help icon link popup" data-content="Data takes 1-minute to load after distribution" data-variation="wide"></i>
 									</span>
 								</td>
-								<td>{{ current_distribution.total_count }}</td>
-								<td>{{ current_distribution.successes }}</td>
-								<td>{{ current_distribution.accounts }}</td>
+								<td>{{ current_distribution.total_count | number: 0 }}</td>
+								<td>{{ current_distribution.successes | number: 0 }}</td>
+								<td>{{ current_distribution.accounts | number: 0 }}</td>
 								<td>{{ current_distribution.krai_owed | number: 0 }}</td>
 								<td>
 									<i class="circular help icon link popup" data-content="There is no receipt available yet." data-variation="wide"></i>
