@@ -200,8 +200,8 @@ module.exports = {
                                             finalized: true
                                         };
 
-                                        console.log('whatFC');
-                                        console.log(JSON.stringify(whatFC));
+                                        //console.log('whatFC');
+                                        //console.log(JSON.stringify(whatFC));
 
                                         DistributionTracker.update(whatFC, function(errFC, respFC) {
                                             if(!errFC) {

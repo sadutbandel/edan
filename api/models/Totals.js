@@ -84,6 +84,8 @@ module.exports = {
 	 **/
 	calculate: function(callbackC) {
 
+		console.log('Calculating');
+		
 		// last distributionTracker record
 		DistributionTracker.last(function(errC, respC) {
 	        
