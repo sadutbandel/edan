@@ -258,11 +258,11 @@ module.exports = {
 									]
 								};
 
-								console.log(TimestampService.utc() + ' Update Where PT');
-								console.log(TimestampService.utc() + ' ' + JSON.stringify(wherePT));
+								//console.log(TimestampService.utc() + ' Update Where PT');
+								//console.log(TimestampService.utc() + ' ' + JSON.stringify(wherePT));
 
-								console.log(TimestampService.utc() + ' Update What PT');
-								console.log(TimestampService.utc() + ' ' + JSON.stringify(recordsPT[0]));
+								//console.log(TimestampService.utc() + ' Update What PT');
+								//console.log(TimestampService.utc() + ' ' + JSON.stringify(recordsPT[0]));
 								Totals.native(function(errPT, collectionPT) {
 									if (!errPT) {
 
