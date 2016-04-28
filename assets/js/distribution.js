@@ -107,7 +107,8 @@
   			}
   		};
 
-		$scope.button = button.default;
+  		$scope.button = button.faucetoff;
+		//$scope.button = button.default;
 
   		$scope.validateAccount = function() {
   			if($scope.account === undefined || $scope.account === null || $scope.account === '' || $scope.account.lastIndexOf('xrb_', 0) !== 0) {
