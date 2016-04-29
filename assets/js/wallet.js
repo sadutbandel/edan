@@ -4,15 +4,15 @@
 
 	.module('Wallet', [])
 
-	.config(function($routeProvider) {
+	.config(['$routeProvider', function($routeProvider) {
 		$routeProvider.when('/wallet', {
 			templateUrl : 'templates/wallet.html',
 			controller: 'walletCtrl'
-		})
-	})
+		});
+	}])
 
-	.controller('walletCtrl', function($rootScope, $scope, $filter) {
-
+	.controller('walletCtrl', ['$rootScope', '$scope', '$filter', function($rootScope, $scope, $filter) {
+		
 		var githubLink = 'https://github.com/clemahieu/raiblocks/releases/download/V' + $scope.rb_version + '/rai-' + $scope.rb_version + '-';
 
 		$scope.platforms = [
@@ -34,5 +34,6 @@
 				link: githubLink + 'Linux.tar.bz2'
 			}
 		];
-	});
+	}]);
+	
 })();

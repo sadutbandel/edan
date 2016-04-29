@@ -4,7 +4,7 @@
 
 	.module('routeHelper', [])
 
-	.run(function($rootScope, $location, $templateCache) {
+	.run(['$rootScope', '$location', '$templateCache', function($rootScope, $location, $templateCache) {
 
 		// detect the route change and perform logic prior to route-change completion
 		$rootScope.$on("$locationChangeStart", function(e, newUrl, oldUrl) {
@@ -21,6 +21,6 @@
 			// prevent caching of routes templates by removing them all.
 			$templateCache.removeAll();
 		});
-	});
+	}]);
 
-})()
+})();

@@ -16,7 +16,7 @@ var tmpPath = '.tmp/public/';
 // (if you're using LESS with the built-in default config, you'll want
 //  to change `assets/styles/importer.less` instead.)
 var cssFilesToInject = [
-  'styles/*.css',
+  'min/semantic.min.css',
   'styles/**/*.css'
 ];
 
@@ -24,11 +24,13 @@ var cssFilesToInject = [
 // (uses Grunt-style wildcard/glob/splat expressions)
 var jsFilesToInject = [
 
-  // Load app dependencies here (pre-ordered and others)
-  'js/dependencies/*.js',
+  // Dependencies like sails.io.js, jQuery, AngularJS, ngRoute, etc are brought in here
+  'js/dependencies/**/*.js',
+  
+  // Semantic UI 
+  'min/semantic.min.js',
 
   // Load rest here (app/bootstrap js files)
-  'js/*.js',
   'js/**/*.js',
 
   // Ignore testing files

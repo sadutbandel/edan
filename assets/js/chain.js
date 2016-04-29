@@ -1,17 +1,17 @@
-(function() {
+;(function() {
 
 	angular
 
 	.module('Chain', [])
 
-	.config(function($routeProvider) {
+	.config(['$routeProvider', function($routeProvider) {
 		$routeProvider.when('/chain', {
 			templateUrl : 'templates/chain.html',
 			controller: 'chainCtrl'
-		})
-	})
+		});
+	}])
 
-	.controller('chainCtrl', function($rootScope, $scope, $http, $timeout) {
+	.controller('chainCtrl', ['$rootScope', '$scope', '$http', '$timeout', function($rootScope, $scope, $http, $timeout) {
 
 		// define the different button states
 		var button = {
@@ -88,5 +88,6 @@
 				});
 			}
 		}
-	});
+	}]);
+
 })();

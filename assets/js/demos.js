@@ -6,14 +6,14 @@
 		'ngclipboard'
 		])
 
-	.config(function($routeProvider) {
+	.config(['$routeProvider', function($routeProvider) {
 		$routeProvider.when('/demos', {
 			templateUrl : 'templates/demos.html',
 			controller: 'demosCtrl'
-		})
-	})
+		});
+	}])
 
-	.controller('demosCtrl', function($rootScope, $scope, $q, $http, $timeout) {
+	.controller('demosCtrl', ['$rootScope', '$scope', '$q', '$http', '$timeout', function($rootScope, $scope, $q, $http, $timeout) {
 
 		// assume the faucet is ON by default
 		$scope.faucetOff = false;
@@ -132,5 +132,6 @@
 				$scope.paid = false;
 			}
 		}
-	});
+	}]);
+
 })();

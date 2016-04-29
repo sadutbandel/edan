@@ -6,14 +6,14 @@
 		'ngclipboard'
 		])
 
-	.config(function($routeProvider) {
+	.config(['$routeProvider', function($routeProvider) {
 		$routeProvider.when('/distribution', {
 			templateUrl : 'templates/distribution.html',
 			controller: 'distributionCtrl'
-		})
-	})
+		});
+	}])
 
-	.controller('distributionCtrl', function($rootScope, $filter, $interval, $scope, $http, $timeout, $location, vcRecaptchaService) {
+	.controller('distributionCtrl', ['$rootScope', '$filter', '$interval', '$scope', '$http', '$timeout', '$location', 'vcRecaptchaService', function($rootScope, $filter, $interval, $scope, $http, $timeout, $location, vcRecaptchaService) {
 
 		$scope.howFaucet = function(bool) {
 			if(bool) {
@@ -274,5 +274,6 @@
 				}, 3000);
 			}
 		}
-	});
+	}]);
+
 })();

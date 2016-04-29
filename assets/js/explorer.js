@@ -4,14 +4,14 @@
 
 	.module('Explorer', [])
 
-	.config(function($routeProvider) {
+   .config(['$routeProvider', function($routeProvider) {
 		$routeProvider.when('/explorer', {
 			templateUrl : 'templates/explorer.html',
 			controller: 'explorerCtrl'
-		})
-	})
+		});
+	}])
 
-	.controller('explorerCtrl', function($rootScope, $scope, $q, $timeout) {
+	.controller('explorerCtrl', ['$rootScope', '$scope', '$q', '$timeout', function($rootScope, $scope, $q, $timeout) {
       
       // define the different button states
       button = {
@@ -178,6 +178,7 @@
          $scope.hash = $rootScope.block;
          $scope.explore();
       }
-   });
+
+   }]);
 
 })();

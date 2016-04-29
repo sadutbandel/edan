@@ -36,7 +36,7 @@
 		$routeProvider.when('/', {
 			templateUrl : 'templates/home.html',
 			controller  : 'homeCtrl'
-		})
+		});
 	}])
 
 	.controller('homeCtrl', ['$rootScope', '$scope', '$location', function($rootScope, $scope, $location) {
