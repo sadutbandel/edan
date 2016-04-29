@@ -32,14 +32,16 @@ module.exports.routes = {
   *                                                                          *
   ***************************************************************************/
 
-  'GET /': { controller: 'SessionController', action: 'append' },
+  'GET /': {
+    view: 'application'
+  },
+
   'POST /paymentBegin': 'PaymentBeginController.create',
   'POST /paymentWait': 'PaymentWaitController.create',
   'POST /paymentFinish': 'PaymentFinishController.create',
   'POST /blockExplorer': 'BlockExplorerController.create',
-  'POST /clear': 'ClearController.create',
   'POST /demo': 'DemoController.create',
-  'GET /distribution': '/',
+  'POST /distribution': 'DistributionController.create',
 
   /**
    * API ROUTES

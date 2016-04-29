@@ -1,7 +1,7 @@
 /**
 * DistributionTracker.js
 *
-* @description :: Keeps track of distribution calculations for a given time range
+* @description :: Keeps track of distribution data for each period
 * 
 */
 
@@ -17,31 +17,26 @@ module.exports = {
 			required:true,
 			unique: false
 		},
-		// started unixtime the counter used
 		started_unix: {
 			type:'integer',
 			required:true,
 			unique: false
 		},
-		// end unixtime the counter used
 		ended_unix: {
 			type:'integer',
 			required:true,
 			unique: true
 		},
-		// the total number of xrb_accounts (distinct) for this counted period of time
 		accounts: {
 			type:'integer',
 			required:true,
 			unique: false
 		},
-		// the total number of successful distribution records
 		successes: {
 			type:'integer',
 			required:true,
 			unique: false
 		},
-		// whether or not final calculations have been done yet
 		finalized: {
 			type:'boolean',
 			required:true,

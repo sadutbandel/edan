@@ -12,17 +12,23 @@
 
 		<div class="ui statistic">
 			<div class="label">
-				Current Wallet Version
+				Current Version
 			</div>
 			<div class="value">
 				{{ rb_version }}
 			</div>
 		</div>
+
+		<br style="clear:both"/><br/>
+		<a class"fluid ui button" href="https://github.com/clemahieu/raiblocks/releases" target="_blank">
+			<i class="github icon"></i>View Release Notes
+		</a>
+		
 		<div class="ui message">
 			<div class="header">
 				Backup Your Wallet!
 			</div>
-			<p>Please backup your wallet <strong>before overwriting existing files</strong> to prevent losing any Rai!</p>
+			<p>Make sure you backup your wallet <strong>before overwriting existing files</strong> to prevent losing any Rai!</p>
 			<a class"fluid ui button" href="https://github.com/clemahieu/raiblocks/wiki/Wallet-Backups" target="_blank">
 				<i class="github icon"></i>Wallet Backup Guide
 			</a>
@@ -40,10 +46,5 @@
   				<i class="icon" ng-class="platform.icon"></i> {{ platform.name }}
   			</a>
 		</div>
-
-		<br style="clear:both"/><br/>
-		<a class"fluid ui button" href="https://github.com/clemahieu/raiblocks/releases" target="_blank">
-			<i class="github icon"></i>View Release Notes
-		</a>
 	</div>
 </div>

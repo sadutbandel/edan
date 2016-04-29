@@ -21,11 +21,11 @@
 				link: githubLink + 'Darwin.dmg'
 			},
 			{
-				name: '64-bit',
+				name: '64',
 				icon: 'windows',
 				link: githubLink + 'win64.exe'
 			},			{
-				name: '32-bit',
+				name: '32',
 				icon: 'windows',
 				link: githubLink + 'win32.exe'
 			},

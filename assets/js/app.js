@@ -15,7 +15,7 @@
 		'vcRecaptcha', // google recaptcha
 		])
 	
-	.run(function($rootScope, $templateCache) {
+	.run(['$rootScope', '$templateCache', function($rootScope, $templateCache) {
 
     	$templateCache.removeAll();
 
@@ -30,14 +30,14 @@
 		$rootScope.faucetNumber = 'xrb_35jjmmmh81kydepzeuf9oec8hzkay7msr6yxagzxpcht7thwa5bus5tomgz9';
 		$rootScope.rb_version = '7.4.9';
 		$rootScope.total_faucet = 340282366000; // used for visual display of distribution # on get started
-	})
+	}])
 
-	.config(function($routeProvider) {
+	.config(['$routeProvider', function($routeProvider) {
 		$routeProvider.when('/', {
 			templateUrl : 'templates/home.html',
 			controller  : 'homeCtrl'
 		})
-	})
+	}])
 
 	.controller('homeCtrl', ['$rootScope', '$scope', '$location', function($rootScope, $scope, $location) {
 

@@ -2,76 +2,24 @@
 * AutomationService.js
 *
 * @description :: Handles various automated tasks such as:
-*                      Fixing stuck 'pending' distribution records.
 *                      Loading the available supply, used after distribution succeeds.
-*                      Processing distribution by looping through accounts requiring payouts.
-*                      Load a new payout schedule when directed by bootstrap.js.
 */
 
 module.exports = {
 
-    // Fixes any stuck 'pending' Distribution records to be 'Violation' so user is not stuck.
-    fixStuckPending: function(callbackSP) {
+    checkDistribution: function(callback) {
 
-        loopStuckPending = function(respFSP) {
-
-            // as long as there are still elements in the array....
-            if(respFSP.length > 0) {
-
-                // always use 0 since we're going to remove it from the array when we're done.
-                var keyFSP = 0;
-
-                var whereFSP = { 
-                    id: respFSP[keyFSP].id
-                };
-
-                var whatFSP = {
-                    modified : TimestampService.unix(),
-                    account: respFSP[keyFSP].account,
-                    ip: respFSP[keyFSP].account,
-                    sessionID: respFSP[keyFSP].account,
-                    status: 'violation'
-                };
-
-                //console.log('whereFSP');
-                //console.log(whereFSP);
-
-                //console.log('whatFSP');
-                //console.log(whatFSP);
-
-                // Update their stuck 'pending' record as 'violation' so they can continue with requests
-                Distribution.update(whereFSP, whatFSP, function(errFSP, updatedFSP) {
-                    if (!errFSP) {
-                            
-                        //console.log('Fixing stuck record...');
-                        //console.log(JSON.stringify(updatedFSP[0]));
-
-                        // remove the 1st element object from the array.
-                        respFSP.splice(0,1);
-
-                        //tail-call recursion
-                        loopStuckPending(respFSP);
-
-                    } else {
-                        callbackSP(errFSP, null); // mongo failure
-                    }
-                });
+        DistributionTracker.last(function(err, resp) {
+            
+            if(!err) {
+                callback(null, resp);
             } else {
-                callbackSP(null, true); // complete!
-            }
-        };
-
-        // Find  pnding records over 1 minute old
-        Distribution.find({ status: "pending", modified: { "$lte": TimestampService.unix() - 60 }}, function(errFSP, respFSP) {
-            if(!errFSP) {
-                loopStuckPending(respFSP); // start tailcall recursion
-            } else {
-                callbackSP(errFSP, null); // no results found
+                callback(err, null);
             }
         });
     },
 
-    // fetch & load the available supply from the RPC into mongo
+    // cache current available supply
     loadAvailableSupply: function(callback) {
 
         AvailableSupplyService.fetch(function(err, resp) {
@@ -95,14 +43,6 @@ module.exports = {
         });
     },
 
-    // 'run' can equal "last" or "payouts"
-    // 
-    //          "last" indicates automation is probably running this function
-    //          "payouts" indicates we're manually running this function
-    // 
-    // First, run finalizeCalculations() to finalize totals for the last unpaid period.
-    // Second, run processPayouts() to find all records with "" block hashes.
-    // Third, run loopPayouts using those found record's accounts to distribute to owed Krai to the Totals record needing it.
     processDistribution: function(run, callbackPD) {
 
         /**
@@ -427,49 +367,5 @@ module.exports = {
         } else if(run === 'payouts') {
             processPayouts();
         }
-    },
-
-    // run processDistribution() & loadAvailableSupply()
-    distributionThenUpdateSupply: function(run, callbackDU) {
-
-        if(run === 'none') {
-            callbackDU('Manual distribution skipped (bootstrap.js)', null);
-        }
-
-        // make sure this finalizes calculations and processes payouts for the past distribution only
-        AutomationService.processDistribution(run, function(errDU, respDU) {
-            if(!errDU) {
-               
-               // update available suppoly
-               AutomationService.loadAvailableSupply(function(errDU, respDU) {
-                    if(!errDU) {
-                        callbackDU(null, respDU);
-                    } else {
-                        callbackDU(errDU, null);
-                    }
-               });                            
-            } else {
-                callbackDU(errDU, null);
-            }
-        });
-    },
-
-    // enter the desired payout amount per day here
-    loadPayoutSchedule: function() {
-
-        var payloadLP = {
-            created_unix: TimestampService.unix(),
-            hourly_rai: '21000000000000000000000000000000000' // 21,000,000/hr
-        };
-
-        PayoutSchedule.create(payloadLP, function(errLP, respLP) {
-            
-            // processed
-            if(!errLP) {
-                console.log(TimestampService.utc() + ' ' + JSON.stringify(respLP));
-            } else { // not processed
-                console.log(TimestampService.utc() + ' ' + JSON.stringify(errLP));
-            }
-        });
     }
 };

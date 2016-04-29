@@ -123,20 +123,23 @@ module.exports.sockets = {
   ***************************************************************************/
   afterDisconnect: function(session, socket, cb) {
 
-    //console.log(TimestampService.utc() + ' [Sockets.js] User disconnected');
+    if(session) {
+      
+      //console.log(TimestampService.utc() + ' [Sockets.js] User disconnected');
 
-    // if there is a payment account left in the session upon user-exit, end the payment account.
-    if(session.payment) {
+      // if there is a payment account left in the session upon user-exit, end the payment account.
+      if(session.payment) {
 
-        PaymentFinishService.init(session.payment.account, function(err, resp) {
-          if(!err) {
-            //console.log(TimestampService.utc() + ' [Sockets.js] (!err) recapture & end payment account #' + session.payment.account);
-            delete session.payment.account;
-            delete session.payment;
-          } else {
-            //console.log(TimestampService.utc() + ' [Sockets.js] (err) recapture & end payment account #' + session.payment.account);
-          }
-        });
+          PaymentFinishService.init(session.payment.account, function(err, resp) {
+            if(!err) {
+              //console.log(TimestampService.utc() + ' [Sockets.js] (!err) recapture & end payment account #' + session.payment.account);
+              delete session.payment.account;
+              delete session.payment;
+            } else {
+              //console.log(TimestampService.utc() + ' [Sockets.js] (err) recapture & end payment account #' + session.payment.account);
+            }
+          });
+      }
     }
 
     return cb();
