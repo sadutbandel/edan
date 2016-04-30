@@ -2,12 +2,14 @@
 * AutomationService.js
 *
 * @description :: Handles various automated tasks such as:
-*                      Loading the available supply, used after distribution succeeds.
+* 
+*                      Loading the available supply after successfully distributing to all accounts.
+*                      Recalculate totals for DistributionTracker for the current period.
 */
 
 module.exports = {
 
-    checkDistribution: function(callback) {
+    recalculateTotals: function(callback) {
 
         DistributionTracker.last(function(err, resp) {
             

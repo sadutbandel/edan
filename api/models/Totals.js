@@ -1,13 +1,11 @@
 /**
 * Totals.js
 *
-* @description :: Count the total distribution records per account
+* @description :: Keep track of the total count of distribution successes per period per account.
 * 
-* WARNING: This must contain a compound index to prevent duplicate records.
-* 		   Anytime the collection is destroyed, the index must be recreated
-* 		   using:
+* WARNING: Compound-index on account and started_unix for assuring uniqueness.
 * 		   
-* 		   db.totals.createIndex( { account: 1, ended_unix: 1 }, { unique: true } )
+* 		   db.totals.createIndex( { account: 1, started_unix: 1 }, { unique: true } )
 */
 
 module.exports = {
@@ -31,6 +29,12 @@ module.exports = {
 		},
 		// end of time range of the Distribution records considered
 		ended_unix: {
+			type: 'integer',
+			required: true,
+			unique: false
+		},
+		// the last time this record was modified
+		modified_unix: {
 			type: 'integer',
 			required: true,
 			unique: false
@@ -371,27 +375,126 @@ module.exports = {
 	 */
 	totalKrai: function(callbackTK) {
 
-		PayoutSchedule.native(function(errTK, collectionTK) {
-			if (!errTK){
+		PayoutSchedule.native(function(err, collection) {
+			if (!err) {
 
-				collectionTK.find().limit(1).sort({'$natural': -1}).toArray(function (errTK, resultsTK) {
-					if (!errTK) {
+				collection.find().limit(1).sort({'$natural': -1}).toArray(function (err, results) {
+					if (!err) {
 
-						KraiFromRawService.convert(resultsTK[0].hourly_rai, function(errTK, respTK) {
+						KraiFromRawService.convert(results[0].hourly_rai, function(err, resp) {
 
-							if(!errTK) {
-								callbackTK(null, { hourly_rai: respTK.response.amount });
+							if(!err) {
+								callback(null, { hourly_rai: resp.response.amount });
 							} else {
-								callbackTK(errTK, null);
+								callback(err, null);
 							}
 						});
 					} else {
-						callbackTK(errTK, null);
+						callback(err, null);
 					}
 				});
 			} else {
-				callbackTK(errTK, null);
+				callback(err, null);
 			}
    		});
+	},
+
+	/*
+ 	 * Determine if a record is expired
+ 	 * Accepts a unix timestamp for comparison against now.
+ 	 */
+ 	checkExpired: function(unixtime, callback) {
+
+		var elapsedTime = TimestampService.unix() - unixtime;
+
+		// (!err) record is expired, returns success
+		if (elapsedTime >= Globals.distributionTimeout) {
+			callback(null, true);
+		} 
+		// (err) record isn't expired, returns error
+		else {
+			var timeLeft = Globals.distributionTimeout - elapsedTime;
+			callback(timeLeft, null);
+		}
+ 	},
+
+ 	/**
+	 * Distribution Request
+ 	 * 
+ 	 * First, check to see if the session start timer is expired.
+ 	 * Second, find the latest totals record for this person.
+ 	 * Third, check to see if this record has been modified in the past 6-seconds.
+ 	 * Fourth, upsert the totals record with a new payload or an updated one.
+ 	 */
+	request: function(parameters, callback) {
+
+		Totals.checkExpired(parameters.sessionStarted, function(err, resp) {
+
+			// session timer is expired. continue!
+			if (!err) {
+
+				// find this account's latest record that's not finalized yet (realtime)
+		        Totals.native(function(err, collection) {
+					if (!err){
+						collection.find({ account: parameters.account, ended_unix: 0 }).limit(1).sort({ 'started_unix': -1 }).toArray(function (err, results) {
+							if (!err) {
+
+								// create a new Totals record object if there were none found
+								if(results.length === 0) {
+
+									results.push({
+									    paid_unix: 0,
+									    receipt_hash: '',
+									    account: parameters.account,
+									    total_count: 0, // increased by 1 down below...
+									    started_unix: TimestampService.unix(),
+									    modified_unix: 0,
+									    ended_unix: 0,
+									    percentage_owed: 0,
+									    krai_owed: 0,
+									    raw_rai_owed: '0'
+									});
+								}
+
+								// check if the record is expired and able to be updated again.
+								Totals.checkExpired(results[0].modified_unix, function(err, resp) {
+
+									// record is expired. continue!
+									if (!err) {
+
+										// update their record with an increased count by 1.
+										Totals.native(function(err, collection) {
+											if (!err) {
+
+												// increase count by 1.
+												results[0].total_count++;
+
+												collection.update({ account: results[0].account, started_unix: results[0].started_unix }, results[0], { upsert: true }, function (err, upserted) {
+													if (!err) {
+														callback(null, { message: 'success' });
+													} else {
+														callback({ message: 'server_error' }, null); // error with mongodb
+													}
+												});
+											} else {
+												callback({ message: 'server_error' }, null); // error with mongodb
+											}
+										});
+									} else {
+										callback({ message: 'try_again' }, null); // record not expired!
+									}
+								});
+							} else {
+								callback({ message: 'server_error' }, null); // error with mongodb
+							}
+						});
+					} else {
+						callback({ message: 'server_error' }, null); // error with mongodb
+					}
+				});
+		    } else {
+		    	callback({ message: 'try_again' }, null); // session timer not expired!
+		    }
+		});
 	}
 };

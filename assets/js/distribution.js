@@ -104,6 +104,13 @@
   				icon: 'warning sign',
   				title: 'Try again',
   				class: 'orange'
+  			},
+
+  			server_error: {
+  				disabled: true,
+  				icon: 'warning sign',
+  				title: 'Server error',
+  				class: 'red'
   			}
   		};
 
