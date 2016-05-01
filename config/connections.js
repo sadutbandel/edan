@@ -68,8 +68,9 @@ module.exports.connections = {
     port: 27017,
     // user: 'username',
     // password: 'password',
-    //database: 'raiblocks'
-    database: 'raiblocks-tmp'
+    //database: 'raiblocks' // <---- prod db
+    //database: 'raiblocks-tmp' // <---- swap db
+    database: 'raiblocks-dev' // <---- dev db
   },
 
   /***************************************************************************

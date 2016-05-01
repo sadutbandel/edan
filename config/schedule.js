@@ -19,6 +19,7 @@ module.exports.schedule = {
 
             task : function (context, sails) {
 
+                // only run in production
                 if(sails.config.port === 1337) {
 
                     AutomationService.owedEstimates( function(err, resp) {
@@ -43,16 +44,13 @@ module.exports.schedule = {
 
             task : function (context, sails) {
 
-                if(sails.config.port === 1338) {
-
-                    AutomationService.blockCount( function(err, resp) {
-                        if(!err) {
-                            console.log(TimestampService.utc() + ' Updated block count to ' + JSON.stringify(resp));                       
-                        } else {
-                            console.log(TimestampService.utc() + ' Problem updating block count ' + JSON.stringify(err));                       
-                        }
-                    });
-                }
+                AutomationService.blockCount( function(err, resp) {
+                    if(!err) {
+                        console.log(TimestampService.utc() + ' Updated block count to ' + JSON.stringify(resp));                       
+                    } else {
+                        console.log(TimestampService.utc() + ' Problem updating block count ' + JSON.stringify(err));                       
+                    }
+                });
             },
             context : {}
         }

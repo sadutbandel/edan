@@ -11,6 +11,7 @@
 
 module.exports.bootstrap = function(cb) {
 
+   // load the available supply
    AutomationService.loadAvailableSupply( function(err, resp) {
       if(!err) {
           console.log(TimestampService.utc() + JSON.stringify(resp));                       
