@@ -75,91 +75,146 @@ module.exports = {
 		}
 	},
 
-	/**
-	 * Calculate metrics by account for current unpaid distribution period
-	 * Grabs all 'accepted' records greater than or equal to the last time Distribution calculations were last finalized
-	 * 	if that time
-	 *
-	 * returns: 
-	 * { hoursSinceLastRan: 0,
-     * lastHour: 1461294000,
-  	 * lastRan: 1461294000 }
-	 *
-	 **/
-	calculate: function(callbackC) {
+ 	/**
+	 * Distribution Request
+ 	 * 
+ 	 * First, check to see if the session start timer is expired.
+ 	 * Second, validate all parameters passed (parameters, recaptcha, account)
+ 	 * Third, find the latest totals record for the requesting user.
+ 	 * Fourth, check to see if this record has been modified in the past 6-seconds.
+ 	 * Fifth, upsert the totals record with a new payload or an updated one.
+ 	 */
+	request: function(parameters, callback) {
 
-		console.log('Calculating');
-		
-		// last distributionTracker record
-		DistributionTracker.last(function(errC, respC) {
-	        
-	      	if(!errC) {
+		// check if the initial session timer is expired (good) or not (bad)
+		checkIfSessionReady = function() {
 
-	      		//console.log('respC');
-	      		//console.log(respC);
+			Totals.checkExpired(parameters.sessionStarted, function(err, resp) {
 
-				// match only 'accepted' records that are in the current, unpaid distribution timeframe (realtime data)
-				var matchC = {
+				// session timer is expired. continue!
+				if (!err) {
+					validation(parameters);
+				} else {
+					callback({ message: 'try_again' }, null); // session timer not expired!
+				}
+			});
+		};
 
-					'$and': [
-						{
-							modified : { 
-			 					'$gte': respC.lastRan
-			 				}
-			 			},
-			 			{ 
-			 				status: 'accepted'
-			 			},
-		 			]
-				};
+		/**
+		 * 1st, validate the parameter input
+		 * 2nd, validate the ReCaptcha response
+		 * 3rd, validate the account
+		 *
+		 * SUCCESS: Returns true
+		 * ERROR: Returns a string containing the message we'll send to the front-end of the app
+		 */
+		validation = function(parameters) {
 
-				//console.log('matchC');
-				//console.log(JSON.stringify(matchC));
+			ValidateParametersService.validate(parameters, function(err, resp) {
+				
+				if(!err) {
 
-				// count 'success' records and group by account.
-				var groupC = {
-					_id: '$account',
-					count: { 
-						'$sum': 1
-					}
-				};
+					ValidateRecaptchaService.validate(parameters.response, function(err, resp) {
+						
+						if(!err) {
 
-				Distribution.native(function(errC, collectionC) {
-					if (!errC) {
-
-						collectionC.aggregate([{ '$match' : matchC }, { '$group' : groupC }]).toArray(function (errC, resultsC) {
-							if (!errC) {
-
-								/**
-								 * No matches found. (bad) HALT request!
-								 * 
-								 * If NO matches are found, then there are no Distribution records yet.
-								 */
+							ValidateAccountService.validate(parameters.account, function(err, resp) {
 								
-								if(Object.keys(resultsC).length === 0) {
-									callbackC('no matches 1', null);
+								if(!err) {
+									fetchLatestTotalsRecord();
+								} else {
+									callback('account_error' , null);
 								}
-								/**
-								 * Matches found. (good) CONTINUE request!
-								 * 
-								 * If matches ARE found, then we should get a list of accounts with counts.
-								 */
-								else {
-									respC.results = resultsC;
-									callbackC(null, respC);
-								}
-							} else {
-								callbackC({ error: errC }, null);
-							}
-						});
-					} else {
-						callbackC({ error: errC }, null);
-					}
+							});
+						} else {
+							callback('recaptcha_error', null);
+						}
+					});
+				} else {
+					callback(err + '_error', null);			
+				}
+			});
+		};
+
+		// find this account's latest record for an account that's not finalized yet (realtime)
+		fetchLatestTotalsRecord = function() {
+
+	        Totals.native(function(err, collection) {
+				if (!err){
+					collection.find({ account: parameters.account, ended_unix: 0 }).limit(1).sort({ 'started_unix': -1 }).toArray(function (err, results) {
+						if (!err) {
+							checkTotalsResults(results);
+						} else {
+							callback({ message: 'server_error' }, null); // error with mongodb
+						}
+					});
+				} else {
+					callback({ message: 'server_error' }, null); // error with mongodb
+				}
+			});
+		};
+
+		// checks the results for the latest Totals record.
+		// if it's empty, we create a new one.
+		checkTotalsResults = function(results) {
+
+			if(results.length === 0) {
+
+				results.push({
+				    paid_unix: 0,
+				    receipt_hash: '',
+				    account: parameters.account,
+				    total_count: 0,
+				    started_unix: TimestampService.unix(),
+				    modified_unix: 0,
+				    ended_unix: 0,
+				    percentage_owed: 0,
+				    krai_owed: 0,
+				    raw_rai_owed: '0'
 				});
-			} else {
-	         	callbackC({ error: errC }, null);
-	      	}
-	   	});
+			}
+
+			checkIfRecordReady(results);
+		};	
+
+		// check if the totals record is ready to be updated again or not
+		checkIfRecordReady = function(results) {
+
+			Totals.checkExpired(results[0].modified_unix, function(err, resp) {
+
+				// session timer is expired. continue!
+				if (!err) {
+					upsertTotalsRecord(results);
+				} else {
+					callback({ message: 'try_again' }, null); // session timer not expired!
+				}
+			});
+		};
+
+		upsertTotalsRecord = function(results) {
+
+			// update their record with an increased count by 1.
+			Totals.native(function(err, collection) {
+				if (!err) {
+
+					// increase count by 1.
+					results[0].total_count++;
+
+					collection.update({ account: results[0].account, started_unix: results[0].started_unix }, results[0], { upsert: true }, function (err, upserted) {
+						if (!err) {
+							callback(null, { message: 'success' });
+						} else {
+							callback({ message: 'server_error' }, null); // error with mongodb
+						}
+					});
+				} else {
+					callback({ message: 'server_error' }, null); // error with mongodb
+				}
+			});
+		}
+
+		// get this party started.
+		checkIfSessionReady();
 	},
 
 	/**
@@ -369,36 +424,6 @@ module.exports = {
 		});
 	},
 
-	/**
-	 * Find the total amount of Krai currently being paid out hourly
-	 * Using KraiFromRawService, return the amount in Krai from raw.
-	 */
-	totalKrai: function(callbackTK) {
-
-		PayoutSchedule.native(function(err, collection) {
-			if (!err) {
-
-				collection.find().limit(1).sort({'$natural': -1}).toArray(function (err, results) {
-					if (!err) {
-
-						KraiFromRawService.convert(results[0].hourly_rai, function(err, resp) {
-
-							if(!err) {
-								callback(null, { hourly_rai: resp.response.amount });
-							} else {
-								callback(err, null);
-							}
-						});
-					} else {
-						callback(err, null);
-					}
-				});
-			} else {
-				callback(err, null);
-			}
-   		});
-	},
-
 	/*
  	 * Determine if a record is expired
  	 * Accepts a unix timestamp for comparison against now.
@@ -417,84 +442,4 @@ module.exports = {
 			callback(timeLeft, null);
 		}
  	},
-
- 	/**
-	 * Distribution Request
- 	 * 
- 	 * First, check to see if the session start timer is expired.
- 	 * Second, find the latest totals record for this person.
- 	 * Third, check to see if this record has been modified in the past 6-seconds.
- 	 * Fourth, upsert the totals record with a new payload or an updated one.
- 	 */
-	request: function(parameters, callback) {
-
-		Totals.checkExpired(parameters.sessionStarted, function(err, resp) {
-
-			// session timer is expired. continue!
-			if (!err) {
-
-				// find this account's latest record that's not finalized yet (realtime)
-		        Totals.native(function(err, collection) {
-					if (!err){
-						collection.find({ account: parameters.account, ended_unix: 0 }).limit(1).sort({ 'started_unix': -1 }).toArray(function (err, results) {
-							if (!err) {
-
-								// create a new Totals record object if there were none found
-								if(results.length === 0) {
-
-									results.push({
-									    paid_unix: 0,
-									    receipt_hash: '',
-									    account: parameters.account,
-									    total_count: 0, // increased by 1 down below...
-									    started_unix: TimestampService.unix(),
-									    modified_unix: 0,
-									    ended_unix: 0,
-									    percentage_owed: 0,
-									    krai_owed: 0,
-									    raw_rai_owed: '0'
-									});
-								}
-
-								// check if the record is expired and able to be updated again.
-								Totals.checkExpired(results[0].modified_unix, function(err, resp) {
-
-									// record is expired. continue!
-									if (!err) {
-
-										// update their record with an increased count by 1.
-										Totals.native(function(err, collection) {
-											if (!err) {
-
-												// increase count by 1.
-												results[0].total_count++;
-
-												collection.update({ account: results[0].account, started_unix: results[0].started_unix }, results[0], { upsert: true }, function (err, upserted) {
-													if (!err) {
-														callback(null, { message: 'success' });
-													} else {
-														callback({ message: 'server_error' }, null); // error with mongodb
-													}
-												});
-											} else {
-												callback({ message: 'server_error' }, null); // error with mongodb
-											}
-										});
-									} else {
-										callback({ message: 'try_again' }, null); // record not expired!
-									}
-								});
-							} else {
-								callback({ message: 'server_error' }, null); // error with mongodb
-							}
-						});
-					} else {
-						callback({ message: 'server_error' }, null); // error with mongodb
-					}
-				});
-		    } else {
-		    	callback({ message: 'try_again' }, null); // session timer not expired!
-		    }
-		});
-	}
 };

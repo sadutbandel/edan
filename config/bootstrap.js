@@ -11,6 +11,18 @@
 
 module.exports.bootstrap = function(cb) {
 
+   /*
+   Only if using fresh DB
+   
+   AutomationService.loadAvailableSupply( function(err, resp) {
+      if(!err) {
+          console.log(TimestampService.utc() + JSON.stringify(resp));                       
+      } else {
+          console.log(TimestampService.utc() + JSON.stringify(err));                       
+      }
+  });
+   */
+
    // allows us to retrieve the remote-client IP and not localhost
    sails.hooks.http.app.set('trust proxy', true);
 

@@ -9,7 +9,7 @@
 
 module.exports = {
 
-    recalculateTotals: function(callback) {
+    minutelyTotals: function(callback) {
 
         DistributionTracker.last(function(err, resp) {
             
