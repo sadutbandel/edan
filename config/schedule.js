@@ -13,7 +13,7 @@ module.exports.schedule = {
          * 4 hours in seconds is...
          * 14400 seconds = 60s * 60m * 4h
          */
-        minutelyTotals : {
+        owedEstimates : {
 
             cron : "* * * * *",
 
@@ -21,11 +21,35 @@ module.exports.schedule = {
 
                 if(sails.config.port === 1337) {
 
-                    AutomationService.minutelyTotals( function(err, resp) {
+                    AutomationService.owedEstimates( function(err, resp) {
                         if(!err) {
                             console.log(TimestampService.utc() + JSON.stringify(resp));                       
                         } else {
                             console.log(TimestampService.utc() + JSON.stringify(err));                       
+                        }
+                    });
+                }
+            },
+            context : {}
+        },
+
+        /**
+         * Update the block count every minute
+         * @type {Object}
+         */
+        blockCount : {
+
+            cron : "* * * * *",
+
+            task : function (context, sails) {
+
+                if(sails.config.port === 1338) {
+
+                    AutomationService.blockCount( function(err, resp) {
+                        if(!err) {
+                            console.log(TimestampService.utc() + ' Updated block count to ' + JSON.stringify(resp));                       
+                        } else {
+                            console.log(TimestampService.utc() + ' Problem updating block count ' + JSON.stringify(err));                       
                         }
                     });
                 }

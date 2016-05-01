@@ -12,9 +12,15 @@
 	}])
 
 	.controller('explorerCtrl', ['$rootScope', '$scope', '$q', '$timeout', function($rootScope, $scope, $q, $timeout) {
-      
+
+      // fetch the current block count
+      io.socket.get('/api/block_count', function (resData, jwres){
+         $scope.block_count = resData;
+         $scope.$apply();
+      });
+
       // define the different button states
-      button = {
+      var button = {
 
          default: {
             disabled: false,

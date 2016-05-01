@@ -43,7 +43,8 @@ module.exports.routes = {
   /**
    * API ROUTES
    */
-  'GET /api/available_supply': 'AvailableSupplyController.fetch',
+  'GET /api/available_supply': 'CacheController.available_supply',
+  'GET /api/block_count': 'CacheController.block_count',
   //'GET /api/past_distributions': 'PastDistributions.fetch',
 
   /***************************************************************************

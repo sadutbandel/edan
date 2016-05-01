@@ -9,7 +9,32 @@
 
 module.exports = {
 
-    minutelyTotals: function(callback) {
+    blockCount: function(callback) {
+
+        BlockCountService.fetch(function(err, resp) {
+            
+            if(!err) {
+                Cache.native(function(err, collection) {
+                    if (!err) {
+
+                        collection.update({ entry: 'block_count' }, { entry: 'block_count', modified: TimestampService.unix(), count: resp.response.count }, { upsert: true }, function (err, upserted) {
+                            if (!err) {
+                                callback(null, resp.response.count);
+                            } else {
+                                callback(err, null); // error with mongodb
+                            }
+                        });
+                    } else {
+                        callback(err, null); // error with mongodb
+                    }
+                });
+            } else {
+                callback(err, null);
+            }
+        });
+    },
+
+    owedEstimates: function(callback) {
 
         DistributionTracker.last(function(err, resp) {
             
@@ -21,22 +46,25 @@ module.exports = {
         });
     },
 
-    // cache current available supply
+    // updates the available supply Cache entry
     loadAvailableSupply: function(callback) {
 
         AvailableSupplyService.fetch(function(err, resp) {
 
             if(!err) {
 
-                // add a new entry for available supply
-                AvailableSupply.create({
-                    modified: TimestampService.unix(),
-                    raw_krai: resp
-                }, function(err, resp) {
-                    if(!err) {
-                        callback(null, resp);
+                Cache.native(function(err, collection) {
+                    if (!err) {
+
+                        collection.update({ entry: 'available_supply' }, { entry: 'available_supply', modified: TimestampService.unix(), raw_krai: resp }, { upsert: true }, function (err, upserted) {
+                            if (!err) {
+                                callback(null, true);
+                            } else {
+                                callback(err, null); // error with mongodb
+                            }
+                        });
                     } else {
-                        callback(err, null);
+                        callback(err, null); // error with mongodb
                     }
                 });
             } else {

@@ -7,6 +7,21 @@
 		</div>
 	</div>
 
+	<!-- content -->
+	<div class="ten wide computer sixteen wide tablet centered column">
+	
+		<!-- Current Block Count -->
+		<div class="ui statistic">
+			<div class="label">
+				Current Block Count (<a href="api/block_count" target="_blank">API</a>)
+			</div>
+			<div class="value">
+				{{ block_count | number:0 }}
+			</div>
+		</div>
+	</div>
+	<br style="clear:both"/>
+
 	<!-- hash search -->
 	<div ng-show="!submitted" class="row ng-hide">
 		<div class="ui form field hash_search ten wide computer sixteen wide tablet centered column">
