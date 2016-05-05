@@ -4,13 +4,6 @@
 
 	.module('Explorer', [])
 
-   .config(['$routeProvider', function($routeProvider) {
-		$routeProvider.when('/explorer', {
-			templateUrl : 'templates/explorer.html',
-			controller: 'explorerCtrl'
-		});
-	}])
-
 	.controller('explorerCtrl', ['$rootScope', '$scope', '$q', '$timeout', function($rootScope, $scope, $q, $timeout) {
 
       // fetch the current block count
@@ -115,8 +108,8 @@
             if($scope.hash) {
 
                $scope.button = button.exploring;
-
-               io.socket.post('/blockExplorer', { hash: $scope.hash }, function (data, jwres) {
+               
+               io.socket.post('/blockExplorer', { hash: $scope.hash, _csrf: $rootScope._csrf }, function (data, jwres) {
 
                   // fail
                   if(data.statusCode === 400) {

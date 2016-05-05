@@ -196,16 +196,23 @@ module.exports = {
 		// Sixth
 		checkViolations = function(results) {
 
+			/*
+			check Totals for thes things
+			 
 			var payload = {
 
 				'$or': [
 					{ account: parameters.account },
-					{ ip: parameters.ip },
-					{ sessionID: parameters.sessionID }
+					{ ip: parameters.ip }
 				],
 
 				'$and': [
-					{ status: 'pending' },
+					{
+						modified_unix: {
+							'$gt' : 
+						}
+
+					},
 		 			{ 
 		 				_id: { 
 		 					'$ne': Distribution.mongo.objectId(parameters.createdID)
@@ -213,6 +220,7 @@ module.exports = {
 		 			}
 				]
 			};
+			*/
 		};
 
 		// Seventh

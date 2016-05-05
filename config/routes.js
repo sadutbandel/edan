@@ -32,7 +32,16 @@ module.exports.routes = {
   *                                                                          *
   ***************************************************************************/
 
-  'GET /': 'SessionController.append',
+  /**
+   * USER-FACING PAGES
+   */
+  'GET /': 'HomeController.find',
+  'GET /start': 'StartController.find',
+  'GET /demos': 'DemosController.find',
+  'GET /distribution': 'DistributionController.find',
+  'GET /explorer': 'ExplorerController.find',
+  'GET /wallet': 'WalletController.find',
+
   'POST /paymentBegin': 'PaymentBeginController.create',
   'POST /paymentWait': 'PaymentWaitController.create',
   'POST /paymentFinish': 'PaymentFinishController.create',

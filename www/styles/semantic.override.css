@@ -1,0 +1,34 @@
+#main {
+	margin-top: 1em;
+}
+.word-wrap{
+	word-wrap: break-word;
+}
+.break-word{
+	display: inline-block !important;
+	word-break: break-word !important;
+}
+.borderless.main.menu .toc.item {
+	display: none !important;
+}
+.hash_search {
+	width: 600px !important;
+}
+.capitalize {
+	text-transform:capitalize;
+}
+@media only screen and (max-width: 730px) {
+
+	.borderless.main.menu .item {
+		display: none !important;
+	}
+	.borderless.main.menu .mobile.item {
+		display: block !important;
+	}
+	.hash_search {
+		width: 306px !important;
+	}
+	.account_textarea {
+		width: 292px !important;
+	}
+}

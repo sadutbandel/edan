@@ -6,15 +6,10 @@
 		'ngclipboard'
 		])
 
-	.config(['$routeProvider', function($routeProvider) {
-		$routeProvider.when('/distribution', {
-			templateUrl : 'templates/distribution.html',
-			controller: 'distributionCtrl'
-		});
-	}])
-
 	.controller('distributionCtrl', ['$rootScope', '$filter', '$interval', '$scope', '$http', '$timeout', '$location', 'vcRecaptchaService', function($rootScope, $filter, $interval, $scope, $http, $timeout, $location, vcRecaptchaService) {
 
+		console.log('distributionCtrl');
+		
 		$scope.howFaucet = function(bool) {
 			if(bool) {
 				$('#how-faucet').modal('show');
@@ -156,7 +151,8 @@
 				// create a payload
 				this.payload = {
 					account: $scope.account,
-					response: $scope.response
+					response: $scope.response,
+					_csrf: $rootScope._csrf
 				};
 				
 				// deliver the payload

@@ -6,13 +6,6 @@
 		'ngclipboard'
 		])
 
-	.config(['$routeProvider', function($routeProvider) {
-		$routeProvider.when('/demos', {
-			templateUrl : 'templates/demos.html',
-			controller: 'demosCtrl'
-		});
-	}])
-
 	.controller('demosCtrl', ['$rootScope', '$scope', '$q', '$http', '$timeout', function($rootScope, $scope, $q, $http, $timeout) {
 
 		// assume the faucet is ON by default
@@ -42,35 +35,36 @@
   		// set default button state
   		$scope.button = button.default;
 
+  		console.log($scope.button);
+
   		// simulate real payment
   		$scope.simulatePayment = function () {
 
   			// 'paying' status
 			$scope.button = button.paying;
 
-			$http.post('/demo').success(function(data) {
-
+			io.socket.post('/demo', $rootScope._csrf, function (data, jwres) {
 				if(data.statusCode === 200) {
 					$scope.paid = true;
 					$scope.account = null;
 					$scope.button = button.default;
+					$scope.$apply();
 				} else {
 					$scope.button = button[data.message];
+					$scope.$apply();
 					$timeout(function() {
 						$scope.account = null;
 						$scope.button = button.default;
+						$scope.$apply();
 					}, 3000);
 				}
-			})
-			.error(function(data, status) {
-				console.error('Error', status, data);
 			});
 		}
 
 		$scope.paymentBegin = function() {
 
 			return $q(function(resolve, reject) {
-				io.socket.post('/paymentBegin', function (data, jwres) {
+				io.socket.post('/paymentBegin', $rootScope._csrf, function (data, jwres) {
 					if(data.statusCode === 400) {
 						$scope.faucetOff = true;
 					} else {
@@ -88,7 +82,9 @@
 			
 			return $q(function(resolve, reject) {
 
-				io.socket.post('/paymentWait', function (data, jwres) {
+				io.socket.post('/paymentWait', $rootScope._csrf, function (data, jwres) {
+
+					console.log(data);
 
 					$scope.paid = data.response.paid;
 
@@ -111,7 +107,7 @@
 		$scope.paymentFinish = function(account) {
 
 			$scope.payment_account = undefined;
-			io.socket.post('/paymentFinish', { account: account });
+			io.socket.post('/paymentFinish', { account: account, _csrf: $rootScope.csrf });
 		}
 
 		$scope.initialize = function(bool) {

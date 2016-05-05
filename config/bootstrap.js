@@ -10,7 +10,7 @@
 */
 
 module.exports.bootstrap = function(cb) {
-
+   
    // load the available supply
    AutomationService.loadAvailableSupply( function(err, resp) {
       if(!err) {
@@ -26,7 +26,8 @@ module.exports.bootstrap = function(cb) {
    // payment wallet is different for dev and prod
    // dev env
    if(sails.config.port === 1337) {
-      sails.config.wallet = Globals.paymentWallets.development;
+      //sails.config.wallet = Globals.paymentWallets.development;
+      sails.config.wallet = Globals.paymentWallets.production;
    } 
    // prod env
    else if(sails.config.port === 1338) {

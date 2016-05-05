@@ -106,13 +106,20 @@ module.exports.sockets = {
   * app's security.                                                          *
   *                                                                          *
   ***************************************************************************/
-  /*
+  
   beforeConnect: function(handshake, cb) {
+    console.log('handshake');
     console.log(handshake);
-    return cb(null, true);
+    return cb();
+  },
+  
+  /*
+  onConnect: function(session, socket) {
+    console.log(TimestampService.utc() + ' onConnect');
+    console.log(session);
   },
   */
- 
+
   /***************************************************************************
   *                                                                          *
   * `afterDisconnect`                                                        *

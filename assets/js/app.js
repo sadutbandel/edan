@@ -3,7 +3,6 @@
  	angular
 
 	.module('Raiblocks', [ // primary module
-		'bootstrap', // angular application boostrap
 		'ngRoute', // angular routing
 		'routeHelper', // route-assist
 		'Chain', // block-chain processing
@@ -17,6 +16,12 @@
 	
 	.run(['$rootScope', '$templateCache', function($rootScope, $templateCache) {
 
+		// fetch csrf token
+		io.socket.get('/csrfToken', function (resData, jwres){
+			$rootScope.csrf = resData._csrf;
+			$rootScope._csrf = { _csrf: $rootScope.csrf };
+		});
+
     	$templateCache.removeAll();
 
 		// initiate sidebar in background
@@ -28,23 +33,6 @@
 		// establish public app-wide variables
 		$rootScope.recaptchaKey = '6LcPNAsTAAAAANCpxZY3SMikIjg5a0T9XTnjM-v4';
 		$rootScope.faucetNumber = 'xrb_35jjmmmh81kydepzeuf9oec8hzkay7msr6yxagzxpcht7thwa5bus5tomgz9';
-		$rootScope.rb_version = '7.5.0';
 		$rootScope.total_faucet = 340282366000; // used for visual display of distribution # on get started
-	}])
-
-	.config(['$routeProvider', function($routeProvider) {
-		$routeProvider.when('/', {
-			templateUrl : 'templates/home.html',
-			controller  : 'homeCtrl'
-		});
-	}])
-
-	.controller('homeCtrl', ['$rootScope', '$scope', '$location', function($rootScope, $scope, $location) {
-
-		// apply popups to social icons
-		$('.social').popup({
-			position: 'bottom center'
-		});
-	}])
-
+	}]);
 })();
