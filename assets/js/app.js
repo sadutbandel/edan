@@ -13,10 +13,16 @@
 		'Wallet', // wallet download
 		'vcRecaptcha', // google recaptcha
 		])
-	
+		
+	// instead of {{}} for interpolation, we'll use [[]] because handlebars.js uses {{}}
+	.config(function($interpolateProvider) {
+		$interpolateProvider.startSymbol('[[');
+		$interpolateProvider.endSymbol(']]');
+	})
+
 	.run(['$rootScope', '$templateCache', function($rootScope, $templateCache) {
 
-		// fetch csrf token
+		// fetch csrf token for app-usage
 		io.socket.get('/csrfToken', function (resData, jwres){
 			$rootScope.csrf = resData._csrf;
 			$rootScope._csrf = { _csrf: $rootScope.csrf };
@@ -30,9 +36,5 @@
 			$('.ui.sidebar').sidebar('hide');
 		});
 
-		// establish public app-wide variables
-		$rootScope.recaptchaKey = '6LcPNAsTAAAAANCpxZY3SMikIjg5a0T9XTnjM-v4';
-		$rootScope.faucetNumber = 'xrb_35jjmmmh81kydepzeuf9oec8hzkay7msr6yxagzxpcht7thwa5bus5tomgz9';
-		$rootScope.total_faucet = 340282366000; // used for visual display of distribution # on get started
 	}]);
 })();

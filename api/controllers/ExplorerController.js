@@ -1,5 +1,5 @@
 /**
- * DistributionController
+ * ExplorerController
  *
  * @description :: 
  */
@@ -12,10 +12,6 @@ module.exports = {
 			req.session.started = TimestampService.unix();
 		}
 
-		var data = {
-			recaptchaKey: Globals.recaptchaKey
-		};
-
-		res.view('distribution', data);
+		res.view('explorer');
 	}
 };

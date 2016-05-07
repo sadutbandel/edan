@@ -1,4 +1,4 @@
-<div class="ui centered grid container">
+<div ng-controller="explorerCtrl" class="ui centered grid container">
 
 	<!-- title -->
 	<div class="row mobile only">
@@ -16,7 +16,7 @@
 				Current Block Count (<a href="api/block_count" target="_blank">API</a>)
 			</div>
 			<div class="value">
-				{{ block_count | number:0 }}
+				{{ block_count }}
 			</div>
 		</div>
 	</div>
@@ -37,7 +37,7 @@
 			ng-class="button.class"
 			class="ui fluid button"
 			ng-click="explore()">
-				<i ng-class="button.icon" class="icon"></i>&nbsp;{{ button.title }}
+				<i ng-class="button.icon" class="icon"></i>&nbsp;[[ button.title ]]
 			</button>
 		</div>
 	</div>
@@ -57,13 +57,13 @@
 	<div ng-show="submitted" class="row ng-hide">
 		<div class="twelve wide computer sixteen wide tablet centered column">
 			<div class="ui piled segment">
-				<h4 class="ui header">Exploring: <span class="word-wrap">{{ hash }}</span></h4>
+				<h4 class="ui header">Exploring: <span class="word-wrap">[[ hash ]]</span></h4>
 				<div class="ui relaxed divided list">
 					<div class="item" ng-repeat="(key, obj) in response track by $index">
 						<i ng-class="obj.icon" class="large middle aligned icon"></i>
 						<div class="content">
-							<span class="header capitalize">{{ key }}</span>
-							<div class="description break-word">{{ obj.value }}</div>
+							<span class="header capitalize">[[ key ]]</span>
+							<div class="description break-word">[[ obj.value ]]</div>
 						</div>
 					</div>
 				</div>

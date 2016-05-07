@@ -32,7 +32,7 @@
 						<div
 						vc-recaptcha
 						theme="'light'"
-						key="recaptchaKey"
+						key="'6LcPNAsTAAAAANCpxZY3SMikIjg5a0T9XTnjM-v4'"
 						on-create="setWidgetId(widgetId)"
 						on-success="setResponse(response)"></div>
 
@@ -46,7 +46,7 @@
 							ng-click="submit()"
 							class="ui button"
 							type="submit">
-								<i ng-class="button.icon" class="icon"></i>&nbsp;{{ button.title }}
+								<i ng-class="button.icon" class="icon"></i>&nbsp;[[ button.title ]]
 							</button>
 							<button ng-click="howFaucet(true)" class="ui grey button">
 								<i class="theme icon"></i>&nbsp;How it works
@@ -55,6 +55,7 @@
 					</form>
 				</div>
 			</div>
+
 			{{#if past_distributions}}
 				<div class="sixteen wide column">
 					<div class="ui small statistics">

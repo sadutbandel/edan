@@ -1,7 +1,5 @@
 <div ng-controller="demosCtrl" class="ui centered grid container">
- 
- 	{{ button }}
- 	
+
 	<!-- title -->
 	<div class="row mobile only">
 		<div class="fourteen wide computer sixteen wide tablet column">
@@ -10,7 +8,7 @@
 	</div>
 
 	<!-- starting description -->
-	<div ng-show="!initialized && !payment_account && !faucetOff" class="twelve wide computer sixteen wide tablet centered column ng-hide">
+	<div ng-hide="initialized || payment_account || faucetOff" class="twelve wide computer sixteen wide tablet centered column">
 
 		<div class="ui blue text container segment">
 
@@ -44,7 +42,7 @@
 	</div>
 
 	<!-- Temporarily Disabled Demo -->
-	<div ng-show="faucetOff" class="row ng-hide">
+	<div ng-cloak ng-show="faucetOff" class="row">
 		<br style="clear:both;"/>
 		<div class="ten wide computer sixteen wide tablet column centered">
 			<div class="ui warning message">
@@ -54,7 +52,7 @@
 	</div>
 
 	<!-- Payment Received Message -->
-	<div ng-show="initialized && paid && !faucetOff" class="row ng-hide">
+	<div ng-cloak ng-show="initialized && paid && !faucetOff" class="row">
 		<div class="ten wide computer sixteen wide tablet column centered">
 			<div class="ui green message">
 				Payment received - Enjoy ad-free pandas!
@@ -63,7 +61,7 @@
 	</div>
 
 	<!-- Post-Demo Actions -->
-	<div ng-show="initialized && paid && !faucetOff" class="row ng-hide">
+	<div ng-cloak ng-show="initialized && paid && !faucetOff" class="row">
 		<div class="six wide computer sixteen wide tablet column centered">
 			<div class="ui fluid buttons">
 				<button ng-click="initialize(false)" class="ui blue button">Read Again</button>
@@ -74,7 +72,7 @@
 	</div>
 
 	<!-- Pay 1 Mrai, Copy Account to Clipboard -->
-	<div ng-show="!paid || !faucetOff" class="twelve wide computer sixteen wide tablet column centered ng-hide">
+	<div ng-cloak ng-show="!paid || !faucetOff" class="twelve wide computer sixteen wide tablet column centered">
 		<div ng-if="payment_account && !paid" class="ui info message word-wrap">
 			<div class="header">
 				To remove ads, pay 1 Krai using either:
@@ -86,7 +84,7 @@
 						id="copy"
 						class="ui mini blue button" 
 						ngclipboard 
-						data-clipboard-text="{{ payment_account }}">
+						data-clipboard-text="[[ payment_account ]]">
 						<i class="clipboard icon"></i> Copy Account #
 					</a>
 				</li>
@@ -97,7 +95,7 @@
 					ng-class="button.class"
 					ng-click="simulatePayment()"
 					class="ui mini button">
-						<i ng-class="button.icon" class="icon"></i>&nbsp;{{ button.title }}
+						<i ng-class="button.icon" class="icon"></i>&nbsp;[[ button.title ]]
 					</button>
 				</li>
 			</ul>
@@ -105,7 +103,7 @@
 	</div>
 
 	<!-- DEMO INLINE WEBSITE -->
-	<div ng-show="initialized && !faucetOff" class="ten wide computer sixteen wide tablet column ui centered raised segment ng-hide">
+	<div ng-cloak ng-show="initialized && !faucetOff" class="ten wide computer sixteen wide tablet column ui centered raised segment">
 
 		<div class="ui grid">
 

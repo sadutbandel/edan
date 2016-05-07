@@ -7,8 +7,6 @@
 		])
 
 	.controller('distributionCtrl', ['$rootScope', '$filter', '$interval', '$scope', '$http', '$timeout', '$location', 'vcRecaptchaService', function($rootScope, $filter, $interval, $scope, $http, $timeout, $location, vcRecaptchaService) {
-
-		console.log('distributionCtrl');
 		
 		$scope.howFaucet = function(bool) {
 			if(bool) {
@@ -152,8 +150,10 @@
 				this.payload = {
 					account: $scope.account,
 					response: $scope.response,
-					_csrf: $rootScope._csrf
+					_csrf: $rootScope.csrf
 				};
+				
+				console.log($rootScope.csrf);
 				
 				// deliver the payload
 				$http.post('/distribution', this.payload).success(function(data) {
