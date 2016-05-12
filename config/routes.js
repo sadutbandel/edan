@@ -38,6 +38,7 @@ module.exports.routes = {
   'GET /': 'HomeController.find',
   'GET /start': 'StartController.find',
   'GET /demos': 'DemosController.find',
+  'GET /freemium-ads-demo': 'FreemiumAdsDemoController.find',
   'GET /distribution': 'DistributionController.find',
   'GET /explorer': 'ExplorerController.find',
   'GET /wallet': 'WalletController.find',

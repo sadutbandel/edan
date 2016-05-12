@@ -8,7 +8,7 @@
 module.exports = {
 
 	create: function(req, res) {
-		
+
 		if(req.session.payment) {
 
 			PaymentWaitService.init(req.session.payment.account, function(err, resp) {
@@ -40,8 +40,6 @@ module.exports = {
 					res.send(err);
 				}
 			});
-		} else {
-			res.send({ statusCode: 400, response: 'faucetoff'});
 		}
 	}
 };

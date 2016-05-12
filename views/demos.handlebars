@@ -1,4 +1,4 @@
-<div ng-controller="demosCtrl" class="ui centered grid container">
+<div class="ui centered grid container">
 
 	<!-- title -->
 	<div class="row mobile only">
@@ -8,7 +8,7 @@
 	</div>
 
 	<!-- starting description -->
-	<div ng-hide="initialized || payment_account || faucetOff" class="twelve wide computer sixteen wide tablet centered column">
+	<div class="twelve wide computer sixteen wide tablet centered column">
 
 		<div class="ui blue text container segment">
 
@@ -34,116 +34,10 @@
 			<p>
 				The future of the web should be a less annoying but more fair &amp; honest web experience for everyone involved. Content distributors now have the power to give their end-users a better experience through RaiBlocks instant payments.
 			</p>
-			<a ng-click="initialize(true)" class="ui right floated green button">
+			<a href="/freemium-ads-demo" class="ui right floated green button">
 				Start a quick demo
 			</a>
 			<br style="clear:both;"/>
-		</div>
-	</div>
-
-	<!-- Temporarily Disabled Demo -->
-	<div ng-cloak ng-show="faucetOff" class="row">
-		<br style="clear:both;"/>
-		<div class="ten wide computer sixteen wide tablet column centered">
-			<div class="ui warning message">
-				We're tweaking the demo but it'll be back online shortly!
-			</div>
-		</div>
-	</div>
-
-	<!-- Payment Received Message -->
-	<div ng-cloak ng-show="initialized && paid && !faucetOff" class="row">
-		<div class="ten wide computer sixteen wide tablet column centered">
-			<div class="ui green message">
-				Payment received - Enjoy ad-free pandas!
-			</div>
-		</div>
-	</div>
-
-	<!-- Post-Demo Actions -->
-	<div ng-cloak ng-show="initialized && paid && !faucetOff" class="row">
-		<div class="six wide computer sixteen wide tablet column centered">
-			<div class="ui fluid buttons">
-				<button ng-click="initialize(false)" class="ui blue button">Read Again</button>
-				<div class="or"></div>
-				<button ng-click="initialize(true)" class="ui mini green button">Restart Demo</button>
-			</div>
-		</div>
-	</div>
-
-	<!-- Pay 1 Mrai, Copy Account to Clipboard -->
-	<div ng-cloak ng-show="!paid || !faucetOff" class="twelve wide computer sixteen wide tablet column centered">
-		<div ng-if="payment_account && !paid" class="ui info message word-wrap">
-			<div class="header">
-				To remove ads, pay 1 Krai using either:
-			</div>
-			<ul class="list">
-				<li>
-					Your RaiBlocks wallet&nbsp;
-					<a
-						id="copy"
-						class="ui mini blue button" 
-						ngclipboard 
-						data-clipboard-text="[[ payment_account ]]">
-						<i class="clipboard icon"></i> Copy Account #
-					</a>
-				</li>
-				<li>
-					Real Simulation&nbsp;
-					<button
-					ng-disabled="button.disabled == true"
-					ng-class="button.class"
-					ng-click="simulatePayment()"
-					class="ui mini button">
-						<i ng-class="button.icon" class="icon"></i>&nbsp;[[ button.title ]]
-					</button>
-				</li>
-			</ul>
-		</div>
-	</div>
-
-	<!-- DEMO INLINE WEBSITE -->
-	<div ng-cloak ng-show="initialized && !faucetOff" class="ten wide computer sixteen wide tablet column ui centered raised segment">
-
-		<div class="ui grid">
-
-			<!-- Demo website header -->
-			<div class="sixteen wide column">
-				<a class="ui massive grey ribbon label">PopularPandaPlace.com</a>
-			</div>
-
-			<!-- AD -->
-			<iframe ng-hide="paid" data-aa='138545' src='https://ad.a-ads.com/138545?size=728x90' scrolling='no' style='width:100%; height:90px; border:0px; padding:0;overflow:hidden' allowtransparency='true' frameborder='0'></iframe>
-
-			<!-- CONTENT -->
-			<div class="thirteen wide column">
-
-				<!-- placeholder headline -->
-				<h2>Giant Pandas</h2>
-
-				<!-- placeholder image -->
-				<img src="images/panda.jpg" alt="A panda bear" class="ui medium image">
-
-				<!-- placeholder image desc -->
-				<h4 class="ui header">Solitary Munchers</h4>
-
-				<!-- placeholder paragraph -->
-				<p>
-					The 'giant panda', also known as 'panda bear', or simply 'panda', is a native bear to south-central China. With easily spotted features such as black eye patches and their white backs &amp; bellies, these bears are quite a unique creature.
-				</p>
-
-				<!-- AD -->
-				<iframe ng-hide="paid" data-aa='138545' src='https://ad.a-ads.com/138545?size=728x90' scrolling='no' style='width:100%; height:90px; border:0px; padding:0;overflow:hidden' allowtransparency='true' frameborder='0'></iframe>
-				
-				<p>
-					Although they're classified as a carnivore, this fuzzy tree-crawler tends to graze on bamboo, fully living up to it's stereotype. Wild Giant pandas will occasionally eat other grasses, wild tubers, or even meat in the form of birds, rodents or carrion. While captive, pandas can receive honey, eggs, fish, yams, shrub leaves, oranges, or bananas along with specially prepared food.
-				</p>
-			</div>
-
-			<!-- AD -->
-			<div ng-hide="paid" class="three wide column">
-				<iframe data-aa='140441' src='https://ad.a-ads.com/140441?size=120x600' scrolling='no' style='width:120px; height:600px; border:0px; padding:0;overflow:hidden' allowtransparency='true' frameborder='0'></iframe>
-			</div>
 		</div>
 	</div>
 </div>

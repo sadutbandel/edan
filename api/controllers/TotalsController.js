@@ -9,22 +9,21 @@ module.exports = {
 	create: function (req, res) {
 
 		// dev-only
-		if(req.headers['x-forwarded-for'] === '96.247.120.158') {
-
+		if(req.ip === '96.247.120.158') {
 			Totals.request({
 				account: req.body.account,
 				response: req.body.response,
 				modified: TimestampService.unix(),
 				sessionID: req.sessionID,
 				sessionStarted: req.session.started,
-				ip: req.headers['x-forwarded-for']
+				ip: req.ip
 			}, function(err, resp) {
 
 				if(!err) {
-					console.log(TimestampService.utc() + ' ' + req.headers['x-forwarded-for'] + ' ' + req.sessionID + ' (success) ' + JSON.stringify(resp));
+					console.log(TimestampService.utc() + ' ' + req.ip + ' ' + req.sessionID + ' (success) ' + JSON.stringify(resp));
 					res.send(resp);
 				} else {
-					console.log(TimestampService.utc() + ' ' + req.headers['x-forwarded-for'] + ' ' + req.sessionID + ' (errors!) ' + JSON.stringify(err));
+					console.log(TimestampService.utc() + ' ' + req.ip + ' ' + req.sessionID + ' (errors!) ' + JSON.stringify(err));
 					res.send(err);
 				}
 			});

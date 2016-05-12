@@ -6,7 +6,7 @@
 		'ngclipboard'
 		])
 
-	.controller('distributionCtrl', ['$rootScope', '$filter', '$interval', '$scope', '$http', '$timeout', '$location', 'vcRecaptchaService', function($rootScope, $filter, $interval, $scope, $http, $timeout, $location, vcRecaptchaService) {
+	.controller('distributionCtrl', ['$rootScope', '$filter', '$interval', '$scope', '$timeout', '$location', 'vcRecaptchaService', function($rootScope, $filter, $interval, $scope, $timeout, $location, vcRecaptchaService) {
 		
 		$scope.howFaucet = function(bool) {
 			if(bool) {
@@ -152,12 +152,10 @@
 					response: $scope.response,
 					_csrf: $rootScope.csrf
 				};
-				
-				console.log($rootScope.csrf);
-				
+								
 				// deliver the payload
-				$http.post('/distribution', this.payload).success(function(data) {
-				
+				io.socket.post('/distribution', this.payload, function (data, jwres) {
+
 					if(data.message === 'success') {
 
 						// clear recaptcha for re-use right-away so front-end exploiters have no advantage against regular users.
@@ -253,20 +251,20 @@
 
 						// activate popups
 						$('.popup').popup();
+						$scope.$apply();
 					}
 
 					// non-success
 					else { 
 						$scope.button = button[data.message];
+						$scope.$apply();
 						$timeout(function() {
 							vcRecaptchaService.reload($scope.widgetId);
 							$scope.init();
 							$scope.button = button.default;
+							$scope.$apply();
 						}, 1000);
 					}
-				})
-				.error(function(data, status) {
-					console.error('Error', status, data);
 				});
 
 			} else {

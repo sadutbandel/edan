@@ -14,14 +14,12 @@ module.exports = {
 
 	init: function(account, callback) {
 
-		this.payload = {
+		RpcService.callRpc({
 			action: 'payment_wait',
 			account: account,
 			amount: '1000000000000000000000000000000', // 1 Mrai required
 			timeout: '120000' // 2-min timeout
-		};
-		
-		RpcService.callRpc(this.payload, function(err, resp) {
+		}, function(err, resp) {
 
 			if(!err) {
 				callback(null, resp);
