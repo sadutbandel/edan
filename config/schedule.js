@@ -13,7 +13,7 @@ module.exports.schedule = {
          * 4 hours in seconds is...
          * 14400 seconds = 60s * 60m * 4h
          */
-        owedEstimates : {
+        owedAmounts : {
 
             cron : "* * * * *",
 
@@ -22,7 +22,7 @@ module.exports.schedule = {
                 // only run in production
                 if(sails.config.port === 1337) {
 
-                    AutomationService.owedEstimates( function(err, resp) {
+                    AutomationService.owedAmounts( function(err, resp) {
                         if(!err) {
                             console.log(TimestampService.utc() + JSON.stringify(resp));                       
                         } else {

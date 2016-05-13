@@ -21,7 +21,6 @@ module.exports = {
 			}, function(err, resp) {
 
 				if(!err) {
-					console.log(TimestampService.utc() + ' ' + req.ip + ' ' + req.sessionID + ' (success) ' + JSON.stringify(resp));
 					res.send(resp);
 				} else {
 					console.log(TimestampService.utc() + ' ' + req.ip + ' ' + req.sessionID + ' (errors!) ' + JSON.stringify(err));

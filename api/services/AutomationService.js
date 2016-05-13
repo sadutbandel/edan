@@ -36,17 +36,72 @@ module.exports = {
         });
     },
 
-    owedEstimates: function(callback) {
+    /**
+     * Calculates the owed amounts based on each account's total count.
+     *
+     * First, fetch the last distribution tracker record.
+     * Second, determine if we should finalize or not
+     * Third, grab all totals records for the unended period
+     * Fourth, calculate
+     */
+    owedAmounts: function(callback) {
 
-        DistributionTracker.last(function(err, resp) {
+        // 1
+        lastDistribution = function() {
+
+            DistributionTracker.last(function(err, resp) {
             
-            if(!err) {
-                console.log(resp);
-                callback(null, resp);
+                if(!err) {
+                    determineFinalization(resp);
+                } else {
+                    callback(err, null);
+                }
+            });
+        };
+        
+        // 2
+        determineFinalization = function(resp) {
+
+            var finalize;
+
+            // if 4+ hours have passed since finalization, finalize.
+            if(resp.hoursSinceLastRan >= 4) {
+                finalize = true;
             } else {
-                callback(err, null);
+                finalize = false;
             }
-        });
+
+            nonFinalizedTotals(finalize);
+        };
+
+        // 3
+        nonFinalizedTotals = function(finalize) {
+            
+            Totals.native(function(err, collection) {
+                if (!err){
+                    collection.find({ ended_unix: 0 }).sort({ 'started_unix': -1 }).toArray(function (err, results) {
+                        if (!err) {
+                            calculateOwedAmounts(results, finalize);
+                        } else {
+                            callback({ message: 'server_error' }, null); // error with mongodb
+                        }
+                    });
+                } else {
+                    callback({ message: 'server_error' }, null); // error with mongodb
+                }
+            });
+        }
+
+        // 4
+        calculateOwedAmounts = function(results, finalize) {
+            for(var key in results) {
+                console.log(key);
+                console.log(results[key]);
+            }
+        }
+
+        // kick off everything
+        lastDistribution();
     },
 
     // updates the available supply Cache entry
@@ -77,15 +132,6 @@ module.exports = {
     },
 
     processDistribution: function(run, callbackPD) {
-
-        /**
-         * First, Find the last distribution period that has not be finalized yet
-         * Second, calculate total accounts & total successes for all accounts during this period (last ran to last hour, this runs bi-hourly)
-         * Third, save that  data for the period in DistributionTracker & mark the distribution period as 'finalized' but not 'paid'
-         * Fourth, move to processPayouts().
-         *
-         * Reserved: matchFC, groupFC, errFC, resultsFC, keyFC, 
-         */
 
         /**
          * Loop over all Totals.js records (accounts) to send distribution and update hash receipt blocks.
