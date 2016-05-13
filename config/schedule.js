@@ -24,9 +24,9 @@ module.exports.schedule = {
 
                     AutomationService.owedAmounts( function(err, resp) {
                         if(!err) {
-                            console.log(TimestampService.utc() + JSON.stringify(resp));                       
+                            console.log(TimestampService.utc() + ' Updated owed amounts ' + JSON.stringify(resp));                       
                         } else {
-                            console.log(TimestampService.utc() + JSON.stringify(err));                       
+                            console.log(TimestampService.utc() + ' Problem updating owed amounts ' + JSON.stringify(err));                       
                         }
                     });
                 }

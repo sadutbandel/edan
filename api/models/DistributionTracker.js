@@ -45,59 +45,57 @@ module.exports = {
 	},
 
 	/**
-	 * Fetch the last DistributionTracker record
-	 *
-	 * Returns { lastHour, lastRan, hoursSinceLastRan }
+	 * Fetch the last DistributionTracker record & generate some numbers
 	 */
-	last: function(callbackF) {
+	last: function(callback) {
 
-		DistributionTracker.native(function(errF, collectionF) {
-			if (!errF) {
+		DistributionTracker.native(function(err, collection) {
+			if (!err) {
 				
-				collectionF.find().limit(1).sort({ 'started_unix': -1 }).toArray(function (errF, resultsF) {
-					if (!errF) {
-						
-						//console.log(TimestampService.utc() + ' resultsF');
-						//console.log(TimestampService.utc() + ' ' + JSON.stringify(resultsF));
+				collection.find().limit(1).sort({ 'started_unix': -1 }).toArray(function (err, results) {
+					if (!err) {
 
-						var keyF = 0,
-						lastHourF = TimestampService.lastHour(), // the last hour that ended (if 7:15pm, then 7pm)
+						var lastHour = TimestampService.lastHour(), // the last hour that ended (if 7:15pm, then 7pm)
 						lastRan,
-						diff;
+						diff,
+						live;
 
-						// if the last record is a non-finalized, realtime record...
-						if(resultsF[keyF].ended_unix === 0) {
-							lastRanF = resultsF[keyF].started_unix;
+						// if the last period is not ended, lastRan is started_unix
+						// otherwise lastRan is ended_unix since we have no realtime records yet.
+						if(results[0].ended_unix === 0) {
+							lastRan = results[0].started_unix;
+							live = true;
+						} else {
+							lastRan = results[0].ended_unix;
+							live = false;
 						}
 
-						// if the last record is a finalized, historical record...
-						else {
-							lastRanF = resultsF[keyF].ended_unix;
-						}
-							
 						// the difference in time between the last hour, and the last time it was ran (usually 2hours if on-schedule)						
-						diff = lastHourF - lastRanF;
+						diff = lastHour - lastRan;
 
 						// if it's over 0 hours, go ahead with calculations
 						if(diff > 0) {
-							hoursSinceLastRanF = (diff) / 60 / 60; // needed for calculating total krai to payout depending on hours
+							hoursSincelastRan = (diff) / 60 / 60; // needed for calculating total krai to payout depending on hours
 			  			} else {
-			  				hoursSinceLastRanF = 0; // it's been under 1 hour, so 0 hours since we last ran this last.
+			  				hoursSincelastRan = 0; // it's been under 1 hour, so 0 hours since we last ran this last.
 			  			}
 
-			  			callbackF(null, {
-			      			created_unix: resultsF[keyF].created_unix,
-			      			started_unix: resultsF[keyF].started_unix,
-			      			hoursSinceLastRan: hoursSinceLastRanF,
-			      			lastHour: lastHourF,
-			      			lastRan: lastRanF
+			  			callback(null, {
+			      			created_unix: results[0].created_unix,
+			      			started_unix: results[0].started_unix,
+			      			hoursSinceLastRan: hoursSincelastRan,
+			      			accounts: results[0].accounts,
+			      			successes: results[0].successes,
+			      			lastHour: lastHour,
+			      			lastRan: lastRan,
+			      			live: live
 			      		});
 					} else {
-						callbackF(errF, null);
+						callback(err, null);
 					}
 				});
 			} else {
-				callbackF(errF, null);
+				callback(err, null);
 			}
 		});
 	},
@@ -105,28 +103,28 @@ module.exports = {
 	/**
 	 * Upsert a realtime DistributionTracker record
 	 */
-	update: function(dataU, callbackU) {
+	update: function(data, callback) {
 
 		var created_unix;
 
-		// we don't want to overwrite created if we are updating.
-		if(dataU.created_unix) {
-			created_unix = dataU.created_unix;
+		// we don't want to overwrite created if we are updating the record
+		if(data.created_unix) {
+			created_unix = data.created_unix;
 		} else {
 			created_unix = TimestampService.unix();
 		}
 
-        var payloadU = {
+        var payload = {
             created_unix: created_unix,
-            started_unix: dataU.started_unix,
-            ended_unix: dataU.ended_unix,
-            accounts: dataU.accounts,
-            successes: dataU.successes,
-            finalized: dataU.finalized
+            started_unix: data.started_unix,
+            ended_unix: data.ended_unix,
+            accounts: data.accounts,
+            successes: data.successes,
+            finalized: data.finalized
         };
 
-        var whereU = {
-			started_unix: payloadU.started_unix
+        var where = {
+			started_unix: payload.started_unix
 		};
 
 		//console.log(TimestampService.utc() + ' Update DT Where');
@@ -135,20 +133,18 @@ module.exports = {
 		//console.log(TimestampService.utc() + ' Update DT Data');
 		//console.log(TimestampService.utc() + ' ' + JSON.stringify(payloadU));
 
-		DistributionTracker.native(function(errU, collectionU) {
-			if (!errU) {
+		DistributionTracker.native(function(err, collection) {
+			if (!err) {
 
-				collectionU.update(whereU, payloadU, { upsert: true }, function (errU, updatedU) {
-					if (!errU) {
-						//console.log(TimestampService.utc() + ' Updated DT');
-						//console.log(TimestampService.utc() + ' ' + JSON.stringify(updatedU));
-						callbackU(null, true);
+				collectionU.update(where, payload, { upsert: true }, function (err, updated) {
+					if (!err) {
+						callback(null, true);
 					} else {
-						callbackU(errU, null);
+						callback(err, null);
 					}
                 });
             } else {
-                callbackU(errU, null);
+                callback(err, null);
             }
         });
 	}

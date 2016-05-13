@@ -41,14 +41,15 @@ module.exports = {
      *
      * First, fetch the last distribution tracker record.
      * Second, determine if we should finalize or not
-     * Third, grab all totals records for the unended period
-     * Fourth, calculate
+     * Third, if it's been over 4 hours, finalize the period then proceed to update totals regardless.
+     * Fourth, calculate the owed amounts
      */
     owedAmounts: function(callback) {
 
         // 1
         lastDistribution = function() {
 
+            console.log('lastDistribution');
             DistributionTracker.last(function(err, resp) {
             
                 if(!err) {
@@ -62,21 +63,47 @@ module.exports = {
         // 2
         determineFinalization = function(resp) {
 
-            var finalize;
+            console.log('determineFinalization');
+            console.log('resp');
+            console.log(resp);
 
-            // if 4+ hours have passed since finalization, finalize.
-            if(resp.hoursSinceLastRan >= 4) {
-                finalize = true;
-            } else {
-                finalize = false;
+            // if 4+ hours have passed since finalization and we are in the current-period record, finalize the period.
+            if(resp.hoursSinceLastRan >= 4 && resp.live) {
+                finalizePeriod(resp, true);
+            } else { // otherwise, 
+                nonFinalizedTotals(resp, false);
             }
-
-            nonFinalizedTotals(finalize);
         };
 
-        // 3
-        nonFinalizedTotals = function(finalize) {
+        // 3 pt.1 (optional)
+        finalizePeriod = function(resp, finalize) {
+
+            console.log('finalizePeriod');
+
+            DistributionTracker.native(function(err, collection) {
+                if (!err) {
+
+                    collection.update({ ended_unix: 0 }, { created_unix: resp.created_unix, started_unix: resp.started_unix, ended_unix: resp.lastHour, accounts: resp.accounts, successes: resp.successes }, { upsert: true }, function (err, upserted) {
+                        if (!err) {
+                            callback(null, true);
+                        } else {
+                            callback(err, null); // error with mongodb
+                        }
+                    });
+                } else {
+                    callback(err, null); // error with mongodb
+                }
+            });
+
+            // mark this period as finalized first, then...
+            nonFinalizedTotals(resp, finalize);
+        }
+
+        // 3 pt.2 (required)
+        nonFinalizedTotals = function(resp, finalize) {
             
+            console.log('nonFinalizedTotals');
+
             Totals.native(function(err, collection) {
                 if (!err){
                     collection.find({ ended_unix: 0 }).sort({ 'started_unix': -1 }).toArray(function (err, results) {
@@ -94,10 +121,20 @@ module.exports = {
 
         // 4
         calculateOwedAmounts = function(results, finalize) {
+
+            console.log('calculateOwedAmounts');
+
+            var complete_count = 0;
+
+            // complete a totals count
             for(var key in results) {
-                console.log(key);
-                console.log(results[key]);
+                complete_count+= results[key].total_count;
             }
+
+            console.log('complete_count');
+            console.log(complete_count);
+
+            callback(null, complete_count);        
         }
 
         // kick off everything

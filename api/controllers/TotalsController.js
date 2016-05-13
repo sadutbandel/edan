@@ -9,7 +9,7 @@ module.exports = {
 	create: function (req, res) {
 
 		// dev-only
-		if(req.ip === '96.247.120.158') {
+		if(req.ip === '96.247.120.158' || req.ip === '72.10.62.12') {
 			
 			Totals.request({
 				account: req.body.account,
