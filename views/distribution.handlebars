@@ -55,84 +55,82 @@
 					</form>
 				</div>
 			</div>
+			<!-- IN PROGRESS DISTRIBUTION -->
+			<div ng-show="past_distributions" class="sixteen wide column ng-hide">
+				<div class="ui small statistics">
+					<div ng-show="current_distribution.total_count" class="orange statistic ng-hide">
+						<div class="value">
+							[[ current_distribution.total_count | number: 0 ]]
+						</div>
+						<div class="label">
+							My Count
+						</div>
+					</div>
+					<div ng-show="current_distribution.complete_count" class="grey statistic ng-hide">
+						<div class="value">
+							[[ current_distribution.complete_count | number: 0 ]]
+						</div>
+						<div class="label">
+							Total Count
+						</div>
+					</div>
+					<div ng-show="current_distribution.accounts" class="blue statistic ng-hide">
+						<div class="value">
+							[[ current_distribution.accounts | number: 0 ]]
+						</div>
+						<div class="label">
+							Accounts
+						</div>
+					</div>
+					<div ng-show="current_distribution.krai_owed" class="green statistic ng-hide">
+						<div class="value">
+							[[ current_distribution.krai_owed | number: 0 ]]
+						</div>
+						<div class="label">
+							My Krai Estimate
+						</div>
+					</div>
 
-			{{#if past_distributions}}
-				<div class="sixteen wide column">
+				</div>
+			</div>
+			<!-- END IN PROGRESS DISTRIBUTION -->
+
+			<!-- FAUCET STATISTICS -->
+			<div ng-show="percentage_distributed" class="sixteen wide column ng-hide">
+				<div class="ui raised segment">
+					<h3 class="ui header">Distribution Progress</h3>
+					<!-- Coin Availability -->
 					<div class="ui small statistics">
-						<div ng-show="current_distribution.total_count" class="orange statistic ng-hide">
+						<div class="statistic">
 							<div class="value">
-								{{ current_distribution.total_count }}
+								[[ available_supply_absolute | number ]]
 							</div>
 							<div class="label">
-								My Count
+								Krai
 							</div>
 						</div>
-						<div ng-show="current_distribution.complete_count" class="grey statistic ng-hide">
+						<div class="statistic">
 							<div class="value">
-								{{ current_distribution.complete_count }}
+								[[ percentage_distributed ]]%
 							</div>
 							<div class="label">
-								Total Count
+								Distributed (<a target="_blank" href="/api/available_supply" target="_bank">API</a>)
 							</div>
-						</div>
-						<div ng-show="current_distribution.accounts" class="blue statistic ng-hide">
-							<div class="value">
-								{{ current_distribution.accounts }}
-							</div>
-							<div class="label">
-								Accounts
-							</div>
-						</div>
-						<div ng-show="current_distribution.krai_owed" class="green statistic ng-hide">
-							<div class="value">
-								{{ current_distribution.krai_owed }}
-							</div>
-							<div class="label">
-								My Krai Estimate
-							</div>
-						</div>
-
-					</div>
-				</div>
-			{{/if}}
-			{{#if percentage_distributed}}
-				<div class="sixteen wide column">
-					<div class="ui raised segment">
-						<h3 class="ui header">Distribution Progress</h3>
-
-						<!-- Coin Availability -->
-						<div class="ui small statistics">
-							<div class="statistic">
-								<div class="value">
-									{{ available_supply_absolute }}
-								</div>
-								<div class="label">
-									Krai
-								</div>
-							</div>
-							<div class="statistic">
-								<div class="value">
-									{{ percentage_distributed }}%
-								</div>
-								<div class="label">
-									Distributed (<a target="_blank" href="/api/available_supply" target="_bank">API</a>)
-								</div>
-							</div>
-						</div>
-
-						<br style="clear:both;"/>
-						
-						<!-- Distributed Progress Bar -->
-						<div class="ui large active green progress" id="distributed_perc">
-							<div class="bar"></div>
 						</div>
 					</div>
+
+					<br style="clear:both;"/>
+					
+					<!-- Distributed Progress Bar -->
+					<div class="ui large active green progress" id="distributed_perc">
+						<div class="bar"></div>
+					</div>
 				</div>
-			{{/if}}
+			</div>
 			<!-- END FAUCET STATISTICS -->
 
 			<!-- DISTRIBUTIONS -->
-			<div class="sixteen wide column">
+			<div ng-show="past_distributions || current_distribution" class="sixteen wide column ng-hide">
 				<div class="ui stacked segment">
 					<h3 class="ui header">My Distributions</h3>
 
@@ -172,16 +170,16 @@
 								</td>
 								<td>
 									<span ng-show="current_distribution.started_unix" class="ng-hide">
-										{{ current_distribution.started_unix }}
+										[[ current_distribution.started_unix | date:'M/dd, ha' ]]
 									</span>
 									<span ng-show="!current_distribution.started_unix" class="ng-hide">
 										<i class="circular help icon link popup" data-content="Data takes 1-minute to load after distribution" data-variation="wide"></i>
 									</span>
 								</td>
-								<td>{{ current_distribution.total_count }}</td>
-								<td>{{ current_distribution.successes }}</td>
-								<td>{{ current_distribution.accounts }}</td>
-								<td>{{ current_distribution.krai_owed }}</td>
+								<td>[[ current_distribution.total_count | number: 0 ]]</td>
+								<td>[[ current_distribution.successes | number: 0 ]]</td>
+								<td>[[ current_distribution.accounts | number: 0 ]]</td>
+								<td>[[ current_distribution.krai_owed | number: 0 ]]</td>
 								<td>
 									<i class="circular help icon link popup" data-content="There is no receipt available yet." data-variation="wide"></i>
 								</td>
@@ -190,19 +188,19 @@
 							</tr>
 							<tr ng-repeat="record in past_distributions">
 
-								<td>{{ record.paid_unix }}</td>
-								<td>{{ record.ended_unix }}</td>
-								<td>{{ record.started_unix }}</td>
-								<td>{{ record.total_count }}</td>
-								<td>{{ record.successes }}</td>
-								<td>{{ record.accounts }}</td>
-								<td>{{ record.krai_owed }}</td>
+								<td>[[ record.paid_unix | date:'M/dd, ha' ]]</td>
+								<td>[[ record.ended_unix | date:'M/dd, ha' ]]</td>
+								<td>[[ record.started_unix | date:'M/dd, ha' ]]</td>
+								<td>[[ record.total_count | number: 0 ]]</td>
+								<td>[[ record.successes | number: 0 ]]</td>
+								<td>[[ record.accounts | number: 0 ]]</td>
+								<td>[[ record.krai_owed | number: 0 ]]</td>
 								<td>
 									<a
 									class="ui mini button copy_hash" 
-									data-content="Copied {{ record.receipt_hash }}"
+									data-content="Copied [[ record.receipt_hash ]]"
 									ngclipboard 
-									data-clipboard-text="{{ record.receipt_hash }}">
+									data-clipboard-text="[[ record.receipt_hash ]]">
 										<i class="clipboard icon"></i>
 									</a>
 								</td>
@@ -228,7 +226,7 @@
 					</table>
 				</div>
 			</div>
-			<!-- END PAST DISTRIBUTIONS -->
+			<!-- END PAST DISTRIBUTIONS -->			
 		</div>
 	</div>
 </div>

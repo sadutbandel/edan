@@ -1,10 +1,12 @@
 /**
 * AutomationService.js
 *
-* @description :: Handles various automated tasks such as:
-* 
-*                      Loading the available supply after successfully distributing to all accounts.
-*                      Recalculate totals for DistributionTracker for the current period.
+* @description :: Handles various automated tasks:
+*
+*                   blockCount() stores the current block count of RaiBlocks into Cache (used in Explorer page)
+*                   owedEstimates() calculates the estimates for owed Krai
+*                   loadAvailableSupply() loads the available supply into Cache
+*                   processDistribution() finalizes the current unpaid period, pays everyone, and creates a new DT period.
 */
 
 module.exports = {
@@ -39,6 +41,7 @@ module.exports = {
         DistributionTracker.last(function(err, resp) {
             
             if(!err) {
+                console.log(resp);
                 callback(null, resp);
             } else {
                 callback(err, null);
@@ -83,119 +86,6 @@ module.exports = {
          *
          * Reserved: matchFC, groupFC, errFC, resultsFC, keyFC, 
          */
-        finalizeCalculations = function() {
-
-            // false indicates "not finalized"
-            DistributionTracker.last(function(errFC, respFC) {
-                if(!errFC) {
-
-                    //console.log('respFC');
-                    //console.log(respFC);
-
-                    var lastHourFC = respFC.lastHour,
-                    lastRanFC = respFC.started_unix;
-
-                    var matchFC = {
-
-                        '$and': [
-                            {
-                                modified : { 
-                                    '$lt': lastHourFC
-                                }
-                            },
-                            {
-                                modified : { 
-                                    '$gte': lastRanFC
-                                }
-                            },
-                            { 
-                                status: 'accepted'
-                            },
-                        ]
-                    };
-
-                    console.log('matchFC');
-                    console.log(JSON.stringify(matchFC));
-
-                    var groupFC = {
-                        _id: '$account',
-                        count: { 
-                            '$sum': 1
-                        }
-                    };
-
-                    Distribution.native(function(errFC, collectionFC) {
-                        if (!errFC){
-
-                            collectionFC.aggregate([{ '$match' : matchFC }, { '$group' : groupFC }]).toArray(function (errFC, resultsFC) {
-                                if (!errFC) {
-
-
-                                    /**
-                                     * No matches found. (bad) HALT request!
-                                     * 
-                                     * If NO matches are found, then there are no Distribution records yet.
-                                     */
-                                    if(Object.keys(resultsFC).length === 0) {
-                                        callbackPD('no matches', null);
-                                    }
-
-                                    /**
-                                     * Matches found. (good) CONTINUE request!
-                                     * 
-                                     * If matches ARE found, then we should get a list of accounts with counts.
-                                     * Count total accounts and records for storage in in DistributionTracker
-                                     */
-                                    else {
-
-                                        var accountsCount = 0,
-                                        recordsCount = 0;
-
-                                        // count stuff
-                                        // make sure to mark 0 ended_unix timestamps with their real distribution period ended times.
-                                        for(keyFC in resultsFC) {
-                                            accountsCount++;
-                                            resultsFC[keyFC].ended_unix = lastHourFC;
-                                            recordsCount += resultsFC[keyFC].count;
-                                        }
-
-                                        // create a DistributionTracker payload
-                                        // mark this period as Finalized!                                        
-                                        var whatFC = {
-                                            created_unix: respFC.created_unix,
-                                            started_unix: respFC.started_unix,
-                                            ended_unix: lastHourFC,
-                                            accounts: accountsCount,
-                                            successes: recordsCount,
-                                            finalized: true
-                                        };
-
-                                        //console.log('whatFC');
-                                        //console.log(JSON.stringify(whatFC));
-
-                                        DistributionTracker.update(whatFC, function(errFC, respFC) {
-                                            if(!errFC) {
-                                                console.log(TimestampService.utc() + ' ---------------- FINALIZING CALCULATIONS SUCCESS ----------------');
-                                                processEndedUnix();
-                                            } else {
-                                                console.log(TimestampService.utc() + ' ---------------- FINALIZING CALCULATIONS ERROR! ----------------');
-                                                callbackPD({ error: errFC }, null);
-                                            }
-                                        });
-                                    }
-                                } else {
-                                    callbackPD({ error: errFC }, null);
-                                }
-                            });
-                        } else {
-                            callbackPD({ error: errFC }, null);
-                        }
-                    });
-                } else {
-                    callbackPD({ error: errFC }, null);
-                }
-            });
-        };
 
         /**
          * Loop over all Totals.js records (accounts) to send distribution and update hash receipt blocks.

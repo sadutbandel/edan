@@ -88,15 +88,15 @@ module.exports = {
  	 * 
  	 * First, check to see if the session start timer is expired and ready.
  	 * Second, validate all parameters passed (parameters, recaptcha, account).
- 	 * Third, find the latest totals record for this request's user.
+ 	 * Third, find the all totals record for the requesting user. Used for most recent unended period & all past distributions.
  	 * Fourth, check if the results are empty and if so, create a template record.
  	 * Fifth, check to see if this record is expired and ready.
- 	 * Sixth, check if this requesting IP or account is in violation of the time-limit.
+ 	 * Sixth, check if this requesting IP or account is in violation of the time-limit. Session excluded since IP covers that.
  	 * Seventh, upsert the totals record with a new payload or an updated one.
  	 */
 	request: function(parameters, callback) {
 
-		// First
+		// 1
 		checkIfSessionReady = function() {
 
 			Totals.checkExpired(parameters.sessionStarted, function(err, resp) {
@@ -110,7 +110,7 @@ module.exports = {
 			});
 		};
 
-		// Second
+		// 2
 		validation = function() {
 
 			ValidateParametersService.validate(parameters, function(err, resp) {
@@ -124,7 +124,7 @@ module.exports = {
 							ValidateAccountService.validate(parameters.account, function(err, resp) {
 								
 								if(!err) {
-									fetchLatestTotalsRecord();
+									fetchTotalsRecords();
 								} else {
 									callback('account_error' , null);
 								}
@@ -139,12 +139,12 @@ module.exports = {
 			});
 		};
 
-		// Third
-		fetchLatestTotalsRecord = function() {
+		// 3
+		fetchTotalsRecords = function() {
 
 	        Totals.native(function(err, collection) {
 				if (!err){
-					collection.find({ account: parameters.account, ended_unix: 0 }).limit(1).sort({ 'started_unix': -1 }).toArray(function (err, results) {
+					collection.find({ account: parameters.account }).sort({ 'started_unix': -1 }).toArray(function (err, results) {
 						if (!err) {
 							checkTotalsResults(results);
 						} else {
@@ -157,12 +157,13 @@ module.exports = {
 			});
 		};
 
-		// Fourth
+		// 4
 		checkTotalsResults = function(results) {
 
-			if(results.length === 0) {
+			// if the first element is not an unended period, we know we need to create one.
+			if(results[0].ended_unix !== 0) {
 
-				results.push({
+				results.unshift({
 				    paid_unix: 0,
 				    receipt_hash: '',
 				    account: parameters.account,
@@ -179,7 +180,7 @@ module.exports = {
 			checkIfRecordReady(results);
 		};	
 
-		// Fifth
+		// 5
 		checkIfRecordReady = function(results) {
 
 			Totals.checkExpired(results[0].modified_unix, function(err, resp) {
@@ -193,37 +194,13 @@ module.exports = {
 			});
 		};
 
-		// Sixth
+		// 6
 		checkViolations = function(results) {
 
-			/*
-			check Totals for thes things
-			 
-			var payload = {
-
-				'$or': [
-					{ account: parameters.account },
-					{ ip: parameters.ip }
-				],
-
-				'$and': [
-					{
-						modified_unix: {
-							'$gt' : 
-						}
-
-					},
-		 			{ 
-		 				_id: { 
-		 					'$ne': Distribution.mongo.objectId(parameters.createdID)
-		 				}
-		 			}
-				]
-			};
-			*/
+			
 		};
 
-		// Seventh
+		// 7
 		upsertTotalsRecord = function(results) {
 
 			// update their record with an increased count by 1.
@@ -235,7 +212,7 @@ module.exports = {
 
 					collection.update({ account: results[0].account, started_unix: results[0].started_unix }, results[0], { upsert: true }, function (err, upserted) {
 						if (!err) {
-							callback(null, { message: 'success' });
+							callback(null, { message: 'success', records: results });
 						} else {
 							callback({ message: 'server_error' }, null); // error with mongodb
 						}

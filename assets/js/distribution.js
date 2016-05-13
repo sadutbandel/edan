@@ -8,6 +8,7 @@
 
 	.controller('distributionCtrl', ['$rootScope', '$filter', '$interval', '$scope', '$timeout', '$location', 'vcRecaptchaService', function($rootScope, $filter, $interval, $scope, $timeout, $location, vcRecaptchaService) {
 		
+		// the button that explains the faucet which opens a modal
 		$scope.howFaucet = function(bool) {
 			if(bool) {
 				$('#how-faucet').modal('show');
@@ -16,9 +17,7 @@
 			}
 		}
 
-		$scope.requestSuccess = false;
-
-		// fetch the available supply
+		// fetch the available supply distributed
 		io.socket.get('/api/available_supply', function (resData, jwres){
 
 			$scope.available_supply_absolute = resData;
@@ -32,6 +31,7 @@
 			});
 		});
 
+		// empties the recaptcha response and widgetID
 		$scope.init = function () {
 			$scope.response = null;
 			$scope.widgetId = null;
@@ -156,7 +156,10 @@
 				// deliver the payload
 				io.socket.post('/distribution', this.payload, function (data, jwres) {
 
-					if(data.message === 'success') {
+					var message = data.message,
+					records = data.records;
+
+					if(message === 'success') {
 
 						// clear recaptcha for re-use right-away so front-end exploiters have no advantage against regular users.
 						vcRecaptchaService.reload($scope.widgetId);						
@@ -168,86 +171,18 @@
 							$scope.button = button.default;
 						}, 1000);
 
-						// store my current distribution
-						var CD = data.current_distribution;
+						// convert unix timestamps to milliseconds
+						angular.forEach(records, function(obj, key) {
+							records[key].ended_unix = obj.ended_unix * 1000;
+							records[key].paid_unix = obj.paid_unix * 1000;
+							records[key].started_unix = obj.started_unix * 1000;
+						});
 
-						// update $scope with the current distribution
-						currDist = function() {
-							$scope.current_distribution = CD;
-						}
-
-						// this only happens if there is no DistributionTracker record yet
-						// that can happen for 1 minute after payouts.
-						if(data.no_records) {
-							$scope.no_records = true;
-						} else {
-							$scope.no_records = false;
-						}
-
-						// store my past distributions every time. 
-						// this historical data does not change like our
-						// realtime current distribution does.
-						if(data.past_distributions) {
-							$scope.past_distributions = data.past_distributions;
-						}
-
-						// new visitor with data, set current_distributions $scope
-						if(!$scope.current_distribution) {
-
-							// set data if it exists
-							if(CD) {
-								currDist();
-							}
-
-							// no data yet, create a new payload.
-							else {
-								$scope.current_distribution = {};
-								$scope.current_distribution.total_count = 0;
-							}
-						} 
-
-						// returning visitor, $scope.current_distribution is set.
-						else {
-
-							// if there is no current_distribution data, payouts must have just happened.
-							if(!CD) {
-
-								// first time this will run
-								if(!$scope.current_distribution.waiting) {
-									$scope.current_distribution = {};
-									$scope.current_distribution.waiting = true; // this makes this section run once.
-									$scope.current_distribution.total_count = 0;
-								}
-
-							} else {
-
-								// if the server payload is more up-to-date...
-								// then the distribution period must have just ended.
-								if(CD.started_unix > $scope.current_distribution.started_unix) {
-									currDist();
-								}
-
-								// if my total count on the server is more up-to-date...
-								if(CD.total_count > $scope.current_distribution.total_count || !$scope.current_distribution.total_count) {
-									currDist();
-								}
-								// if the complete count on the server is more up-to-date...
-								if(CD.complete_count > $scope.current_distribution.complete_count || !$scope.current_distribution.complete_count) {
-									currDist();
-								}
-
-								// if the account they are submitting is different, update the payload.
-								if($scope.account !== $scope.lastAccount) {
-									currDist();
-								}
-							}
-						}
-
-						// increase my count
-						$scope.current_distribution.total_count++;
-
-						// save the account we're submitting to see if it changes.
-						$scope.lastAccount = $scope.account;
+						// my current distribution data
+						$scope.current_distribution = records[0];
+						records.splice(0,1);
+						// my past distributions data
+						$scope.past_distributions = records;
 
 						// activate popups
 						$('.popup').popup();
