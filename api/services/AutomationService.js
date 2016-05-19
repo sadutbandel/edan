@@ -40,75 +40,36 @@ module.exports = {
      * Calculates the owed amounts based on each account's total count.
      *
      * First, fetch the last distribution tracker record.
-     * Second, determine if we should finalize or not
-     * Third, if it's been over 4 hours, finalize the period then proceed to update totals regardless.
-     * Fourth, calculate the owed amounts
+     * Second, gather totals records to prepare for counting successes / accounts
+     * Third, count all of the total successes and accounts for this period
+     * Fourth, calculate percentages owed, owed amounts per account
+     * Fifth, update Totals records with ended time, owed %, owed amount
      */
     owedAmounts: function(callback) {
 
         // 1
-        lastDistribution = function() {
+        fetchLastDistribution = function() {
 
-            console.log('lastDistribution');
+            console.log('fetchLastDistribution()');
             DistributionTracker.last(function(err, resp) {
             
                 if(!err) {
-                    determineFinalization(resp);
+                    gatherTotalsRecords(resp);
                 } else {
                     callback(err, null);
                 }
             });
         };
-        
+
         // 2
-        determineFinalization = function(resp) {
+        gatherTotalsRecords = function(dtResp) {
 
-            console.log('determineFinalization');
-            console.log('resp');
-            console.log(resp);
-
-            // if 4+ hours have passed since finalization and we are in the current-period record, finalize the period.
-            if(resp.hoursSinceLastRan >= 4 && resp.live) {
-                finalizePeriod(resp, true);
-            } else { // otherwise, 
-                nonFinalizedTotals(resp, false);
-            }
-        };
-
-        // 3 pt.1 (optional)
-        finalizePeriod = function(resp, finalize) {
-
-            console.log('finalizePeriod');
-
-            DistributionTracker.native(function(err, collection) {
-                if (!err) {
-
-                    collection.update({ ended_unix: 0 }, { created_unix: resp.created_unix, started_unix: resp.started_unix, ended_unix: resp.lastHour, accounts: resp.accounts, successes: resp.successes }, { upsert: true }, function (err, upserted) {
-                        if (!err) {
-                            callback(null, true);
-                        } else {
-                            callback(err, null); // error with mongodb
-                        }
-                    });
-                } else {
-                    callback(err, null); // error with mongodb
-                }
-            });
-
-            // mark this period as finalized first, then...
-            nonFinalizedTotals(resp, finalize);
-        }
-
-        // 3 pt.2 (required)
-        nonFinalizedTotals = function(resp, finalize) {
-            
-            console.log('nonFinalizedTotals');
-
+            console.log('gatherTotalsRecords()');
             Totals.native(function(err, collection) {
                 if (!err){
                     collection.find({ ended_unix: 0 }).sort({ 'started_unix': -1 }).toArray(function (err, results) {
                         if (!err) {
-                            calculateOwedAmounts(results, finalize);
+                            countAll(dtResp, results);
                         } else {
                             callback({ message: 'server_error' }, null); // error with mongodb
                         }
@@ -119,26 +80,147 @@ module.exports = {
             });
         }
 
+        // 3
+        countAll = function(dtResp, tResults) {
+
+            console.log('countAll');
+            dtResp.successes = 0;
+            dtResp.accounts = 0;
+
+            // add counts to dtResp object
+            for(var key in tResults) {
+                dtResp.accounts++;
+                dtResp.successes+= tResults[key].total_count;
+            }
+
+            updateDistributionTracker(dtResp, tResults)
+        };
+
         // 4
-        calculateOwedAmounts = function(results, finalize) {
+        updateDistributionTracker = function(dtResp, tResults) {
 
-            console.log('calculateOwedAmounts');
+            console.log('updateDistributionTracker()');
+            console.log('dtResp');
+            console.log(dtResp);
 
-            var complete_count = 0;
+            // we don't want to overwrite created if we are updating the record
+            var created_unix,
+            ended_unix;
+
+            if(dtResp.created_unix) {
+                created_unix = dtResp.created_unix;
+            } else {
+                created_unix = TimestampService.unix();
+            }
+
+            if(dtResp.live) {
+                ended_unix = 0;
+            } else {
+                ended_unix = dtResp.ended_unix;
+            }
+
+            // create the payload for delivering to DT
+            var payload = {
+                created_unix: created_unix,
+                started_unix: dtResp.started_unix,
+                ended_unix: ended_unix,
+                accounts: dtResp.accounts,
+                successes: dtResp.successes
+            };
+
+            var where = {
+                started_unix: payload.started_unix
+            };
+
+            DistributionTracker.native(function(err, collection) {
+                if (!err) {
+
+                    collection.update(where, payload, { upsert: true }, function (err, updated) {
+                        if (!err) {
+                            calculateOwedAmounts(dtResp, tResults);
+                        } else {
+                            callback(err, null);
+                        }
+                    });
+                } else {
+                    callback(err, null);
+                }
+            });
+        };
+
+        // 5
+        calculateOwedAmounts = function(dtResp, results) {
+
+            console.log('calculateOwedAmounts()');
+
+            //var payout_amount = Globals.hourlyKrai * resp.hoursSinceLastRan;
+            var payout_amount = Globals.hourlyKrai * 4;
 
             // complete a totals count
             for(var key in results) {
-                complete_count+= results[key].total_count;
+                results[key].percentage_owed = results[key].total_count / dtResp.successes;
+                results[key].krai_owed = Math.floor(results[key].percentage_owed * payout_amount);
+                results[key].raw_rai_owed = results[key].krai_owed + '' + Globals.rawKrai;
             }
 
-            console.log('complete_count');
-            console.log(complete_count);
+            loopEnded(results);
+        };
 
-            callback(null, complete_count);        
-        }
+        // 6
+        loopEnded = function(results) {
+
+            console.log('loopEnded()');
+
+            if(results.length > 0) {
+
+                var where = { 
+                    account: results[0].account,
+                    started_unix: results[0].started_unix
+                };
+
+                var what = {
+                    paid_unix : results[0].paid_unix,
+                    receipt_hash : "", // we know it's an empty string, but we have to explicitly define it here, or else '' will be passed and cause failure of insertion.
+                    account: results[0].account,
+                    total_count: results[0].total_count,
+                    started_unix: results[0].started_unix,
+                    ended_unix: TimestampService.lastHour(),
+                    percentage_owed: results[0].percentage_owed,
+                    krai_owed: results[0].krai_owed,
+                    raw_rai_owed: results[0].raw_rai_owed
+                };
+
+                Totals.native(function(err, collection) {
+                    if (!err) {
+
+                        collection.update(where, what, function (err, collection) {
+                            if (!err) {
+
+                                // remove the 1st element object from the array.
+                                results.splice(0,1);
+
+                                // tail-call recursion
+                                loopEnded(results);
+
+                            } else {
+                                callback(err, null); // query failure
+                            }
+                        });
+                    } else {
+                        callback(err, null); // mongo failure
+                    }
+                });
+            }
+
+            // no more records left? process payouts!
+            else {
+                console.log('no more records left');
+                //processPayouts();
+            }
+        };
 
         // kick off everything
-        lastDistribution();
+        fetchLastDistribution();
     },
 
     // updates the available supply Cache entry
@@ -257,90 +339,6 @@ module.exports = {
                 callbackPD(null, true); // all records paid out
             }
         };
-
-        /**
-         * Loop over all Totals.js records (accounts) to update their ended_unix timestamps before paying out.
-         */
-        loopEnded = function(respLE) {
-
-            if(respLE.length > 0) {
-
-                var keyLE = 0;
-
-                var whereLE = { 
-                    account: respLE[keyLE].account,
-                    started_unix: respLE[keyLE].started_unix
-                };
-
-                var whatLE = {
-                    paid_unix : respLE[keyLE].paid_unix,
-                    receipt_hash : "", // we know it's an empty string, but we have to explicitly define it here, or else '' will be passed and cause failure of insertion.
-                    account: respLE[keyLE].account,
-                    total_count: respLE[keyLE].total_count,
-                    started_unix: respLE[keyLE].started_unix,
-                    ended_unix: TimestampService.lastHour(),
-                    percentage_owed: respLE[keyLE].percentage_owed,
-                    krai_owed: respLE[keyLE].krai_owed,
-                    raw_rai_owed: respLE[keyLE].raw_rai_owed
-                };
-                
-                //console.log(TimestampService.utc() + ' Update Where LE');
-                //console.log(TimestampService.utc() + ' ' + JSON.stringify(whereLE));
-
-                //console.log(TimestampService.utc() + ' Update What LE');
-                //console.log(TimestampService.utc() + ' ' + JSON.stringify(whatLE));
-
-
-                // SAVE ENDED_UNIX TIMESTAMP 
-                // We must REBUILD the record properties or else the other properties will be lost.
-                Totals.native(function(errLE, collectionLE) {
-                    if (!errLE) {
-
-                        collectionLE.update(whereLE, whatLE, function (errLE, collectionLE) {
-                            if (!errLE) {
-
-                                //console.log(TimestampService.utc() + ' Updating totals ended_unix...');
-                                //console.log(TimestampService.utc() + ' ' + JSON.stringify(updatedLE[0]));
-
-                                // remove the 1st element object from the array.
-                                respLE.splice(0,1);
-
-                                //tail-call recursion
-                                loopEnded(respLE);
-
-                            } else {
-                                callbackPD(errLE, null); // query failure
-                            }
-                        });
-                    } else {
-                        callbackPD(errLE, null); // mongo failure
-                    }
-                });
-            }
-
-            // no more records left? process payouts!
-            else {
-                processPayouts();
-            }
-        };
-
-        /**
-         * Loops over all empty ("") receipt_hashes for realtime records (ended_unix: 0) to update their ended_unix timestamps
-         */
-        processEndedUnix = function() {
-
-            // grab all records needing payouts where they have been finalized (not a realtime record)
-            var wherePE = { receipt_hash: "", ended_unix: 0 };
-
-            Totals.find(wherePE, function(errPE, respPE) { 
-                
-                if(!errPE) {
-                    loopEnded(respPE); // start loopEnded 
-                } else {
-                    callbackPD(errPE, null); // query failure
-                }
-            });
-        }
 
         /**
          * Loops over all empty ("") receipt_hashes to process payouts for each account.

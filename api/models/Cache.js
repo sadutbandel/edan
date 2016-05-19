@@ -6,6 +6,8 @@
 
 module.exports = {
 
+	autoCreatedAt: false,
+	autoUpdatedAt: false,
 	schema: false,
 
 	attributes: {

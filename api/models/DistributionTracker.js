@@ -98,54 +98,5 @@ module.exports = {
 				callback(err, null);
 			}
 		});
-	},
-
-	/**
-	 * Upsert a realtime DistributionTracker record
-	 */
-	update: function(data, callback) {
-
-		var created_unix;
-
-		// we don't want to overwrite created if we are updating the record
-		if(data.created_unix) {
-			created_unix = data.created_unix;
-		} else {
-			created_unix = TimestampService.unix();
-		}
-
-        var payload = {
-            created_unix: created_unix,
-            started_unix: data.started_unix,
-            ended_unix: data.ended_unix,
-            accounts: data.accounts,
-            successes: data.successes,
-            finalized: data.finalized
-        };
-
-        var where = {
-			started_unix: payload.started_unix
-		};
-
-		//console.log(TimestampService.utc() + ' Update DT Where');
-		//console.log(TimestampService.utc() + ' ' + JSON.stringify(whereU));
-
-		//console.log(TimestampService.utc() + ' Update DT Data');
-		//console.log(TimestampService.utc() + ' ' + JSON.stringify(payloadU));
-
-		DistributionTracker.native(function(err, collection) {
-			if (!err) {
-
-				collectionU.update(where, payload, { upsert: true }, function (err, updated) {
-					if (!err) {
-						callback(null, true);
-					} else {
-						callback(err, null);
-					}
-                });
-            } else {
-                callback(err, null);
-            }
-        });
 	}
 };
