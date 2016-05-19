@@ -14,12 +14,6 @@
 		'Wallet', // wallet download
 		'vcRecaptcha', // google recaptcha
 		])
-		
-	// instead of {{}} for interpolation, we'll use [[]] because handlebars.js uses {{}}
-	.config(['$interpolateProvider', function($interpolateProvider) {
-		$interpolateProvider.startSymbol('[[');
-		$interpolateProvider.endSymbol(']]');
-	}])
 
 	.run(['BootstrapPayload', '$rootScope', '$templateCache', function(BootstrapPayload, $rootScope, $templateCache) {
 

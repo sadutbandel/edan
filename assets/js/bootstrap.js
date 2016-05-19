@@ -5,9 +5,18 @@
      */
 	var app = 'Raiblocks';
     var bootstrap = angular.module('bootstrap', []);
+
+    // create a dependency injector for doing stuff here before the application loads
     var initInjector = angular.injector(['ng']);
-    var $q = initInjector.get(['$q']);
-    var $http = initInjector.get('$http');
+
+    // we're going to change how we interpolate below
+    var $interpolate = initInjector.get('$interpolate');
+
+    // instead of {{}} for interpolation, we'll use [[]] because handlebars.js uses {{}}
+    bootstrap.config(['$interpolate', function($interpolate) {
+        $interpolate.startSymbol('[[');
+        $interpolate.endSymbol(']]');
+    }])
 
 	bootstrapApplication();
 

@@ -4,7 +4,7 @@
 * @description :: Handles various automated tasks:
 *
 *                   blockCount() stores the current block count of RaiBlocks into Cache (used in Explorer page)
-*                   owedEstimates() calculates the estimates for owed Krai
+*                   owedEstimates() calculates the estimated owed Krai per account for the period
 *                   loadAvailableSupply() loads the available supply into Cache
 *                   processDistribution() finalizes the current unpaid period, pays everyone, and creates a new DT period.
 */
@@ -37,8 +37,6 @@ module.exports = {
     },
 
     /**
-     * Calculates the owed amounts based on each account's total count.
-     *
      * First, fetch the last distribution tracker record.
      * Second, gather totals records to prepare for counting successes / accounts
      * Third, count all of the total successes and accounts for this period
@@ -223,7 +221,6 @@ module.exports = {
         fetchLastDistribution();
     },
 
-    // updates the available supply Cache entry
     loadAvailableSupply: function(callback) {
 
         AvailableSupplyService.fetch(function(err, resp) {
